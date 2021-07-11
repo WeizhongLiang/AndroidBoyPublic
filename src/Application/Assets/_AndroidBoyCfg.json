@@ -1,0 +1,95 @@
+{
+  "AndroidBoy": {
+    "RecentInput": [
+      "<debug_pd>",
+      "do_send_data_request",
+      "e2ee",
+      "ModernizeE2EE"
+    ],
+    "enableADBCommandsView": false,
+    "enableLogcatView": false,
+    "enableOutlookDetector": true
+  },
+  "MailAnalyzer": {
+    "recheck error": false
+  },
+  "ViewLogcat": {
+    "ColsVisual": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ],
+    "RecentPush_0": "https://hardene2e.dmz.webex.com/meet/mactest",
+    "RecentPush_1": "onSignout",
+    "RecentPush_2": "handle_join_success",
+    "RecentPush_3": "contextMgr",
+    "RecentPush_4": "onAccountTokenSwapResult",
+    "RecentPush_5": "ModernizeE2EE",
+    "RecentPush_6": "https://alpha.webex.com/meet/weizlian",
+    "RecentPush_7": "https://hardene2e.dmz.webex.com/hardene2e/j.php?MTID=m38d31ae67932ab9229e3e142118e497d",
+    "RecentPush_8": "https://train.qa.webex.com/train/e.php?MTID=m0d0b27188efde2803aaab777d8a2e2d7",
+    "RecentPush_9": "https://sademo2.dmz.webex.com/sademo2-en/j.php?MTID=m736f98b6993a3b735d1fee49f67d3288",
+    "selLogLevel": "Verbose",
+    "selPackage": "com.cisco.webex.meetings",
+    "selProcess": "com.cisco.webex.meetings"
+  },
+  "ViewOutlookDetector": {
+    "colWidths": [
+      296,
+      127,
+      147,
+      741
+    ],
+    "errorDefinition": {
+      "OCSP response has expired": [
+        "certificate expired",
+        "certificate"
+      ],
+      "aReason=31000021": [
+        "no audio(31000021)",
+        "audio"
+      ],
+      "cmReason = 65002": [
+        "no audio(65002)",
+        "audio"
+      ],
+      "errNo: 31001": [
+        "can't join meeting(31001)",
+        "join meeting"
+      ],
+      "errNo: 31002": [
+        "can't join meeting(31002)",
+        "join meeting"
+      ],
+      "errorNo=31016": [
+        "can't join meeting(31016)",
+        "join meeting"
+      ],
+      "errorNo=500000": [
+        "can't join meeting(500000)",
+        "join meeting"
+      ],
+      "ret =30028": [
+        "can't turn on mic",
+        "audio"
+      ]
+    },
+    "filterDays": 3,
+    "filterFolderName": "Tickets",
+    "filterToName": "webex-android-support(mailer list)"
+  },
+  "ViewWBXTraceFile": {
+    "ColsVisual": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      true
+    ],
+    "selLogLevel": "Verbose"
+  }
+}

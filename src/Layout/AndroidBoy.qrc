@@ -1,0 +1,52 @@
+<RCC>
+  <qresource prefix="icon">
+    <file>icons/command.svg</file>
+    <file>icons/log_file.svg</file>
+    <file>icons/logcat.svg</file>
+    <file>icons/arrow_left.svg</file>
+    <file>icons/arrow_right.svg</file>
+    <file>icons/excel.svg</file>
+    <file>icons/date.svg</file>
+    <file>icons/outlook_date.svg</file>
+    <file>icons/outlook_folder.svg</file>
+    <file>icons/folder.svg</file>
+    <file>icons/outlook.svg</file>
+    <file>icons/outlook_account.svg</file>
+    <file>icons/outlook_email.svg</file>
+    <file>icons/detail.svg</file>
+    <file>icons/bt_close.svg</file>
+    <file>icons/check.svg</file>
+    <file>icons/copy.svg</file>
+    <file>icons/mark.svg</file>
+    <file>icons/bt_find.svg</file>
+    <file>icons/bt_fliter.svg</file>
+    <file>icons/bt_auto_scroll.svg</file>
+    <file>icons/bt_start.svg</file>
+    <file>icons/bt_stop.svg</file>
+    <file>icons/bt_clear.svg</file>
+    <file>icons/bt_next_marked.svg</file>
+    <file>icons/bt_prev_marked.svg</file>
+    <file>icons/bt_save.svg</file>
+    <file>icons/bt_settings.svg</file>
+  </qresource>
+  <qresource prefix="gif">
+    <file>gifs/loading_24.gif</file>
+    <file>gifs/loading_40.gif</file>
+    <file>gifs/loading_1.svg</file>
+    <file>gifs/loading_2.svg</file>
+    <file>gifs/loading_3.svg</file>
+    <file>gifs/loading_4.svg</file>
+    <file>gifs/loading_5.svg</file>
+    <file>gifs/loading_6.svg</file>
+    <file>gifs/loading_7.svg</file>
+    <file>gifs/loading_8.svg</file>
+    <file>gifs/loading_9.svg</file>
+    <file>gifs/loading_10.svg</file>
+    <file>gifs/loading_11.svg</file>
+    <file>gifs/loading_12.svg</file>
+    <file>gifs/loading.gif</file>
+  </qresource>
+  <qresource prefix="png">
+    <file>pngs/android_boy.png</file>
+  </qresource>
+</RCC>

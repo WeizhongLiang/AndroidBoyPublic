@@ -1,0 +1,32 @@
+<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+  <radialGradient fy="50%" fx="50%" r="70%" cy="50%" cx="50%" id="svg_3">
+   <stop stop-color="#588ac8" offset="80%"/>
+   <stop stop-color="#2b518e" offset="100%"/>
+  </radialGradient>
+  <radialGradient fy="25%" fx="50%" r="70%" cy="25%" cx="50%" id="svg_2">
+   <stop stop-color="#85aae2" offset="0%"/>
+   <stop stop-color="#dcebfe" offset="100%"/>
+  </radialGradient>
+  <radialGradient fy="10%" fx="50%" r="70%" cy="10%" cx="50%" id="svg_1">
+   <stop stop-color="#dae9fd" offset="0%"/>
+   <stop stop-color="#ffffff" offset="80%"/>
+   <stop stop-color="#dee8f7" offset="100%"/>
+  </radialGradient>
+ </defs>
+ <g>
+  <title>Layer 1</title>
+  <g stroke="null">
+   <title stroke="null">Image from the Silk icon theme by Mark James</title>
+   <desc stroke="null">Image from the Silk icon theme by Mark James, traced from http://commons.wikimedia.org/wiki/File:Email.png by CMG Lee.</desc>
+
+   <g stroke="null" stroke-linejoin="round" stroke-linecap="round">
+    <rect stroke="null" fill="url(#svg_3)" ry="1" rx="1" height="24.37501" width="29.875" y="3.62499" x="1.125"/>
+    <rect stroke="null" fill="#eef3f8" height="19.94319" width="26.14063" y="5.8409" x="2.99218"/>
+    <rect stroke="null" fill="url(#svg_2)" height="15.51137" width="22.40625" y="8.05681" x="4.85937"/>
+    <path stroke="#bbccdd" fill="none" d="m4.85937,23.56818l7.46875,-8.86364q3.73438,-4.43182 7.46875,0l7.46875,8.86364"/>
+    <path stroke="#85aae2" fill="url(#svg_1)" d="m4.85937,8.05681l7.46875,8.86364q3.73438,4.43182 7.46875,0l7.46875,-8.86364"/>
+   </g>
+  </g>
+ </g>
+</svg>
