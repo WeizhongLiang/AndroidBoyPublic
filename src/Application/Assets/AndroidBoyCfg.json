@@ -9,10 +9,14 @@
     "enableADBCommandsView": false,
     "enableLogcatView": false,
     "enableOutlookDetector": true,
-    "winGeometry": "AdnQywADAAAAAAEtAAAAZAAABSwAAAN/AAABLQAAAIAAAAUsAAADfwAAAAAAAAAABpAAAAEtAAAAgAAABSwAAAN/"
+    "winGeometry": "AdnQywADAAAAAACfAAAASAAABfwAAANjAAAAnwAAAGQAAAX8AAADYwAAAAAAAAAABpAAAACfAAAAZAAABfwAAANj"
   },
   "MailAnalyzer": {
     "recheck error": false
+  },
+  "ViewDumpFile": {
+    "startSelectDir": "",
+    "symbolFolder": "/Users/weizlian/Desktop/MyPrj/cisco-repos/cctg-android-fork/src/mc/build/intermediates/cmake/pureDebug/obj/arm64-v8a"
   },
   "ViewLogcat": {
     "ColsVisual": [
@@ -42,7 +46,7 @@
       296,
       127,
       147,
-      741
+      786
     ],
     "errorDefinition": {
       "OCSP response has expired": [
