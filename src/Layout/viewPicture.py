@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/Users/weizlian/Desktop/MyPrj/github-repos/Python/AndroidBoy/src/Layout/viewPicture.ui'
+# Form implementation generated from reading ui file '/Users/weizlian/Desktop/MyPrj/github-repos/Python/AndroidBoyPublic/src/Layout/viewPicture.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.4
 #
@@ -21,10 +21,19 @@ class Ui_Form(object):
         self.gridLayout.setObjectName("gridLayout")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.lbPicture = QtWidgets.QLabel(Form)
+        self.saPicture = QtWidgets.QScrollArea(Form)
+        self.saPicture.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.saPicture.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.saPicture.setWidgetResizable(True)
+        self.saPicture.setAlignment(QtCore.Qt.AlignCenter)
+        self.saPicture.setObjectName("saPicture")
+        self.lbPicture = QtWidgets.QLabel()
+        self.lbPicture.setGeometry(QtCore.QRect(0, 0, 549, 474))
         self.lbPicture.setText("")
+        self.lbPicture.setAlignment(QtCore.Qt.AlignCenter)
         self.lbPicture.setObjectName("lbPicture")
-        self.horizontalLayout.addWidget(self.lbPicture)
+        self.saPicture.setWidget(self.lbPicture)
+        self.horizontalLayout.addWidget(self.saPicture)
         self.gridLayout.addLayout(self.horizontalLayout, 0, 0, 1, 1)
 
         self.retranslateUi(Form)

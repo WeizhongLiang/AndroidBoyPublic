@@ -5,7 +5,7 @@ import zipfile
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QByteArray, QObject
 from PyQt5.QtGui import QKeyEvent
-from PyQt5.QtWidgets import QDialog, QListWidgetItem, QDesktopWidget, QComboBox
+from PyQt5.QtWidgets import QDialog, QListWidgetItem, QDesktopWidget
 from src.Layout.dialogMailDetail import Ui_Dialog
 
 from src.Common import QTHelper, SystemHelper, FileUtility, Const

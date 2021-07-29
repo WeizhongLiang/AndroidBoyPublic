@@ -197,10 +197,12 @@ class MailAnalyzer:
                             continue
         return False
 
-    def _onTrace(self, item: WBXTraceItemV3, param: [any]):
+    def _onCheckErrorInTrace(self, item: WBXTraceItemV3, param: [any]):
         checkList: {} = param[0]
         for err, name in checkList.items():
-            if err in item.mMessage or self.sStopAnalyze:
+            if self.sStopAnalyze:
+                return False
+            if err in item.mMessage:
                 # item.mPosInFile
                 self.mAnalyzeResult["KeyError"][err] = {
                     "errName": name[0],
@@ -209,7 +211,8 @@ class MailAnalyzer:
                     "logPos": item.mPosInFile,
                     "logFile": param[1],
                 }
-                return False
+                del checkList[err]
+                return True
         return True
 
     def _handleKeyError(self) -> bool:
@@ -236,7 +239,7 @@ class MailAnalyzer:
                 continue
 
             if re.search(r".wbt$", attachPath, flags=re.IGNORECASE):
-                if not WBXTracerFile(attachPath, True).readTraces(self._onTrace, [needToCheck, attachPath]):
+                if not WBXTracerFile(attachPath, True).readTraces(self._onCheckErrorInTrace, [needToCheck, attachPath]):
                     Logger.e(appModel.getAppTag(), f"readTrace from {attachPath} failed")
             elif re.search(r".zip$", attachPath, flags=re.IGNORECASE):
                 if not zipfile.is_zipfile(attachPath):
@@ -249,7 +252,7 @@ class MailAnalyzer:
                         fileData = zipFile.read(subFileName)
                         fullSubFileName = f"{attachPath}?{subFileName}"
                         if not WBXTracerFile(fileData, False).readTraces(
-                                self._onTrace, [needToCheck, fullSubFileName]):
+                                self._onCheckErrorInTrace, [needToCheck, fullSubFileName]):
                             Logger.e(appModel.getAppTag(), f"readTrace from {fullSubFileName} failed")
                     else:
                         continue

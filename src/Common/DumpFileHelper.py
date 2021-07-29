@@ -49,6 +49,7 @@ class DumpFileHelper:
         Logger.d(appModel.getAppTag(), "")
         self._mOnStackInfoUpdated = onStackInfoUpdated
         self._mReadDumpOutput = ""
+        self._mOpenError = ""
         self._mFileInfo = ""
         self._mThreads = []  # ViewDumpFile.ThreadInfo
         self._mSymbolFolder = symbolFolder
@@ -94,6 +95,9 @@ class DumpFileHelper:
                                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = stackWalkProcess.communicate()
         self._mReadDumpOutput = stdout.decode("utf-8")
+        self._mOpenError = stderr.decode("utf-8")
+        if len(self._mReadDumpOutput) == 0 and len(self._mOpenError) != 0:
+            return False
 
         # format dump output
         self._mFileInfo, self._mThreads = self._formatDumpOutput(self._mReadDumpOutput.split(os.linesep), crashedOnly)
@@ -117,6 +121,9 @@ class DumpFileHelper:
         os.remove(tempDumpPath)
 
         return openReturn
+
+    def getOpenError(self):
+        return self._mOpenError
 
     @staticmethod
     def _formatDumpOutput(lines: [str], crashedOnly: bool = False):

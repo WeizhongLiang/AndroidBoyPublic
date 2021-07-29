@@ -286,12 +286,12 @@ class LogcatFile:
         procTime = DateTimeHelper.ProcessTime()
         itemCount = 0
         lineStart = 0
-        lineEnd = contentData.find("\n", lineStart)
+        lineEnd = contentData.find(b"\n", lineStart)
         while lineEnd > 0:
-            if contentData.find("<tag>", lineStart, lineStart + 6) != lineStart:
+            if contentData.find(b"<tag>", lineStart, lineStart + 6) != lineStart:
                 itemCount += 1
             lineStart = lineEnd + 1
-            lineEnd = contentData.find("\n", lineStart)
+            lineEnd = contentData.find(b"\n", lineStart)
         self._mTraceCount = itemCount
         Logger.i(appModel.getAppTag(), f"end total {itemCount} rows "
                                        f"in {procTime.getMicroseconds()} seconds ")
@@ -304,9 +304,9 @@ class LogcatFile:
         procTime = DateTimeHelper.ProcessTime()
         contentData = self._mFileContent
         lineStart = 0
-        lineEnd = contentData.find("\n", lineStart)
+        lineEnd = contentData.find(b"\n", lineStart)
         while lineEnd > 0:
-            if contentData.find("<tag>", lineStart, lineStart + 6) != lineStart:
+            if contentData.find(b"<tag>", lineStart, lineStart + 6) != lineStart:
                 logLine = contentData[lineStart:lineEnd]
                 fmtType, pattern = LogcatFile.detectFormat(logLine)
                 if fmtType > 0:
@@ -315,7 +315,7 @@ class LogcatFile:
                         if not onTrace(logItem, param):
                             break
             lineStart = lineEnd + 1
-            lineEnd = contentData.find("\n", lineStart)
+            lineEnd = contentData.find(b"\n", lineStart)
         Logger.i(appModel.getAppTag(), f"end read {self._mTraceCount} rows "
                                        f"in {procTime.getMicroseconds()} seconds ")
         return True

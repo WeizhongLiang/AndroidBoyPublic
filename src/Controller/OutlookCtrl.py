@@ -294,7 +294,7 @@ class OutlookCtrl:
         if len(emailsFromCache) == 0:
             emailsFromCache = []
         # second, read new record via applescript
-        emailsFromAS = [] # self._queryMailsViaAppleScript(emailFilter)
+        emailsFromAS = self._queryMailsViaAppleScript(emailFilter)
         Logger.i(appModel.getAppTag(), f"emailsFromAS={len(emailsFromAS)}")
         # merge them
         emails = emailsFromAS + emailsFromCache

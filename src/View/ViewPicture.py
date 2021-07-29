@@ -2,13 +2,17 @@ import os
 
 from PyQt5 import QtCore
 from PyQt5.QtCore import QObject, QEvent, QSize, QRect, QPoint
-from PyQt5.QtGui import QPixmap, QMouseEvent, QWheelEvent
+from PyQt5.QtGui import QPixmap, QMouseEvent, QWheelEvent, QPalette, QCursor
 from PyQt5.QtWidgets import QWidget
 
 from src.Common import QTHelper, DateTimeHelper
 from src.Common.Logger import Logger
 from src.Layout.viewPicture import Ui_Form
 from src.Model.AppModel import appModel
+
+
+_maxRation = 2.0
+_minRation = 0.2
 
 
 class ViewPicture(QWidget, Ui_Form):
@@ -18,13 +22,21 @@ class ViewPicture(QWidget, Ui_Form):
         self.setupUi(self)
         QTHelper.switchMacUI(self)
 
-        self.lbPicture.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        self.saPicture.setBackgroundRole(QPalette.Dark)
+        self.saPicture.setVisible(True)
+        self.saPicture.setWidget(self.lbPicture)
+        self.saPicture.setWidgetResizable(True)
+        self._mScrollVertical = self.saPicture.verticalScrollBar()
+        self._mScrollHorizontal = self.saPicture.horizontalScrollBar()
+        self.lbPicture.installEventFilter(self)
 
         self.mImage = QPixmap()
-        self.installEventFilter(self)
         self._mPressPos = QPoint(0, 0)
         self._mScaleRation = 1.0
+        self._mOffsetPoint = QPoint(0, 0)
+        self._mRectLabel = self.lbPicture.geometry()
         self._mRectImage = QRect(0, 0, self.mImage.width(), self.mImage.height())
+        self._mScaledSize = QSize(self._mRectImage.width(), self._mRectImage.height())
         # self._mDlgPictureController = DialogPictureController(self)
 
         self.show()
@@ -35,40 +47,44 @@ class ViewPicture(QWidget, Ui_Form):
         return
 
     def resizeEvent(self, QResizeEvent):
-        self._scaleImage()
+        self._mRectLabel = self.lbPicture.geometry()
+        self._updateImagePos()
         return
 
     def eventFilter(self, source: QObject, event: QEvent) -> bool:
+        if source != self.lbPicture:
+            Logger.i(appModel.getAppTag(), f"source={source}")
+            return super(ViewPicture, self).eventFilter(source, event)
         eventType = event.type()
         if eventType == QtCore.QEvent.MouseButtonPress:
             mouse = QMouseEvent(event)
             self._mPressPos = mouse.pos()
+            self.setCursor(QCursor(QtCore.Qt.OpenHandCursor))
+            return True
+        if eventType == QtCore.QEvent.MouseButtonRelease:
+            self._mPressPos = QPoint(0, 0)
+            self.setCursor(QCursor(QtCore.Qt.ArrowCursor))
+            return True
         elif eventType == QtCore.QEvent.MouseMove:
             mouse = QMouseEvent(event)
-            moveX = mouse.x() - self._mPressPos.x()
-            moveY = mouse.y() - self._mPressPos.y()
-            Logger.i(appModel.getAppTag(), f"will move: ({moveX},{moveY})")
-            # self.scrollArea.scroll(moveX, moveY)
-            return False
+            self.setOffset(mouse.x() - self._mPressPos.x(), mouse.y() - self._mPressPos.y())
+            return True
         elif eventType == QtCore.QEvent.Wheel:
             wheel = QWheelEvent(event)
             numPixels = wheel.pixelDelta()
             numAngles = wheel.angleDelta()
             if numPixels.y() > 0 or numAngles.y() > 0:
-                if self._mScaleRation < 4.0:
-                    self._mScaleRation += 0.1
+                self.setScaleRation(self._mScaleRation + 0.1)
             else:
-                if self._mScaleRation > 0.2:
-                    self._mScaleRation -= 0.1
-            self._scaleImage()
-            return False
+                self.setScaleRation(self._mScaleRation - 0.1)
+            return True
         return super(ViewPicture, self).eventFilter(source, event)
 
     def openPictureFile(self, path: str):
         Logger.i(appModel.getAppTag(), "")
         self.mImage = QPixmap(path)
         self._mRectImage = QRect(0, 0, self.mImage.width(), self.mImage.height())
-        self._scaleImage()
+        self._updateImagePos()
         self.lbPicture.setPixmap(self.mImage)
         return
 
@@ -85,25 +101,52 @@ class ViewPicture(QWidget, Ui_Form):
         os.remove(tempDumpPath)
         return
 
-    def setScaleRation(self, ration: float):
-        self._mScaleRation = ration
-        if self._mScaleRation > 4.0:
-            self._mScaleRation = 4.0
-        if self._mScaleRation < 0.2:
-            self._mScaleRation = 0.2
-        self._scaleImage()
+    def setOffset(self, deltaX: int, deltaY: int):
+        newX = self._mOffsetPoint.x() - deltaX
+        newY = self._mOffsetPoint.y() - deltaY
+        if newX > self._mScaledSize.width():
+            newX = self._mScaledSize.width()
+        if newX < 0:
+            newX = 0
+        if newY > self._mScaledSize.height():
+            newY = self._mScaledSize.height()
+        if newY < 0:
+            newY = 0
+        self._mOffsetPoint.setX(newX)
+        self._mOffsetPoint.setY(newY)
+        # Logger.i(appModel.getAppTag(),
+        #         f"self._mOffsetPoint=({self._mOffsetPoint.x()}, {self._mOffsetPoint.y()})")
+        self._mScrollHorizontal.setValue(self._mOffsetPoint.x())
+        self._mScrollVertical.setValue(self._mOffsetPoint.y())
         return
 
-    def _scaleImage(self):
+    def setScaleRation(self, ration: float):
+        # Logger.i(appModel.getAppTag(), f"ration = {ration}")
+        if ration > _maxRation:
+            ration = _maxRation
+        if ration < _minRation:
+            ration = _minRation
+        if self._mScaleRation != ration:
+            self._mScaleRation = ration
+            self._updateImagePos()
+        return
+
+    def _updateImagePos(self):
         if self._mRectImage.width() == 0 or self._mRectImage.height() == 0:
             return
 
-        rectLabel = self.lbPicture.geometry()
-        scaleSize = QSize(rectLabel.width() * self._mScaleRation, rectLabel.height() * self._mScaleRation)
-        if rectLabel.width() > rectLabel.height():
-            scaleSize.setWidth(self._mRectImage.width() * scaleSize.height() / self._mRectImage.height())
+        self._mScaledSize = QSize(self._mRectLabel.width() * self._mScaleRation,
+                                  self._mRectLabel.height() * self._mScaleRation)
+        if self._mRectLabel.width() > self._mRectLabel.height():
+            self._mScaledSize.setWidth(
+                self._mRectImage.width() * self._mScaledSize.height() / self._mRectImage.height())
         else:
-            scaleSize.setHeight(self._mRectImage.height() * scaleSize.width() / self._mRectImage.width())
-        Logger.i(appModel.getAppTag(), f"scale to ({scaleSize.width()},{scaleSize.height()})")
-        self.lbPicture.setPixmap(self.mImage.scaled(scaleSize))
+            self._mScaledSize.setHeight(
+                self._mRectImage.height() * self._mScaledSize.width() / self._mRectImage.width())
+        # Logger.i(appModel.getAppTag(), f"scale=({self._mScaledSize.width()}, {self._mScaledSize.height()})"
+        #                                f"@{self._mScaleRation:.1f}, "
+        #                                f"offset=({self._mScrollHorizontal.value()}, {self._mScrollVertical.value()})")
+        self.lbPicture.setPixmap(self.mImage.scaled(self._mScaledSize))
+        self._mOffsetPoint.setX(self._mScrollHorizontal.value())
+        self._mOffsetPoint.setY(self._mScrollVertical.value())
         return

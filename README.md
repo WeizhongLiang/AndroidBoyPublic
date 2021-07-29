@@ -1,17 +1,18 @@
 # AndroidBoyPublic
 
 
+```
 main.py: startup script
-run.bat: a short cut to start up App from Windows OS.
-run.sh: a short cut to start up App from MAC OS.
+run.bat: a shortcut to start up App from Windows OS.
+run.sh: a shortcut to start up App from macOS.
 src
   Application
     AndroidBoy.py: App main UI
     Assets
       _AndroidBoyCfg.json: default config file
     Script
-       getAllFolders.applescript: apple script for getting all folders under outlook account
-       getMails.applescript: apple script for getting all mails under outlook account
+      getAllFolders.applescript: apple script for getting all folders under Outlook account
+      getMails.applescript: apple script for getting all mails under Outlook account
     Common: some help utility
     Controller
       CCTGDownloader.py: controller for downloading apk and symbol files
@@ -46,4 +47,5 @@ src
   Windows: <The python path>/Script
   Mac: /Library/Frameworks/Python.framework/Versions/3.9/bin/pip
   Please refer to run.bat or run.sh.
+```
 

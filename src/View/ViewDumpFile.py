@@ -2,9 +2,9 @@ import os
 
 import pyperclip
 from PyQt5 import QtCore
-from PyQt5.QtCore import QModelIndex, QObject, Qt
-from PyQt5.QtGui import QKeyEvent, QPalette, QColor
-from PyQt5.QtWidgets import QWidget, QTreeWidgetItem, QFileDialog, QAbstractItemView
+from PyQt5.QtCore import QModelIndex, QObject
+from PyQt5.QtGui import QKeyEvent, QPalette
+from PyQt5.QtWidgets import QWidget, QTreeWidgetItem, QFileDialog, QAbstractItemView, QMessageBox
 
 from src.Common import QTHelper
 from src.Common.DumpFileHelper import DumpFileHelper, StackInfo, ThreadInfo
@@ -61,13 +61,13 @@ class ViewDumpFile(QWidget, Ui_Form):
         self.show()
         return
 
-    def _handleKeyRelease(self, source: QObject, key: int, modifiers: int, hasControl: bool, hasShift: bool):
+    def _handleKeyRelease(self, source: QObject, key: int):
         retValue = False
         if source == self.treeDump:
             if key == QtCore.Qt.Key_C:
                 selText = ""
                 selection = self.treeDump.selectedItems()
-                selection.sort(key=lambda item: item.data(0, TreeItemRole.itemIndex))
+                selection.sort(key=lambda rowItem: rowItem.data(0, TreeItemRole.itemIndex))
 
                 for item in selection:
                     itemType = item.data(0, TreeItemRole.itemType)
@@ -96,10 +96,10 @@ class ViewDumpFile(QWidget, Ui_Form):
 
             keyEvent = QKeyEvent(event)
             key = keyEvent.key()
-            modifiers = keyEvent.modifiers()
-            hasControl = (modifiers & Qt.ControlModifier) == Qt.ControlModifier
-            hasShift = (modifiers & Qt.ShiftModifier) == Qt.ShiftModifier
-            if self._handleKeyRelease(source, key, modifiers, hasControl, hasShift):
+            # modifiers = keyEvent.modifiers()
+            # hasControl = (modifiers & Qt.ControlModifier) == Qt.ControlModifier
+            # hasShift = (modifiers & Qt.ShiftModifier) == Qt.ShiftModifier
+            if self._handleKeyRelease(source, key):
                 return super(ViewDumpFile, self).eventFilter(source, event)
             else:
                 return False
@@ -160,6 +160,10 @@ class ViewDumpFile(QWidget, Ui_Form):
         self._mRootName = os.path.basename(path)
         if self._mDumpFileHelper.openDumpFile(path, crashedOnly):
             self._showThreadsToUI(self._mDumpFileHelper.getThreads())
+        else:
+            qm = QMessageBox()
+            qm.question(self, f"Open {path} failed", self._mDumpFileHelper.getOpenError(), qm.Yes)
+
         return
 
     def openDumpData(self, data, title: str, crashedOnly: bool = False):
