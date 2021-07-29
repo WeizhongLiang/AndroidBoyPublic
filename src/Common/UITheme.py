@@ -41,6 +41,10 @@ class UITheme:
         self.iconLogFile = None
         self.iconLogcat = None
         self.iconCommand = None
+        self.iconZoomIn = None
+        self.iconZoomOut = None
+        self.iconRotateClockwise = None
+        self.iconRotateAnticlockwise = None
 
         self.iconOutlook = None
         self.iconOutlookAccount = None
@@ -74,6 +78,10 @@ class UITheme:
         self.iconLogFile = QIcon(QPixmap(":/icon/icons/log_file.svg"))
         self.iconLogcat = QIcon(QPixmap(":/icon/icons/logcat.svg"))
         self.iconCommand = QIcon(QPixmap(":/icon/icons/command.svg"))
+        self.iconZoomIn = QIcon(QPixmap(":/icon/icons/zoom_in.svg"))
+        self.iconZoomOut = QIcon(QPixmap(":/icon/icons/zoom_out.svg"))
+        self.iconRotateClockwise = QIcon(QPixmap(":/icon/icons/rotate_clockwise.svg"))
+        self.iconRotateAnticlockwise = QIcon(QPixmap(":/icon/icons/rotate_anticlockwise.svg"))
 
         self.iconOutlook = QIcon(QPixmap(":/icon/icons/outlook.svg"))
         self.iconOutlookAccount = QIcon(QPixmap(":/icon/icons/outlook_account.svg"))

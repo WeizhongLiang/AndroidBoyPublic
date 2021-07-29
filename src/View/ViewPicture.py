@@ -2,12 +2,14 @@ import os
 
 from PyQt5 import QtCore
 from PyQt5.QtCore import QObject, QEvent, QSize, QRect, QPoint
-from PyQt5.QtGui import QPixmap, QMouseEvent, QWheelEvent, QPalette, QCursor
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtGui import QPixmap, QMouseEvent, QWheelEvent, QPalette, QCursor, QTransform, QContextMenuEvent
+from PyQt5.QtWidgets import QWidget, QMenu
 
 from src.Common import QTHelper, DateTimeHelper
 from src.Common.Logger import Logger
 from src.Layout.viewPicture import Ui_Form
+
+from src.Common.UITheme import uiTheme
 from src.Model.AppModel import appModel
 
 
@@ -80,12 +82,32 @@ class ViewPicture(QWidget, Ui_Form):
             return True
         return super(ViewPicture, self).eventFilter(source, event)
 
+    def contextMenuEvent(self, event: QContextMenuEvent):
+        menu = QMenu()
+        rotateClockwise = menu.addAction(uiTheme.iconRotateClockwise, "Clockwise rotate")
+        rotateAnticlockwise = menu.addAction(uiTheme.iconRotateAnticlockwise, "Anticlockwise rotate")
+        menu.addSeparator()
+        zoomIn = menu.addAction(uiTheme.iconZoomIn, "Zoom in")
+        zoomOut = menu.addAction(uiTheme.iconZoomOut, "Zoom out")
+        action = menu.exec_(self.mapToGlobal(event.pos()))
+
+        if action is None:
+            return
+        elif action == rotateClockwise:
+            self.setRotation(90)
+        elif action == rotateAnticlockwise:
+            self.setRotation(-90)
+        elif action == zoomIn:
+            self.setScaleRation(self._mScaleRation + 0.1)
+        elif action == zoomOut:
+            self.setScaleRation(self._mScaleRation - 0.1)
+        return
+
     def openPictureFile(self, path: str):
         Logger.i(appModel.getAppTag(), "")
         self.mImage = QPixmap(path)
         self._mRectImage = QRect(0, 0, self.mImage.width(), self.mImage.height())
         self._updateImagePos()
-        self.lbPicture.setPixmap(self.mImage)
         return
 
     def openPictureData(self, data):
@@ -99,6 +121,14 @@ class ViewPicture(QWidget, Ui_Form):
         self.openPictureFile(tempDumpPath)
         # remove temp file
         os.remove(tempDumpPath)
+        return
+
+    def setRotation(self, rotation: int):
+        transform = QTransform()
+        trans = transform.rotate(rotation)
+        self.mImage = self.mImage.transformed(trans)
+        self._mRectImage = QRect(0, 0, self.mImage.width(), self.mImage.height())
+        self._updateImagePos()
         return
 
     def setOffset(self, deltaX: int, deltaY: int):
