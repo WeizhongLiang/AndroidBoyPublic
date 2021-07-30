@@ -199,6 +199,8 @@ class MailAnalyzer:
 
     def _onCheckErrorInTrace(self, item: WBXTraceItemV3, param: [any]):
         checkList: {} = param[0]
+        if len(checkList) == 0:
+            return False
         for err, name in checkList.items():
             if self.sStopAnalyze:
                 return False

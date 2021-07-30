@@ -526,7 +526,7 @@ class ViewOutlookDetector(QWidget, Ui_Form):
         return
 
     def _onExportExcel(self):
-        excelFiler = open('email_file.csv', mode='w')
+        excelFiler = open('email_file.csv', mode='w', newline='', encoding='utf-8')
         excelWriter = csv.writer(excelFiler, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         for emailID, emailItem in self._mFilterMails.items():
             treeItemInfo: TreeItemInfo = cast(TreeItemInfo, emailItem.mCustomerData)
