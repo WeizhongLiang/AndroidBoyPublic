@@ -8,6 +8,11 @@ set _mailsFolder to ""
 
 on initParams(_fileName)
 	set srcFile to ((path to desktop) as text) & _fileName
+	if not my isFileExistsMac(srcFile) then
+		log "file: " & srcFile & " not exist, use default parameters."
+		return
+	end if
+	
 	set lns to paragraphs of (read file srcFile)
 	set _indexParam to 1
 	repeat with ln in lns
@@ -43,6 +48,16 @@ on initParams(_fileName)
 		end if
 	end tell
 end initParams
+
+on isFileExistsMac(_path) -- (String) as Boolean
+	tell application "System Events"
+		if exists file _path then
+			return true
+		else
+			return false
+		end if
+	end tell
+end isFileExistsMac
 
 on isFileExists(_path)
 	set _script to "[ -f '" & _path & "' ] && echo true || echo false"

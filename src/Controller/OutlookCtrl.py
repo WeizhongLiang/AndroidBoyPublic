@@ -231,8 +231,19 @@ class OutlookCtrl:
         else:
             import applescript
             scriptFile = appModel.getScriptFile("getAllFolders.applescript")
-            r = applescript.run(scriptFile)
-            accounts = json.loads(r.out)
+
+            # write filter params
+            appleParams = [
+                "" + os.linesep,  # account filter: abc@def.com
+                "" + os.linesep,  # to recipient filter: webex-android-support@cisco.com
+            ]
+            fw = open(os.path.join(SystemHelper.desktopPath(), "as_params.cfg"), "w")
+            fw.writelines(appleParams)
+            Logger.i(appModel.getAppTag(), f"appleParams={appleParams}")
+            fw.close()
+            asRead = applescript.run(scriptFile)
+            os.remove(fw.name)
+            accounts = json.loads(asRead.out)
             FileUtility.saveJsonFile(cacheFilePath, accounts)
 
         for account in accounts:
