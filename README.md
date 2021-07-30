@@ -47,5 +47,7 @@ src
   Windows: <The python path>/Script
   Mac: /Library/Frameworks/Python.framework/Versions/3.9/bin/pip
   Please refer to run.bat or run.sh.
+  
+3. To run Outlook detector in macOS, please install "JSON Helper for AppleScript" first.
 ```
 
