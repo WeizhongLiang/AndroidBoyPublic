@@ -32,7 +32,7 @@ class LogcatItem:
         return DateTimeHelper.getTimestampString(self.mDate, None)
 
     def getLoggerLevel(self) -> LoggerLevel:
-        return LogcatItem.getLogLevelByStr.get(self.mLevel)
+        return LogcatItem.getLogLevelByStr.get(self.mLevel[0])
 
 
 class LogcatFile:
@@ -43,13 +43,16 @@ class LogcatFile:
     _defaultTime = datetime.strptime("1971-01-01 00:00:00.0", "%Y-%m-%d %H:%M:%S.%f")
     _defaultYear = _defaultTime.year
 
-    regDatetime1 = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}"  # 2018-02-07 06:16:28.555
-    regDatetime2 = r"\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}"  # 02-07 06:16:28.555
-    regDatetime3 = r"\d{0,}\.\d{3}"  # 1517955388.555
+    regSpace = r"\s{1,}"
+    regIndex = r"\d{1,}"
+    regDatetime1 = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3,}"  # 2018-02-07 06:16:28.555
+    regDatetime2 = r"\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3,}"  # 02-07 06:16:28.555
+    regDatetime3 = r"\d{0,}\.\d{3,}"  # 1517955388.555
     regPID_TID = r"\d{0,}-\d{0,}"
-    regPID_TID2 = r"\d{0,}\s\d{0,}"
+    regPID_TID2 = r"\d{0,}\s{1,}\d{0,}"
     regPackageName = r"[A-Za-z]\S{0,}"
     regLevel = r"(V|D|I|W|E)"
+    regLevel2 = r"(Verbos|Debug|Info|Warning|Error|Fatal|Silent)"
     regTag = r".+"
     regMessage = r"\s.{0,}"
     regulars = {
@@ -90,7 +93,10 @@ class LogcatFile:
         30: [re.compile(fr"^{regLevel}/{regTag}:"), 0],
         31: [re.compile(fr"^{regLevel}:"), 0],
 
-        32: [re.compile(fr"^{regDatetime2}\s{regPID_TID2}\s{regLevel}\s{regTag}:"), 5],
+        32: [re.compile(fr"^{regDatetime2}{regSpace}{regPID_TID2}{regSpace}{regLevel}{regSpace}{regTag}:"), 5],
+
+        33: [re.compile(fr"^{regIndex}{regSpace}{regDatetime1}"
+                        fr"{regSpace}{regPID_TID2}{regSpace}{regLevel2}{regSpace}{regTag}:"), 7],
     }
 
     @staticmethod
@@ -145,7 +151,7 @@ class LogcatFile:
         if pattern[1] == 0:
             logSplit = [logLine]
         else:
-            logSplit = re.split(r"\s", logLine, maxsplit=pattern[1])
+            logSplit = re.split(r"\s+", logLine, maxsplit=pattern[1])
         try:
             if fmtType in range(0, 8):
                 logTime = datetime.strptime(f"{logSplit[0]} {logSplit[1]}", "%Y-%m-%d %H:%M:%S.%f")
@@ -172,6 +178,10 @@ class LogcatFile:
                 tags = logSplit[pattern[1]].split(":", 1)
                 return LogcatItem(logTime.timestamp(),
                                   logSplit[2], logSplit[3], "", logSplit[4], tags[0], tags[1])
+            elif fmtType == 33:
+                logTime = datetime.strptime(f"{logSplit[1]} {logSplit[2]}", "%Y-%m-%d %H:%M:%S.%f")
+                return LogcatItem(logTime.timestamp(),
+                                  logSplit[3], logSplit[4], "", logSplit[5], logSplit[6], logSplit[7])
         except IndexError as e:
             Logger.e(appModel.getAppTag(), f"formatData exception:{logLine}, error:{e}")
         except ValueError as e:

@@ -295,7 +295,9 @@ class WidgetTracerList(QWidget, Ui_Form):
             return
         dataToCopy = ""
         for item in items:
-            dataToCopy += item.text()
+            trace: TracerLine = item.data(Qt.UserRole)
+            dataToCopy += trace.getFullText()
+            # dataToCopy += item.text()
             dataToCopy += os.linesep
         pyperclip.copy(dataToCopy)
         self._mNotifyWidget.notify(f"Copied {len(items)} logs to clipboard", 2)
