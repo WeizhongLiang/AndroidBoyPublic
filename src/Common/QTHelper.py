@@ -75,9 +75,11 @@ class ListForQLineEdit(QListWidget):
 
     @staticmethod
     def getInstance():
-        if ListForQLineEdit._instance is None:
-            ListForQLineEdit._instance = ListForQLineEdit()
-        return ListForQLineEdit._instance
+        return ListForQLineEdit()
+        # single instance may cause crash......
+        # if ListForQLineEdit._instance is None:
+        #     ListForQLineEdit._instance = ListForQLineEdit()
+        # return ListForQLineEdit._instance
 
     def __init__(self, parent: QWidget = None):
         super(ListForQLineEdit, self).__init__(parent)
@@ -90,6 +92,7 @@ class ListForQLineEdit(QListWidget):
         if self._mEditor is not None:
             self._mEditor.removeEventFilter(self)
             self.removeEventFilter(self)
+        return
 
     def _onSelectItem(self, item: QListWidgetItem):
         if self._mEditor is not None:

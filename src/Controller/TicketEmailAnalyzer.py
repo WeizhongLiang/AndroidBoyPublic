@@ -36,14 +36,17 @@ class MailAnalyzer:
         self.mCustomerData = None
         self.mAnalyzeResult = {}
         self.mErrorDefinition = errorDefinition
-        self._analyzeMail()
+        self.analyzeMail(False)
         return
 
-    def _analyzeMail(self):
+    def analyzeMail(self, recheck: bool = False):
         senderName = self.mMailItem.mSenderName
         Logger.d(appModel.getAppTag(), f"mail={senderName}")
         emailFolder = self.mMailItem.mLocalFolder
-        self._readResult(emailFolder)
+        if recheck:
+            self.mAnalyzeResult = {}
+        else:
+            self._readResult(emailFolder)
         if "BaseInfo" not in self.mAnalyzeResult:
             self._saveBaseInfo(self.mMailItem)
         if "Attachment" not in self.mAnalyzeResult:

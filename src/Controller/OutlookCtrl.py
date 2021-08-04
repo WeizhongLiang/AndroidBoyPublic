@@ -62,7 +62,7 @@ class EmailObjectMac:
         self.EntryID = email["_id"]
         self.Subject = email["_subject"]
         self.Body = email["_body"]
-        self.ReceivedTime = self._getReceivedTime(email["_receivedTime"])
+        self.ReceivedTime = self.getReceivedTime(email["_receivedTime"])
         self.SenderName = email["_senderName"]
         self.SenderEmailAddress = email["_senderEmail"]
         self.ReceivedByName = "receivedByName"
@@ -71,7 +71,7 @@ class EmailObjectMac:
         return
 
     @staticmethod
-    def _getReceivedTime(timeStr) -> datetime:
+    def getReceivedTime(timeStr) -> datetime:
         return datetime.strptime(timeStr, '%m%d%Y_%H%M%S')
 
 
@@ -225,8 +225,8 @@ class OutlookCtrl:
 
     def _initAccountsForMac(self):
         cacheFilePath = os.path.join(self.sLocalFolderBase, "cacheAccounts.json")
-        useCache = False
-        if useCache:
+        cachedOnly = appModel.readConfig(self.__class__.__name__, "OnlyCachedAccounts", False)
+        if cachedOnly:
             accounts = FileUtility.loadJsonFile(cacheFilePath)
         else:
             import applescript
@@ -253,6 +253,7 @@ class OutlookCtrl:
                     not self._mOnReadItem(None, None, accountItem):
                 return self._mAccounts, self._mFolders
             self._readFoldersMac(account["_folders"], accountItem)
+        appModel.saveConfig(self.__class__.__name__, "OnlyCachedAccounts", cachedOnly)
         return self._mAccounts, self._mFolders
 
     def initAccounts(self) -> Tuple[dict[str, AccountItem], dict[str, FolderItem]]:
@@ -276,23 +277,28 @@ class OutlookCtrl:
         return self._mFilterMails
 
     def _queryMailsViaAppleScript(self, emailFilter: EmailFilter) -> [str, EmailItem]:
-        import applescript
-        scriptFile = appModel.getScriptFile("getMails.applescript")
-        # write filter params
-        appleParams = [
-            "" + os.linesep,                        # account filter: abc@def.com
-            emailFilter.folders[0] + os.linesep,    # folder filter: abc@def.com
-            DateTimeHelper.getTimestampString(emailFilter.beginDate, "%Y-%m-%d %H:%M:%S") + os.linesep,
-            DateTimeHelper.getTimestampString(emailFilter.endDate, "%Y-%m-%d %H:%M:%S") + os.linesep,
-            self.sLocalFolderBase + os.linesep,
-            ]
-        fw = open(os.path.join(SystemHelper.desktopPath(), "as_params.cfg"), "w")
-        fw.writelines(appleParams)
-        Logger.i(appModel.getAppTag(), f"appleParams={appleParams}")
-        fw.close()
-        asRead = applescript.run(scriptFile)
-        os.remove(fw.name)
-        emailsFromAS = json.loads(asRead.out)
+        cachedOnly = appModel.readConfig(self.__class__.__name__, "OnlyCachedMails", False)
+        if cachedOnly:
+            emailsFromAS = []
+        else:
+            import applescript
+            scriptFile = appModel.getScriptFile("getMails.applescript")
+            # write filter params
+            appleParams = [
+                "" + os.linesep,                        # account filter: abc@def.com
+                emailFilter.folders[0] + os.linesep,    # folder filter: abc@def.com
+                DateTimeHelper.getTimestampString(emailFilter.beginDate, "%Y-%m-%d %H:%M:%S") + os.linesep,
+                DateTimeHelper.getTimestampString(emailFilter.endDate, "%Y-%m-%d %H:%M:%S") + os.linesep,
+                self.sLocalFolderBase + os.linesep,
+                ]
+            fw = open(os.path.join(SystemHelper.desktopPath(), "as_params.cfg"), "w")
+            fw.writelines(appleParams)
+            Logger.i(appModel.getAppTag(), f"appleParams={appleParams}")
+            fw.close()
+            asRead = applescript.run(scriptFile)
+            os.remove(fw.name)
+            emailsFromAS = json.loads(asRead.out)
+        appModel.saveConfig(self.__class__.__name__, "OnlyCachedMails", cachedOnly)
         return emailsFromAS
 
     def _readFilterItemsMac(self, emailFilter: EmailFilter) -> dict[str, EmailItem]:
@@ -315,6 +321,11 @@ class OutlookCtrl:
         # filter mail
         for emailInfo in emails:
             email = emailInfo["_mails"]
+            receivedTime = EmailObjectMac.getReceivedTime(email["_receivedTime"]).timestamp()
+            if emailFilter.beginDate != 0 and receivedTime < emailFilter.beginDate:
+                continue
+            if emailFilter.endDate != 0 and receivedTime > emailFilter.endDate:
+                continue
             folderItem = self._mFolders[email["_folderID"]]
             emailItem = EmailItem(EmailObjectMac(email),
                                   folderItem, self.sLocalFolderBase)
@@ -342,7 +353,7 @@ class OutlookCtrl:
         if SystemHelper.isWindows():
             self._readFilterItemsWindows(emailFilter)
         elif SystemHelper.isMac():
-            self._correctFilter(emailFilter)
+            # self._correctFilter(emailFilter)
             self._readFilterItemsMac(emailFilter)
             self._saveFilterMailsSummary(emailFilter)
         else:
