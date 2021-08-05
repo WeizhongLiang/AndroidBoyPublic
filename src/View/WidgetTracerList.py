@@ -438,7 +438,7 @@ class WidgetTracerList(QWidget, Ui_Form):
         appModel.addRecentInput(findMsg)
         if self.ckWords.checkState() == Qt.Checked:
             findMsg = r"\b" + findMsg + r"\b"
-        if self.ckCase.checkState() == Qt.Checked:
+        if self.ckCase.checkState() != Qt.Checked:
             findFlag = re.IGNORECASE
         if reverse:
             startFind = self.listTrace.count() - 1
@@ -476,7 +476,7 @@ class WidgetTracerList(QWidget, Ui_Form):
         appModel.addRecentInput(findMsg)
         if self.ckWords.checkState() == Qt.Checked:
             findMsg = r"\b" + findMsg + r"\b"
-        if self.ckCase.checkState() == Qt.Checked:
+        if self.ckCase.checkState() != Qt.Checked:
             findFlag = re.IGNORECASE
         if reverse:
             startFind = 0
