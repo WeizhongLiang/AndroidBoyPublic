@@ -482,6 +482,28 @@ class ViewOutlookDetector(QWidget, Ui_Form):
                 "no audio(31000021)",
                 "audio"
             ],
+            "processJoinMeetingCommand, success=false": [
+                "can't join meeting(processJoinMeetingCommand failure)",
+                "join meeting"
+            ],
+            "processGlobalSearchCommand, success= false": [
+                "no meeting found(processGlobalSearchCommand failure) -  might captcha",
+                "join meeting"
+            ],
+            "createLicenseDlg": [
+                "join meeting failure (meeting license limit, correct scenario)",
+                "join meeting"
+            ],
+            # same log with processJoinMeetingCommand, success=false, how to handle???
+            "<MsgCode>107</MsgCode><Message>WebExUserIDInactive</Message>": [
+                "account inactive (processJoinMeetingCommand failure) ",
+                "join meeting"
+            ],
+            # NATIVE_WME  [TID:36650][NATIVE_TID:25673][UTIL] MultiMediaDataEncrypt, Decrypt Error this=0x757d185a98
+            "Decrypt Error": [
+                "e2ee decrypt error",
+                "in meeting session not work"
+            ],
             "cmReason = 65002": [
                 "no audio(65002)",
                 "audio"
@@ -505,7 +527,57 @@ class ViewOutlookDetector(QWidget, Ui_Form):
             "ret =30028": [
                 "can't turn on mic",
                 "audio"
-            ]
+            ],
+            "<MsgCode>133</MsgCode><Message>InvalidPassword</Message>": [
+                "invalid password(processJoinMeetingCommand failure)",
+                "join meeting"
+            ],
+            "{\"code\":401000,\"message\":\"Need login before access\"}": [
+                "join require login(WbxAppApi failure)",
+                "join meeting"
+            ],
+            "{\"code\":403019": [
+                "host account in active(WbxAppApi return response)",
+                "join meeting"
+            ],
+            "{\"code\":404006": [
+                "cannot find the data(WbxAppApi return response)",
+                "join meeting"
+            ],
+            "{\"code\":404003": [
+                "Meeting data not found(WbxAppApi return response)",
+                "join meeting"
+            ],
+            "<MsgCode>118</MsgCode><Message>CanNotJoinNotStartedMeeting</Message>": [
+                "not started yet(processJoinMeetingCommand failure)",
+                "join meeting"
+            ],
+            "<MsgCode>120</MsgCode><Message>UnkownError</Message>": [
+                "unkonwn error(processJoinMeetingCommand failure)",
+                "join meeting"
+            ],
+            "on_conference_join_confirm, ERROR in joining code=53": [
+                "GCC_RESULT_CONFERENCE_NOT_FOUND",
+                "join meeting"
+            ],
+            "SSL_connect timeout with": [
+                "might join meeting",
+                "ssl connect timeout"
+            ],
+            "select fail with 115": [
+                "might join meeting",
+                "socket error"
+            ],
+            "Network is unreachable": [
+                "might join meeting",
+                "Network is unreachable"
+            ],
+            "xmlApiErr2LocalErr Unknown XMLAPI Error:1001": [
+                "xml api error",
+                "xml api error"
+            ],
+
+
         }
         self.mErrorDefinition = appModel.readConfig(self.__class__.__name__, "errorDefinition", errorDefinition)
 
