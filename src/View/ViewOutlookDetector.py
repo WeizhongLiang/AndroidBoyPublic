@@ -576,6 +576,11 @@ class ViewOutlookDetector(QWidget, Ui_Form):
                 "xml api error",
                 "xml api error"
             ],
+            "get reject join message": [
+                "get reject from CB(too many join)",
+                "join meeting"
+            ],
+
 
 
         }
