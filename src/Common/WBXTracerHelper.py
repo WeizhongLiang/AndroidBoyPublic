@@ -61,8 +61,8 @@ class WBXTraceDefine:
     ENCODE_UTF16_BE = b'\03'
     ENCODE_UTF8 = b'\04'
     getEncodeStr = {
-        ENCODE_AUTO: "ansi",
-        ENCODE_ANSI: "ansi",
+        ENCODE_AUTO: "ascii",
+        ENCODE_ANSI: "ascii",
         ENCODE_UTF16_LE: "utf-16-le",
         ENCODE_UTF16_BE: "utf-16-be",
         ENCODE_UTF8: "utf-8",
