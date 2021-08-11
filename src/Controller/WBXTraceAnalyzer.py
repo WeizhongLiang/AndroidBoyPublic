@@ -6,8 +6,11 @@ from src.Common import SystemHelper
 """
 windows: Intel(R) Core(TM) i7-6600U CPU @ 2.60GHz 2.81 GHz
     python          18.06 seconds
-    c++@debug       5.8 seconds
     c++@release     0.398721 seconds
+    
+windows: Intel(R) Core(TM) i5-9400F CPU @ 2.90GHz 2.90 GHz
+    python          12.271663 seconds
+    c++@release     0.298202 seconds
     
 mac: Intel(R) 2.6 GHz 6-Core Intel Core i7
     python          14.336805 seconds
