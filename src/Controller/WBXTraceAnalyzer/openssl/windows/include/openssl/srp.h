@@ -1,14 +1,10 @@
 /*
- * Copyright 2004-2018 The OpenSSL Project Authors. All Rights Reserved.
- * Copyright (c) 2004, EdelKey Project. All Rights Reserved.
+ * Copyright 2011-2016 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
  * in the file LICENSE in the source distribution or at
  * https://www.openssl.org/source/license.html
- *
- * Originally written by Christophe Renou and Peter Sylvester,
- * for the EdelKey project.
  */
 
 #ifndef HEADER_SRP_H
@@ -58,7 +54,6 @@ typedef struct SRP_VBASE_st {
     char *seed_key;
     const BIGNUM *default_g;
     const BIGNUM *default_N;
-    const EVP_MD *md;
 } SRP_VBASE;
 
 /*
@@ -81,14 +76,8 @@ DEPRECATEDIN_1_1_0(SRP_user_pwd *SRP_VBASE_get_by_user(SRP_VBASE *vb, char *user
 /* NOTE: unlike in SRP_VBASE_get_by_user, caller owns the returned pointer.*/
 SRP_user_pwd *SRP_VBASE_get1_by_user(SRP_VBASE *vb, char *username);
 
-char *SRP_create_verifier_md(const char *user, const char *pass, char **salt,
-                             char **verifier, const char *N, const char *g, const EVP_MD *md);
 char *SRP_create_verifier(const char *user, const char *pass, char **salt,
                           char **verifier, const char *N, const char *g);
-int SRP_create_verifier_BN_md(const char *user, const char *pass, BIGNUM **salt,
-                              BIGNUM **verifier, const BIGNUM *N,
-                              const BIGNUM *g, const EVP_MD *md);
-
 int SRP_create_verifier_BN(const char *user, const char *pass, BIGNUM **salt,
                            BIGNUM **verifier, const BIGNUM *N,
                            const BIGNUM *g);
@@ -120,20 +109,14 @@ SRP_gN *SRP_get_default_gN(const char *id);
 /* server side .... */
 BIGNUM *SRP_Calc_server_key(const BIGNUM *A, const BIGNUM *v, const BIGNUM *u,
                             const BIGNUM *b, const BIGNUM *N);
-BIGNUM *SRP_Calc_B_md(const BIGNUM *b, const BIGNUM *N, const BIGNUM *g,
-                      const BIGNUM *v, const EVP_MD *md);
 BIGNUM *SRP_Calc_B(const BIGNUM *b, const BIGNUM *N, const BIGNUM *g,
                    const BIGNUM *v);
 int SRP_Verify_A_mod_N(const BIGNUM *A, const BIGNUM *N);
-BIGNUM *SRP_Calc_u_md(const BIGNUM *A, const BIGNUM *B, const BIGNUM *N, const EVP_MD *md);
-BIGNUM *SRP_Calc_u(BIGNUM *A, BIGNUM *B, const BIGNUM *N);
+BIGNUM *SRP_Calc_u(const BIGNUM *A, const BIGNUM *B, const BIGNUM *N);
 
 /* client side .... */
-BIGNUM *SRP_Calc_x_md(const BIGNUM *s, const char *user, const char *pass, const EVP_MD *md);
 BIGNUM *SRP_Calc_x(const BIGNUM *s, const char *user, const char *pass);
 BIGNUM *SRP_Calc_A(const BIGNUM *a, const BIGNUM *N, const BIGNUM *g);
-BIGNUM *SRP_Calc_client_key_md(const BIGNUM *N, const BIGNUM *B, const BIGNUM *g,
-                               const BIGNUM *x, const BIGNUM *a, const BIGNUM *u, const EVP_MD *md);
 BIGNUM *SRP_Calc_client_key(const BIGNUM *N, const BIGNUM *B, const BIGNUM *g,
                             const BIGNUM *x, const BIGNUM *a, const BIGNUM *u);
 int SRP_Verify_B_mod_N(const BIGNUM *B, const BIGNUM *N);

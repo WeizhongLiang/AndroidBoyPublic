@@ -33,9 +33,6 @@ typedef struct RIPEMD160state_st {
 } RIPEMD160_CTX;
 
 int RIPEMD160_Init(RIPEMD160_CTX *c);
-#ifdef OPENSSL_FIPS
-int private_RIPEMD160_Init(RIPEMD160_CTX *c);
-#endif
 int RIPEMD160_Update(RIPEMD160_CTX *c, const void *data, size_t len);
 int RIPEMD160_Final(unsigned char *md, RIPEMD160_CTX *c);
 unsigned char *RIPEMD160(const unsigned char *d, size_t n, unsigned char *md);

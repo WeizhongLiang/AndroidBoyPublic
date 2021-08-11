@@ -3,6 +3,12 @@ import os
 
 from src.Common import SystemHelper
 
+"""
+windows: Intel(R) Core(TM) i7-6600U CPU @ 2.60GHz 2.81 GHz
+    python          18.06 seconds
+    c++@debug       5.8 seconds
+    c++@release     0.398721 seconds
+"""
 _libPath = os.path.dirname(os.path.realpath(__file__))
 if SystemHelper.isMac():
     _libPath = os.path.join(_libPath, "WBXTraceAnalyzer", "output", "mac", "libWBXTraceAnalyzer.dylib")
@@ -20,8 +26,10 @@ try:
     _analyzeFile.argtypes = [ctypes.c_char_p]
     _analyzeFile.restype = ctypes.c_char_p
     _valid = True
+    print(f"load {_libPath} success")
 except Exception as e:
     _valid = False
+    print(f"load {_libPath} failed: {e}")
 
 
 def isValid() -> bool:

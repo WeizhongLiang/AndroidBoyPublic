@@ -99,7 +99,7 @@ class PackageChecker:
                 error = stderr.decode("utf-8")
                 self._mErrorMsg = f"Please install python first: {error}"
                 return False, ""
-            pythonPath = stdout.decode().rstrip()
+            pythonPath = stdout.decode().rstrip().split(os.linesep)[0]
             return True, os.path.join(os.path.dirname(pythonPath), "Scripts", "pip")
         except Exception as e:
             self._mErrorMsg = f"_getPIPPathWindows find where is python failed: {e}"

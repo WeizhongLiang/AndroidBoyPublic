@@ -1,11 +1,16 @@
 /*
- * Copyright 1995-2019 The OpenSSL Project Authors. All Rights Reserved.
- * Copyright (c) 2002, Oracle and/or its affiliates. All rights reserved
+ * Copyright 1995-2018 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
  * in the file LICENSE in the source distribution or at
  * https://www.openssl.org/source/license.html
+ */
+
+/* ====================================================================
+ * Copyright 2002 Sun Microsystems, Inc. ALL RIGHTS RESERVED.
+ * ECDH support in OpenSSL originally developed by
+ * SUN MICROSYSTEMS, INC., and contributed to the OpenSSL project.
  */
 
 #ifndef HEADER_CRYPTO_H
@@ -16,63 +21,15 @@
 
 # include <openssl/e_os2.h>
 
-#ifdef OCTEON_OPENSSL
-# define OCTEON_HW_ASSIST 1
-extern unsigned int OPENSSL_octcap_P;
-#  define OCTEON_HWA_CAPABLE      (OPENSSL_octcap_P & OCTEON_HW_ASSIST)
-
-#define MUL_PAD 8
-#define MODEXP_GUARD 192
-#define CAV_ASSERT(e)       (void)((e) ? 0 : (OPENSSL_die("CAVS Assert" #e , OPENSSL_FILE, OPENSSL_LINE), 1))
-
-#define ROUNDUP8(val) (((val) + 7)&0xfffffff8)
-#define MINIMUM(a,b) ( (a<b)? a :b)
-#define MAXIMUM(a,b) ( (a>b)? a :b)
-
-#ifdef B_ENDIAN
-#define cvmx_htobe64(val)                   (val)
-#define cvmx_htobe32(val)                   (val)
-#define cvmx_htobe16(val)                   (val)
-#define cvmx_betoh64(val)                   (val)
-#define cvmx_betoh32(val)                   (val)
-#define cvmx_betoh16(val)                   (val)
-#define cvmx_htole64(val)                   __builtin_bswap64(val)
-#define cvmx_htole32(val)                   __builtin_bswap32(val)
-#define cvmx_htole16(val)                   __builtin_bswap16(val)
-#define cvmx_letoh64(val)                   __builtin_bswap64(val)
-#define cvmx_letoh32(val)                   __builtin_bswap32(val)
-#define cvmx_letoh16(val)                   __builtin_bswap16(val)
-#define cvmx_bswap64(val)                   (val)
-#define cvmx_bswap32(val)                   (val)
-#define cvmx_bswap16(val)                   (val)
-#else /* BIG_ENDIAN */
-#define cvmx_htobe64(val)                   __builtin_bswap64(val)
-#define cvmx_htobe32(val)                   __builtin_bswap32(val)
-#define cvmx_htobe16(val)                   __builtin_bswap16(val)
-#define cvmx_betoh64(val)                   __builtin_bswap64(val)
-#define cvmx_betoh32(val)                   __builtin_bswap32(val)
-#define cvmx_betoh16(val)                   __builtin_bswap16(val)
-#define cvmx_htole64(val)                   (val)
-#define cvmx_htole32(val)                   (val)
-#define cvmx_htole16(val)                   (val)
-#define cvmx_letoh64(val)                   (val)
-#define cvmx_letoh32(val)                   (val)
-#define cvmx_letoh16(val)                   (val)
-#define cvmx_bswap64(val)                   __builtin_bswap64(val)
-#define cvmx_bswap32(val)                   __builtin_bswap32(val)
-#define cvmx_bswap16(val)                   __builtin_bswap16(val)
-#endif /*LITTILE_ENDIAN */
-#endif
-
 # ifndef OPENSSL_NO_STDIO
 #  include <stdio.h>
 # endif
 
+# include <openssl/stack.h>
 # include <openssl/safestack.h>
 # include <openssl/opensslv.h>
 # include <openssl/ossl_typ.h>
 # include <openssl/opensslconf.h>
-# include <openssl/cryptoerr.h>
 
 # ifdef CHARSET_EBCDIC
 #  include <openssl/ebcdic.h>
@@ -153,12 +110,15 @@ DEFINE_STACK_OF(void)
 # define CRYPTO_EX_INDEX_UI              11
 # define CRYPTO_EX_INDEX_BIO             12
 # define CRYPTO_EX_INDEX_APP             13
-# define CRYPTO_EX_INDEX_UI_METHOD       14
-# define CRYPTO_EX_INDEX_DRBG            15
-# define CRYPTO_EX_INDEX__COUNT          16
+# define CRYPTO_EX_INDEX__COUNT          14
 
-/* No longer needed, so this is a no-op */
-#define OPENSSL_malloc_init() while(0) continue
+/*
+ * This is the default callbacks, but we can have others as well: this is
+ * needed in Win32 where the application malloc and the library malloc may
+ * not be the same.
+ */
+#define OPENSSL_malloc_init() \
+    CRYPTO_set_mem_functions(CRYPTO_malloc, CRYPTO_realloc, CRYPTO_free)
 
 int CRYPTO_mem_ctrl(int mode);
 
@@ -208,8 +168,6 @@ const char *OpenSSL_version(int type);
 # define OPENSSL_PLATFORM         3
 # define OPENSSL_DIR              4
 # define OPENSSL_ENGINES_DIR      5
-# define OPENSSL_CFOM_ENG_DIR     6
-# define OPENSSL_CORONA_STR       7
 
 int OPENSSL_issetugid(void);
 
@@ -253,7 +211,7 @@ void *CRYPTO_get_ex_data(const CRYPTO_EX_DATA *ad, int idx);
  * The old locking functions have been removed completely without compatibility
  * macros. This is because the old functions either could not properly report
  * errors, or the returned error values were not clearly documented.
- * Replacing the locking functions with no-ops would cause race condition
+ * Replacing the locking functions with with no-ops would cause race condition
  * issues in the affected applications. It is far better for them to fail at
  * compile time.
  * On the other hand, the locking callbacks are no longer used.  Consequently,
@@ -345,7 +303,6 @@ void OPENSSL_cleanse(void *ptr, size_t len);
         CRYPTO_mem_debug_pop()
 int CRYPTO_mem_debug_push(const char *info, const char *file, int line);
 int CRYPTO_mem_debug_pop(void);
-void CRYPTO_get_alloc_counts(int *mcount, int *rcount, int *fcount);
 
 /*-
  * Debugging functions (enabled by CRYPTO_set_mem_debug(1))
@@ -360,8 +317,6 @@ void CRYPTO_mem_debug_realloc(void *addr1, void *addr2, size_t num, int flag,
 void CRYPTO_mem_debug_free(void *addr, int flag,
         const char *file, int line);
 
-int CRYPTO_mem_leaks_cb(int (*cb) (const char *str, size_t len, void *u),
-                        void *u);
 #  ifndef OPENSSL_NO_STDIO
 int CRYPTO_mem_leaks_fp(FILE *);
 #  endif
@@ -379,51 +334,14 @@ ossl_noreturn void OPENSSL_die(const char *assertion, const char *file, int line
 int OPENSSL_isservice(void);
 
 int FIPS_mode(void);
-
-int FIPS_cc_mode(void);
-int FIPS_cc_set(int r);
 int FIPS_mode_set(int r);
-int FIPS_cfom_get_load_permission(void);
-void FIPS_lock_cleanup(void);
-int FIPS_check_selftest_run(int version);
-
-
-const char * FIPS_module_vertxt(void);
-const char *FIPS_module_spec(void);
 
 void OPENSSL_init(void);
-# ifdef OPENSSL_SYS_UNIX
-void OPENSSL_fork_prepare(void);
-void OPENSSL_fork_parent(void);
-void OPENSSL_fork_child(void);
-# endif
 
 struct tm *OPENSSL_gmtime(const time_t *timer, struct tm *result);
 int OPENSSL_gmtime_adj(struct tm *tm, int offset_day, long offset_sec);
 int OPENSSL_gmtime_diff(int *pday, int *psec,
                         const struct tm *from, const struct tm *to);
-
-# define fips_md_init(alg) fips_md_init_ctx(alg, alg)
-
-# ifdef OPENSSL_FIPS
-#  define fips_md_init_ctx(alg, cx) \
-        int alg##_Init(cx##_CTX *c) \
-        { \
-        if (FIPS_mode()) OPENSSL_die(("Low level API call to digest " #alg " forbidden in FIPS mode!"), \
-                                       OPENSSL_FILE, OPENSSL_LINE); \
-        return private_##alg##_Init(c); \
-        } \
-        int private_##alg##_Init(cx##_CTX *c)
-
-#  define fips_cipher_abort(alg) \
-        if (FIPS_mode()) OPENSSL_die(("Low level API call to cipher " #alg " forbidden in FIPS mode!"), \
-                                       OPENSSL_FILE, OPENSSL_LINE); \
-
-# else
-#  define fips_md_init_ctx(alg, cx) \
-        int alg##_Init(cx##_CTX *c)
-#  define fips_cipher_abort(alg) while(0)
-# endif
 
 /*
  * CRYPTO_memcmp returns zero iff the |len| bytes at |a| and |b| are equal.
@@ -432,13 +350,9 @@ int OPENSSL_gmtime_diff(int *pday, int *psec,
  * into a defined order as the return value when a != b is undefined, other
  * than to be non-zero.
  */
-#ifdef OCTEON_OPENSSL  
 int CRYPTO_memcmp(const volatile void * volatile in_a,
                   const volatile void * volatile in_b,
                   size_t len);
-#else
-int CRYPTO_memcmp(const void * in_a, const void * in_b, size_t len);  
-#endif //OCTEON_OPENSSL
 
 /* Standard initialisation options */
 # define OPENSSL_INIT_NO_LOAD_CRYPTO_STRINGS 0x00000001L
@@ -458,9 +372,8 @@ int CRYPTO_memcmp(const void * in_a, const void * in_b, size_t len);
 # define OPENSSL_INIT_ENGINE_PADLOCK         0x00004000L
 # define OPENSSL_INIT_ENGINE_AFALG           0x00008000L
 /* OPENSSL_INIT_ZLIB                         0x00010000L */
-# define OPENSSL_INIT_ATFORK                 0x00020000L
+/* currently unused                          0x00020000L */
 /* OPENSSL_INIT_BASE_ONLY                    0x00040000L */
-# define OPENSSL_INIT_NO_ATEXIT              0x00080000L
 /* OPENSSL_INIT flag range 0xfff00000 reserved for OPENSSL_init_ssl() */
 /* Max OPENSSL_INIT flag value is 0x80000000 */
 
@@ -480,12 +393,8 @@ void OPENSSL_thread_stop(void);
 /* Low-level control of initialization */
 OPENSSL_INIT_SETTINGS *OPENSSL_INIT_new(void);
 # ifndef OPENSSL_NO_STDIO
-int OPENSSL_INIT_set_config_filename(OPENSSL_INIT_SETTINGS *settings,
-                                     const char *config_filename);
-void OPENSSL_INIT_set_config_file_flags(OPENSSL_INIT_SETTINGS *settings,
-                                        unsigned long flags);
 int OPENSSL_INIT_set_config_appname(OPENSSL_INIT_SETTINGS *settings,
-                                    const char *config_appname);
+                                    const char *config_file);
 # endif
 void OPENSSL_INIT_free(OPENSSL_INIT_SETTINGS *settings);
 
@@ -526,6 +435,33 @@ int CRYPTO_THREAD_cleanup_local(CRYPTO_THREAD_LOCAL *key);
 CRYPTO_THREAD_ID CRYPTO_THREAD_get_current_id(void);
 int CRYPTO_THREAD_compare_id(CRYPTO_THREAD_ID a, CRYPTO_THREAD_ID b);
 
+/* BEGIN ERROR CODES */
+/*
+ * The following lines are auto generated by the script mkerr.pl. Any changes
+ * made after this point may be overwritten when the script is next run.
+ */
+
+int ERR_load_CRYPTO_strings(void);
+
+/* Error codes for the CRYPTO functions. */
+
+/* Function codes. */
+# define CRYPTO_F_CRYPTO_DUP_EX_DATA                      110
+# define CRYPTO_F_CRYPTO_FREE_EX_DATA                     111
+# define CRYPTO_F_CRYPTO_GET_EX_NEW_INDEX                 100
+# define CRYPTO_F_CRYPTO_MEMDUP                           115
+# define CRYPTO_F_CRYPTO_NEW_EX_DATA                      112
+# define CRYPTO_F_CRYPTO_SET_EX_DATA                      102
+# define CRYPTO_F_FIPS_MODE_SET                           109
+# define CRYPTO_F_GET_AND_LOCK                            113
+# define CRYPTO_F_OPENSSL_BUF2HEXSTR                      117
+# define CRYPTO_F_OPENSSL_HEXSTR2BUF                      118
+# define CRYPTO_F_OPENSSL_INIT_CRYPTO                     116
+
+/* Reason codes. */
+# define CRYPTO_R_FIPS_MODE_NOT_SUPPORTED                 101
+# define CRYPTO_R_ILLEGAL_HEX_DIGIT                       102
+# define CRYPTO_R_ODD_NUMBER_OF_DIGITS                    103
 
 # ifdef  __cplusplus
 }

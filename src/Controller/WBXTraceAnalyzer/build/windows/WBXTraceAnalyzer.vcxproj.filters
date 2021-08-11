@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{45617757-5aa3-4c24-b725-efd51973ce70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\nlohmann">
+      <UniqueIdentifier>{cdbe0531-c9e3-490e-9efc-b4197709a6aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\WBXTracer">
+      <UniqueIdentifier>{99fd7606-134d-424c-895c-8e4e3a363651}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Analyzer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\WBXTraceAnalyzer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\nlohmann\json.hpp">
+      <Filter>src\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\WBXTracer\WbxTracerDef.h">
+      <Filter>src\WBXTracer</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Analyzer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

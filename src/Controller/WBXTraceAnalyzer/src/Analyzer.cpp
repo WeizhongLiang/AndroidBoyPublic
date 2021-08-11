@@ -5,6 +5,30 @@
 //  Created by WeizhongLiang on 2021/8/5.
 //
 
+#if defined(_WIN32) || defined(_WIN64)
+#include <windows.h>
+#pragma comment(lib, "wsock32.lib")
+#define EXPORT __declspec(dllexport)
+
+BOOL APIENTRY DllMain(HMODULE hModule,
+    DWORD  ul_reason_for_call,
+    LPVOID lpReserved
+)
+{
+    switch (ul_reason_for_call)
+    {
+    case DLL_PROCESS_ATTACH:
+    case DLL_THREAD_ATTACH:
+    case DLL_THREAD_DETACH:
+    case DLL_PROCESS_DETACH:
+        break;
+    }
+    return TRUE;
+}
+#else
+#define EXPORT 
+#endif
+
 #include <iostream>
 #include <fstream>
 #include "Analyzer.h"
@@ -34,7 +58,7 @@ void AESDecrypt(std::uint8_t* data, size_t len, const AES_KEY* key){
     AES_cbc_encrypt(data, data, len, key, aesiv, AES_DECRYPT);
 }
 void SimpleDecrypt(std::uint8_t* data, size_t len){
-    for (int i=0; i<len; i++){
+    for (int i=0; i<(std::int32_t)len; i++){
         data[i] = ~data[i] - 0xc5;
     }
 }
@@ -135,7 +159,7 @@ bool WBXTraceReader::readFrom(std::uint8_t* data, std::uint32_t len){
             decryptWbxTracerItemData(lpItem);
             
             std::uint32_t itemIndex = itemCount;
-            std::uint64_t itemTime = lpItem->time * 1000 + lpItem->millitm;
+            std::uint64_t itemTime = (std::uint64_t)lpItem->time * 1000 + (std::uint64_t)lpItem->millitm;
             std::uint32_t itemPosInFile = (std::uint32_t)(curData - data);
             int nameLen = lpItem->hintof - lpItem->nameof;
             int instanceLen = lpItem->msgof - lpItem->hintof;
@@ -175,7 +199,7 @@ const char* WBXTraceAnalyzer::analyze(const char* wbtPath, const char* logFileNa
     std::uint8_t* byBuffer = nullptr;
     fileHandle.seekg(0, std::ios::beg);
     if (fileLen>0){
-        byBuffer = new BYTE[fileLen];
+        byBuffer = new std::uint8_t[(std::int32_t)fileLen];
         fileHandle.read((char*)byBuffer, fileLen);
     }
     fileHandle.close();
@@ -224,17 +248,21 @@ const char* WBXTraceAnalyzer::getAnalyzeResult(){
 }
 
 WBXTracer::WBXTraceAnalyzer sAnalyzer;
+#ifdef __APPLE__
 #pragma GCC visibility push(default)
+#endif
 extern "C"  {
-    void setErrDefine(const char* errDefine){
+    EXPORT void setErrDefine(const char* errDefine){
         sAnalyzer.setErrorDefine(errDefine);
     }
-    const char* analyzeData(std::uint8_t* data, std::uint32_t len, const char* logFileName){
+    EXPORT const char* analyzeData(std::uint8_t* data, std::uint32_t len, const char* logFileName){
         return sAnalyzer.analyze(data, len, logFileName);
     }
-    const char* analyzeFile(const char* wbtPath){
+    EXPORT const char* analyzeFile(const char* wbtPath){
         return sAnalyzer.analyze(wbtPath, wbtPath);
     }
 }
+#ifdef __APPLE__
 #pragma GCC visibility pop
+#endif
 

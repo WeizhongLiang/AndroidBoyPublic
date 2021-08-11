@@ -35,9 +35,6 @@ typedef struct {
 } WHIRLPOOL_CTX;
 
 int WHIRLPOOL_Init(WHIRLPOOL_CTX *c);
-#ifdef OPENSSL_FIPS
-int private_WHIRLPOOL_Init(WHIRLPOOL_CTX *c);
-#endif
 int WHIRLPOOL_Update(WHIRLPOOL_CTX *c, const void *inp, size_t bytes);
 void WHIRLPOOL_BitUpdate(WHIRLPOOL_CTX *c, const void *inp, size_t bits);
 int WHIRLPOOL_Final(unsigned char *md, WHIRLPOOL_CTX *c);

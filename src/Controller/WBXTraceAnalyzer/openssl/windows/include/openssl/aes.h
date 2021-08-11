@@ -10,13 +10,9 @@
 #ifndef HEADER_AES_H
 # define HEADER_AES_H
 
-#include <openssl/e_os2.h>
 # include <openssl/opensslconf.h>
 
 # include <stddef.h>
-# ifdef OCTEON_OPENSSL
-#  include <stdint.h>
-# endif
 # ifdef  __cplusplus
 extern "C" {
 # endif
@@ -39,10 +35,6 @@ struct aes_key_st {
     unsigned int rd_key[4 * (AES_MAXNR + 1)];
 # endif
     int rounds;
-# if defined(OCTEON_OPENSSL) || defined(OCTEON_STRUCTS)
-    uint64_t cvmkey[4];
-    int cvm_keylen;
-# endif
 };
 typedef struct aes_key_st AES_KEY;
 
@@ -51,10 +43,6 @@ const char *AES_options(void);
 int AES_set_encrypt_key(const unsigned char *userKey, const int bits,
                         AES_KEY *key);
 int AES_set_decrypt_key(const unsigned char *userKey, const int bits,
-                        AES_KEY *key);
-int private_AES_set_encrypt_key(const unsigned char *userKey, const int bits,
-                        AES_KEY *key);
-int private_AES_set_decrypt_key(const unsigned char *userKey, const int bits,
                         AES_KEY *key);
 
 void AES_encrypt(const unsigned char *in, unsigned char *out,
@@ -96,7 +84,7 @@ int AES_unwrap_key(AES_KEY *key, const unsigned char *iv,
                    unsigned char *out,
                    const unsigned char *in, unsigned int inlen);
 
-int AES_NI_enabled(void);
+
 # ifdef  __cplusplus
 }
 # endif

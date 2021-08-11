@@ -1,5 +1,5 @@
 /*
- * Copyright 1999-2021 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 1999-2018 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -39,32 +39,12 @@ extern "C" {
  * (Prior to 0.9.5a beta1, a different scheme was used: MMNNFFRBB for
  *  major minor fix final patch/beta)
  */
-
-# define OPENSSL_VERSION_NUMBER  0x101010bfL
-/* # define OPENSSL_VERSION_TEXT    "OpenSSL 1.1.1b-dev  xx XXX xxxx" */
-
-/*
- * CiscoSSL uses the following 3 directives for
- * revision tracking of a build.  These values should
- * be provided using CFLAGS (via jenkins)
- */
-    /* e.g. 1.0.1g4.3 */
-#define CISCOSSL_VERSION "CiscoSSL 1.1.1k.7.2.225"
-# ifndef CISCOSSL_BRANCH
-    /* e.g. ciscossl_1_0_1_4_throttle */
-#  define CISCOSSL_BRANCH    "not defined"
-# endif
-
+# define OPENSSL_VERSION_NUMBER  0x1010009fL
 # ifdef OPENSSL_FIPS
-#  define OPENSSL_VERSION_TEXT    CISCOSSL_VERSION "-fips"
+#  define OPENSSL_VERSION_TEXT    "OpenSSL 1.1.0i-fips  14 Aug 2018"
 # else
-#  define OPENSSL_VERSION_TEXT    CISCOSSL_VERSION
+#  define OPENSSL_VERSION_TEXT    "OpenSSL 1.1.0i  14 Aug 2018"
 # endif
-
-/*
- *  DO NOT USE THIS DEFINE OUTSIDE OF CISCOSSL
- */
-#define CORONA_SIGNATURE_STR "CSCO_CSM_CiscoSSL_1.1.1k.7.2.225 OSS_CSM_OpenSSL_1.1.1k_OpenSSLSoftwareFoundation"
 
 /*-
  * The macros below are to be used for shared library (.so, .dll, ...)

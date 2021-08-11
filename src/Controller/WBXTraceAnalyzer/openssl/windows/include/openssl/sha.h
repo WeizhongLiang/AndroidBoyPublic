@@ -17,21 +17,6 @@
 extern "C" {
 #endif
 
-# if defined(OPENSSL_FIPS)
-#  define FIPS_SHA_SIZE_T size_t
-# endif
-
-# ifdef OCTEON_OPENSSL
-#  define sha_assert(aexpr,rexpr) {if(!(aexpr)) {printf("Assertion %s Failed\n",#aexpr); return rexpr ;}}
-  /* Octeon MIPS Specific Crypto Implementation Need,Not an API */
-#  define uint64_t_mul(abhi,ablo,a,b) \
-{\
-    asm volatile("dmultu %[rs],%[rt]" :: [rs] "d" (a), [rt] "d" (b) );\
-    asm volatile("mfhi %[rd] " : [rd] "=d" (abhi) : );\
-    asm volatile("mflo %[rd] " : [rd] "=d" (ablo) : );\
-}
-# endif
-
 /*-
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * ! SHA_LONG has to be at least 32 bits wide.                    !
@@ -51,9 +36,6 @@ typedef struct SHAstate_st {
     SHA_LONG Nl, Nh;
     SHA_LONG data[SHA_LBLOCK];
     unsigned int num;
-# if defined(OCTEON_OPENSSL) || defined(OCTEON_STRUCTS)
-    uint64_t E, F, G;
-# endif
 } SHA_CTX;
 
 int SHA1_Init(SHA_CTX *c);
@@ -71,17 +53,6 @@ typedef struct SHA256state_st {
     SHA_LONG Nl, Nh;
     SHA_LONG data[SHA_LBLOCK];
     unsigned int num, md_len;
-# if defined(OCTEON_OPENSSL) || defined(OCTEON_STRUCTS)
-    uint64_t iv[4];
-    uint64_t totalin;
-    /* input length need not be a multiple of 64 */
-    uint8_t pbuf[64];
-    uint64_t plen;
-    /* Negative Test Case Handling */
-    uint32_t done;
-    /* sha224=0;sha256=1 */
-    uint32_t sha256;
-# endif
 } SHA256_CTX;
 
 int SHA224_Init(SHA256_CTX *c);
@@ -129,17 +100,6 @@ typedef struct SHA512state_st {
         unsigned char p[SHA512_CBLOCK];
     } u;
     unsigned int num, md_len;
-# if defined(OCTEON_OPENSSL) || defined(OCTEON_STRUCTS)
-    uint64_t iv[8];
-    uint64_t totalin;
-    /* input length need not be a multiple of 128 */
-    uint8_t pbuf[128];
-    uint64_t plen;
-    /* Negative Test Case Handling */
-    uint32_t done;
-    /* sha384=0;sha512=1; */
-    uint32_t sha512;
-#  endif
 } SHA512_CTX;
 
 int SHA384_Init(SHA512_CTX *c);
@@ -151,18 +111,6 @@ int SHA512_Update(SHA512_CTX *c, const void *data, size_t len);
 int SHA512_Final(unsigned char *md, SHA512_CTX *c);
 unsigned char *SHA512(const unsigned char *d, size_t n, unsigned char *md);
 void SHA512_Transform(SHA512_CTX *c, const unsigned char *data);
-int SHA512_224_Init(SHA512_CTX *c);
-int SHA512_256_Init(SHA512_CTX *c);
-
-#ifdef OPENSSL_FIPS
-int private_SHA512_256_Init(SHA512_CTX *c);
-int private_SHA512_224_Init(SHA512_CTX *c);
-int private_SHA1_Init(SHA_CTX *c);
-int private_SHA224_Init(SHA256_CTX *c);
-int private_SHA256_Init(SHA256_CTX *c);
-int private_SHA384_Init(SHA512_CTX *c);
-int private_SHA512_Init(SHA512_CTX *c);
-#endif
 
 #ifdef  __cplusplus
 }

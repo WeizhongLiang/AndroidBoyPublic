@@ -35,16 +35,9 @@ typedef struct MD5state_st {
     MD5_LONG Nl, Nh;
     MD5_LONG data[MD5_LBLOCK];
     unsigned int num;
-# ifdef OCTEON_OPENSSL
-    uint64_t E, F;
-    uint64_t md5hash[2];
-# endif
 } MD5_CTX;
 
 int MD5_Init(MD5_CTX *c);
-#ifdef OPENSSL_FIPS
-int private_MD5_Init(MD5_CTX *c);
-#endif
 int MD5_Update(MD5_CTX *c, const void *data, size_t len);
 int MD5_Final(unsigned char *md, MD5_CTX *c);
 unsigned char *MD5(const unsigned char *d, size_t n, unsigned char *md);
