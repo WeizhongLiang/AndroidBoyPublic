@@ -178,6 +178,7 @@ class WidgetTracerTabview(QWidget, Ui_Form):
                 appModel.saveConfig(self._mConfigName, f"col_width_{col}", width)
                 isHidden = self.tvTrace.isColumnHidden(col)
                 appModel.saveConfig(self._mConfigName, f"col_hidden_{col}", isHidden)
+        ListForQLineEdit.closeInstance()
         return
 
     def resizeEvent(self, QResizeEvent):

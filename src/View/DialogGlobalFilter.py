@@ -19,6 +19,11 @@ class DialogGlobalFilter(QDialog, Ui_Dialog):
         self._bindEvent()
         return
 
+    def closeEvent(self, event):
+        Logger.i(appModel.getAppTag(), "")
+        ListForQLineEdit.closeInstance()
+        return
+
     def _initLogLevel(self):
         self.cbLogLevel.addItem("Verbose", LoggerLevel.Verbose)
         self.cbLogLevel.addItem("Debug", LoggerLevel.Debug)

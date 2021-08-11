@@ -53,6 +53,7 @@ class ViewADBCommands(QWidget, Ui_Form):
         Logger.i(appModel.getAppTag(), "")
         self._mADBCommands.close()
         self._mUpdateTimer.stop()
+        ListForQLineEdit.closeInstance()
         return
 
     def _bindEvent(self):

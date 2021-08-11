@@ -134,6 +134,7 @@ class ViewDumpFile(QWidget, Ui_Form):
 
     def closeEvent(self, event):
         Logger.i(appModel.getAppTag(), "")
+        ListForQLineEdit.closeInstance()
         return
 
     def resizeEvent(self, QResizeEvent):

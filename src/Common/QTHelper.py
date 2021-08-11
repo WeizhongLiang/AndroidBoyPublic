@@ -75,11 +75,18 @@ class ListForQLineEdit(QListWidget):
 
     @staticmethod
     def getInstance():
-        return ListForQLineEdit()
+        # return ListForQLineEdit()
         # single instance may cause crash......
-        # if ListForQLineEdit._instance is None:
-        #     ListForQLineEdit._instance = ListForQLineEdit()
-        # return ListForQLineEdit._instance
+        if ListForQLineEdit._instance is None:
+            ListForQLineEdit._instance = ListForQLineEdit()
+        return ListForQLineEdit._instance
+
+    @staticmethod
+    def closeInstance():
+        if ListForQLineEdit._instance is not None:
+            ListForQLineEdit._instance.close()
+            ListForQLineEdit._instance = None
+        return
 
     def __init__(self, parent: QWidget = None):
         super(ListForQLineEdit, self).__init__(parent)

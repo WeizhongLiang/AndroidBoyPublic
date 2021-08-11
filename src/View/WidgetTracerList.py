@@ -317,6 +317,7 @@ class WidgetTracerList(QWidget, Ui_Form):
     def closeEvent(self, event):
         Logger.i(appModel.getAppTag(), "")
         appModel.saveConfig(self._mConfigName, "ColsVisual", self._mColsVisual)
+        ListForQLineEdit.closeInstance()
         return
 
     def clearLog(self, clearLines=True):

@@ -61,6 +61,7 @@ class ViewLogcat(QWidget, Ui_Form):
         self._setCurDevice(None)
         self._mTracerWidget.closeEvent(event)
         self._mLogcatFile.closeWrite()
+        ListForQLineEdit.closeInstance()
         return
 
     def _setCurDevice(self, device: AndroidDevice = None):

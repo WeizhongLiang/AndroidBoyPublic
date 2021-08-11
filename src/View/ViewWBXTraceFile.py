@@ -52,6 +52,7 @@ class ViewWBXTraceFile(QWidget, Ui_Form):
         Logger.i(appModel.getAppTag(), "")
         self._stopReadTracesThread()
         self._mTracerWidget.closeEvent(event)
+        ListForQLineEdit.closeInstance()
         return
 
     def resizeEvent(self, QResizeEvent):

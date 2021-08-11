@@ -11,6 +11,7 @@ from src.Layout.dialogMailDetail import Ui_Dialog
 from src.Common import QTHelper, SystemHelper, FileUtility, Const
 from src.Common.IntEnum import IntEnum
 from src.Common.Logger import Logger
+from src.Common.QTHelper import ListForQLineEdit
 from src.Common.UITheme import uiTheme
 from src.Controller.OutlookCtrl import EmailItem
 from src.Controller.TicketEmailAnalyzer import DumpFileState
@@ -78,6 +79,7 @@ class DialogMailDetail(QDialog, Ui_Dialog):
         Logger.i(appModel.getAppTag(), "")
         self._saveSummary()
         self._handleWndPos(False)
+        ListForQLineEdit.closeInstance()
         return
 
     def eventFilter(self, source: QObject, event: QtCore.QEvent):
