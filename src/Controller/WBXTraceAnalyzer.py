@@ -8,6 +8,10 @@ windows: Intel(R) Core(TM) i7-6600U CPU @ 2.60GHz 2.81 GHz
     python          18.06 seconds
     c++@debug       5.8 seconds
     c++@release     0.398721 seconds
+    
+mac: Intel(R) 2.6 GHz 6-Core Intel Core i7
+    python          14.336805 seconds
+    c++@release     0.283109 seconds
 """
 _libPath = os.path.dirname(os.path.realpath(__file__))
 if SystemHelper.isMac():

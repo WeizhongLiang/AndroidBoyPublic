@@ -14,8 +14,8 @@ from src.Common.UITheme import uiTheme
 from src.Model.AppModel import appModel
 
 
-# openssl s_client -connect gmbts3mcccl01.webex.com:443
-# nm -gU /usr/local/Cellar/cairo/1.12.16/lib/cairo/libcairo-trace.0.dylib
+# openssl s_client -connect www.google.com:443
+# nm -gU something.dylib
 
 class ViewADBCommands(QWidget, Ui_Form):
     _mEventConnectState = QtCore.pyqtSignal(int)

@@ -1,7 +1,6 @@
 import os
 import re
 import sys
-import ctypes.util
 import zipfile
 import json
 
@@ -62,12 +61,3 @@ except OSError:
     print("Unable to load the specified library.")
     sys.exit()
 
-"""
-import ctypes
-dll = ctypes.CDLL('your.dll')
-Open = dll.Open
-Open.argtypes = [ctypes.POINTER(ctypes.c_void_p),ctypes.c_char_p]
-Open.restype = ctypes.c_uint16
-Handle = ctypes.c_void_p()
-result = Open(ctypes.byref(Handle),'c:\\Config.xml')
-"""
