@@ -653,8 +653,10 @@ class ViewOutlookDetector(QWidget, Ui_Form):
         menu = QMenu()
         if len(selItems) > 0:
             recheck = menu.addAction(uiTheme.iconCopy, "Recheck mail")
+            openFolder = menu.addAction(uiTheme.iconFolder, "Open mail folder")
         else:
             recheck = None
+            openFolder = None
         action = menu.exec_(self.mapToGlobal(event.pos()))
 
         if action is None:
@@ -670,4 +672,12 @@ class ViewOutlookDetector(QWidget, Ui_Form):
                     analyzer.analyzeMail(True)
             Logger.i(appModel.getAppTag(), f"end recheck, total {len(selItems)} "
                                            f"in {procTime.getMicroseconds()} seconds ")
+        elif action == openFolder:
+            for item in selItems:
+                itemType = item.data(0, TreeItemRole.itemType.value)
+                if itemType == TreeItemType.email:
+                    itemInfo: TreeItemInfo = item.data(0, TreeItemRole.itemData.value)
+                    email: EmailItem = itemInfo.mData
+                    SystemHelper.openAtExplorer(email.mLocalFolder)
+                    break
         return

@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 from datetime import datetime
@@ -284,11 +285,13 @@ class OutlookCtrl:
             import applescript
             scriptFile = appModel.getScriptFile("getMails.applescript")
             # write filter params
+            emailFilterForAS = copy.deepcopy(emailFilter)
+            self._correctFilter(emailFilterForAS)
             appleParams = [
-                "" + os.linesep,                        # account filter: abc@def.com
-                emailFilter.folders[0] + os.linesep,    # folder filter: abc@def.com
-                DateTimeHelper.getTimestampString(emailFilter.beginDate, "%Y-%m-%d %H:%M:%S") + os.linesep,
-                DateTimeHelper.getTimestampString(emailFilter.endDate, "%Y-%m-%d %H:%M:%S") + os.linesep,
+                "" + os.linesep,                             # account filter: abc@def.com
+                emailFilterForAS.folders[0] + os.linesep,    # folder filter: abc@def.com
+                DateTimeHelper.getTimestampString(emailFilterForAS.beginDate, "%Y-%m-%d %H:%M:%S") + os.linesep,
+                DateTimeHelper.getTimestampString(emailFilterForAS.endDate, "%Y-%m-%d %H:%M:%S") + os.linesep,
                 self.sLocalFolderBase + os.linesep,
                 ]
             fw = open(os.path.join(SystemHelper.desktopPath(), "as_params.cfg"), "w")
@@ -353,7 +356,6 @@ class OutlookCtrl:
         if SystemHelper.isWindows():
             self._readFilterItemsWindows(emailFilter)
         elif SystemHelper.isMac():
-            # self._correctFilter(emailFilter)
             self._readFilterItemsMac(emailFilter)
             self._saveFilterMailsSummary(emailFilter)
         else:
