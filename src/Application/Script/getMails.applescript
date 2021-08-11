@@ -184,15 +184,14 @@ on appendAttachments(_message, _dictMailInfo, _mailTmpFolder)
 			try
 				if my isFileExists(_savedPath) then
 				else
-					-- log "download " & _savedPath
+					save _attachment in POSIX file _mailTmpFolder
+					(* 
+					save _attachment in _tmpPath
 					tell application "Finder"
-						if (exists _tmpPath) then
-						else
-							save _attachment in _tmpPath
-						end if
 						-- Move to correct folder
 						move _tmpPath to POSIX file _mailTmpFolder with replacing
 					end tell
+					*)
 				end if
 				
 				set end of _dictAttachment to {_name:_attachmentName, _size:_attachment's file size, _path:_savedPath}
