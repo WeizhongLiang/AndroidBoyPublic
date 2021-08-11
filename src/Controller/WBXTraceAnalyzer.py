@@ -45,19 +45,19 @@ def isValid() -> bool:
 
 def setErrDefine(errorDefine: str):
     if isValid():
-        _setErrDefine(errorDefine.encode("ascii"))
+        _setErrDefine(errorDefine.encode("ascii", "ignore"))
     return
 
 
 def analyzeData(logData: bytes, logFileName: str) -> str:
     if isValid():
-        return _analyzeData(logData, len(logData), logFileName.encode("ascii")).decode("ascii")
+        return _analyzeData(logData, len(logData), logFileName.encode("ascii", "ignore")).decode("ascii")
     else:
         return "{}"
 
 
 def analyzeFile(wbtPath: str) -> str:
     if isValid():
-        return _analyzeFile(wbtPath.encode("ascii")).decode("ascii")
+        return _analyzeFile(wbtPath.encode("ascii", "ignore")).decode("ascii")
     else:
         return "{}"
