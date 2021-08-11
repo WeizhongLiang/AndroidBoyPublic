@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "analyzeData(unsigned char*, int, char const*):WBXTraceAnalyzer.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "::analyzeData(const unsigned char *, int32_t, const char *):WBXTraceAnalyzer.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "decryptItemData(wbxtraceitem_v3*, unsigned char*):WBXTraceAnalyzer.cpp">
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>

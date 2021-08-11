@@ -5,9 +5,9 @@ from src.Common import SystemHelper
 
 _libPath = os.path.dirname(os.path.realpath(__file__))
 if SystemHelper.isMac():
-    _libPath = os.path.join(_libPath, "WBXTraceAnalyzer", "Mac", "libWBXTraceAnalyzer.dylib")
+    _libPath = os.path.join(_libPath, "WBXTraceAnalyzer", "output", "mac", "libWBXTraceAnalyzer.dylib")
 else:
-    _libPath = os.path.join(_libPath, "WBXTraceAnalyzer", "Windows", "WBXTraceAnalyzer.dll")
+    _libPath = os.path.join(_libPath, "WBXTraceAnalyzer", "output", "windows", "WBXTraceAnalyzer.dll")
 
 try:
     _libHandle = ctypes.CDLL(_libPath)
