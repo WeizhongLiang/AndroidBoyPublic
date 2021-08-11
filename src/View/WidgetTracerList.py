@@ -71,7 +71,7 @@ class TracerLine:
 
 class WidgetTracerList(QWidget, Ui_Form):
     getLevelStr = {
-        LoggerLevel.Verbose: "Verbos",
+        LoggerLevel.Verbose: "Verbose",
         LoggerLevel.Debug: "Debug",
         LoggerLevel.Info: "Info",
         LoggerLevel.Warning: "Warning",

@@ -21,7 +21,7 @@ from src.View.DialogTraceDetail import DialogTraceDetail
 
 class WidgetTracerTabview(QWidget, Ui_Form):
     getLevelStr = {
-        LoggerLevel.Verbose: "Verbos",
+        LoggerLevel.Verbose: "Verbose",
         LoggerLevel.Debug: "Debug",
         LoggerLevel.Info: "Info",
         LoggerLevel.Warning: "Warning",

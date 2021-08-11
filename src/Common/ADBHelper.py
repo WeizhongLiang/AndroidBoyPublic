@@ -111,8 +111,8 @@ class AndroidLogItem:
 
 
 class AndroidPackage:
-    # package:/data/app/com.miui.screenrecorder-yVME9t1AlMpw5Cq1Y1MT8w==
-    # /base.apk=com.miui.screenrecorder uid:1000
+    # package:/data/app/com.miui.abc-yVME9t1AlMpw5Cq1Y1MT8w==s
+    # /base.apk=com.miui.abc uid:1000
     def __init__(self, item):
         self.mIsValid = False
         try:
@@ -145,7 +145,7 @@ class AndroidPackage:
 class AndroidProcess:
     # USER           UID   PID  PPID NAME
     # u0_a275      10275  9331   680 com.cisco.webex.meetings
-    # u0_a275      10275  9431   680 com.cisco.webex.meetings:mtgsvc
+    # u0_a275      10275  9431   680 com.cisco.webex.meetings:abc
     def __init__(self, item):
         self.mIsValid = False
         try:
@@ -175,7 +175,7 @@ class AndroidDevice:
         self.mProductName = _adbReturn(self.mID, "shell getprop ro.product.name")  # equuleus
         self.mProductBoard = _adbReturn(self.mID, "shell getprop ro.product.board")  # sdm845
         self.mBuildVersionRelease = _adbReturn(self.mID, "shell getprop ro.build.version.release")  # 10
-        self.mBuildversionSDK = _adbReturn(self.mID, "shell getprop ro.build.version.sdk")  # 29
+        self.mBuildVersionSDK = _adbReturn(self.mID, "shell getprop ro.build.version.sdk")  # 29
         self.mABIList = _adbReturn(self.mID, "shell getprop ro.product.cpu.abilist")  # arm64-v8a,armeabi-v7a,armeabi
         self._mThreadLogcat = None
         self._mProcessLogcat = None  # subprocess.Popen
@@ -189,7 +189,7 @@ class AndroidDevice:
 
     def __str__(self):
         return f"{self.mProductBrand}-{self.mProductModel}" \
-               f"(Android {self.mBuildVersionRelease}, API {self.mBuildversionSDK})"
+               f"(Android {self.mBuildVersionRelease}, API {self.mBuildVersionSDK})"
 
     def __lt__(self, other):
         return self.__str__() < other.__str__()

@@ -52,7 +52,7 @@ class LogcatFile:
     regPID_TID2 = r"\d{0,}\s{1,}\d{0,}"
     regPackageName = r"[A-Za-z]\S{0,}"
     regLevel = r"(V|D|I|W|E)"
-    regLevel2 = r"(Verbos|Debug|Info|Warning|Error|Fatal|Silent)"
+    regLevel2 = r"(Verbose|Debug|Info|Warning|Error|Fatal|Silent)"
     regTag = r".+"
     regMessage = r"\s.{0,}"
     regulars = {
