@@ -116,7 +116,12 @@ class CCTGDownloader:
     def _download(self, targetUrl: str, localPath: str):
         self._mDownloadUrl = targetUrl
         self._mLocalPath = localPath
-        response: Response = requests.get(targetUrl, headers=self._mReqHeaders, stream=True)
+        try:
+            response: Response = requests.get(targetUrl, headers=self._mReqHeaders, stream=True)
+        except Exception as e:
+            Logger.e(appModel.getAppTag(), f"request failed: exception = {e}")
+            self._setState(RequestState.failed, Response())
+            return False
         while response.status_code == 401:
             if not self._setState(RequestState.needAuthorization, response):
                 Logger.e(appModel.getAppTag(), f"authorization failed: status_code={response.status_code}")
