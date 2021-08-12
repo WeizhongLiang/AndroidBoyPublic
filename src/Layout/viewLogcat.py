@@ -326,5 +326,5 @@ class Ui_Form(object):
         self.btMark.setToolTip(_translate("Form", "Mark the log"))
         self.btPrevMark.setToolTip(_translate("Form", "Prev marked"))
         self.btNextMark.setToolTip(_translate("Form", "Next marked"))
-        self.btOpenLogFolder.setToolTip(_translate("Form", "Next marked"))
+        self.btOpenLogFolder.setToolTip(_translate("Form", "Open default log file folder"))
 import AndroidBoy_rc

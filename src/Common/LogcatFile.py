@@ -99,6 +99,8 @@ class LogcatFile:
 
         33: [re.compile(fr"^{regIndex}{regSpace}{regDatetime1}"
                         fr"{regSpace}{regPID_TID2}{regSpace}{regLevel2}{regSpace}{regTag}:"), 7],
+
+        999: [re.compile(r""), 0],   # last choice ... just show it
     }
 
     @staticmethod
@@ -155,7 +157,9 @@ class LogcatFile:
         else:
             logSplit = re.split(r"\s+", logLine, maxsplit=pattern[1])
         try:
-            if fmtType in range(0, 8):
+            if fmtType == 999:
+                return LogcatItem(-1, LogcatFile._defaultTime.timestamp(), "", "", "", "V", "", logLine)
+            elif fmtType in range(0, 8):
                 logTime = datetime.strptime(f"{logSplit[0]} {logSplit[1]}", "%Y-%m-%d %H:%M:%S.%f")
                 ret = LogcatFile._formatNonTime(logSplit, 2, fmtType)
                 return LogcatItem(-1, logTime.timestamp(),
@@ -317,7 +321,7 @@ class LogcatFile:
         contentData = self._mFileContent
         lineStart = 0
         lineEnd = contentData.find("\n", lineStart)
-        while lineEnd > 0:
+        while lineEnd >= 0:
             if contentData.find("<tag>", lineStart, lineStart + 6) != lineStart:
                 logLine = contentData[lineStart:lineEnd]
                 fmtType, pattern = LogcatFile.detectFormat(logLine)

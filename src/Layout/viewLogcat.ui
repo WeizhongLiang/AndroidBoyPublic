@@ -733,7 +733,7 @@
               </size>
              </property>
              <property name="toolTip">
-              <string>Next marked</string>
+              <string>Open default log file folder</string>
              </property>
              <property name="text">
               <string/>
