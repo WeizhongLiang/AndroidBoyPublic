@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/Users/weizlian/Desktop/MyPrj/github-repos/Python/AndroidBoyPublic/src/Layout/viewADBCommands.ui'
+# Form implementation generated from reading ui file 'viewADBCommands.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.4
 #

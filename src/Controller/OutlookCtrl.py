@@ -123,7 +123,7 @@ class OutlookCtrl:
     sLocalFolderBase = ""
 
     def __init__(self, onReadItem):
-        # def onReadItem(email: EmailItem, folder: FolderItem, account: AccountItem) -> bool:
+        # def onReadItem(email: EmailItem, folder: FolderItem, account: AccountItem, index: int, count: int) -> bool:
         Logger.i(appModel.getAppTag(), "")
 
         self._mOnReadItem = onReadItem
@@ -139,7 +139,8 @@ class OutlookCtrl:
         if folderItem is None:
             return 0
         folderItem.mItems.clear()
-        Logger.d(appModel.getAppTag(), f"[{folderItem.mName}] begin {len(folder.Items)} emails")
+        totalCount = len(folder.Items)
+        curIndex = 0
         for email in folder.Items:
             # object class type:
             # https://docs.microsoft.com/en-us/office/vba/api/outlook.olobjectclass
@@ -147,6 +148,7 @@ class OutlookCtrl:
             # https://docs.microsoft.com/en-us/office/vba/api/outlook.mailitem.subject
             # don't want to "access warning"? set it in Outlook:
             # "File" -> "Options" -> "Trust Center" -> "Trust Center Settings" -> "Programmatic Access"
+            curIndex += 1
             if email.Class != 43:
                 continue
             if (emailFilter.tos and email.To in emailFilter.tos) \
@@ -164,7 +166,7 @@ class OutlookCtrl:
                 emailItem = EmailItem(email, folderItem, self.sLocalFolderBase)
                 self._mFilterMails[emailItem.mID] = emailItem
                 if self._mOnReadItem is not None and \
-                        not self._mOnReadItem(emailItem, folderItem, folderItem.mAccount):
+                        not self._mOnReadItem(emailItem, folderItem, folderItem.mAccount, curIndex, totalCount):
                     return readCount
                 readCount += 1
                 if readCount < 0:
@@ -181,11 +183,14 @@ class OutlookCtrl:
         return readCount
 
     def _readFolders(self, folders, accountItem):
+        totalCount = len(folders)
+        curIndex = 0
         for folder in folders:
+            curIndex += 1
             folderItem = FolderItem(folder, accountItem)
             self._mFolders[folderItem.mID] = folderItem
             if self._mOnReadItem is not None and \
-                    not self._mOnReadItem(None, folderItem, accountItem):
+                    not self._mOnReadItem(None, folderItem, accountItem, curIndex, totalCount):
                 return
             self._readFolders(folder.folders, accountItem)
         return
@@ -201,11 +206,14 @@ class OutlookCtrl:
 
             # init all folders
             if len(self._mAccounts) == 0 and outlookObject is not None:
+                totalCount = len(accountsObject)
+                curIndex = 0
                 for account in accountsObject:
+                    curIndex += 1
                     accountItem = AccountItem(account, outlookObject)
                     self._mAccounts[accountItem.mID] = accountItem
                     if self._mOnReadItem is not None and \
-                            not self._mOnReadItem(None, None, accountItem):
+                            not self._mOnReadItem(None, None, accountItem, curIndex, totalCount):
                         return self._mAccounts, self._mFolders
                     inbox = outlookObject.Folders(account.DeliveryStore.DisplayName)
                     self._readFolders(inbox.Folders, accountItem)
@@ -217,11 +225,14 @@ class OutlookCtrl:
         return self._mAccounts, self._mFolders
 
     def _readFoldersMac(self, folders, accountItem):
+        totalCount = len(folders)
+        curIndex = 0
         for folder in folders:
+            curIndex += 1
             folderItem = FolderItem(FolderObjectMac(folder["_id"], folder["_name"]), accountItem)
             self._mFolders[folderItem.mID] = folderItem
             if self._mOnReadItem is not None and \
-                    not self._mOnReadItem(None, folderItem, accountItem):
+                    not self._mOnReadItem(None, folderItem, accountItem, curIndex, totalCount):
                 return
             self._readFoldersMac(folder["_folders"], accountItem)
         return
@@ -249,11 +260,14 @@ class OutlookCtrl:
             accounts = json.loads(asRead.out)
             FileUtility.saveJsonFile(cacheFilePath, accounts)
 
+        totalCount = len(accounts)
+        curIndex = 0
         for account in accounts:
+            curIndex += 1
             accountItem = AccountItem(AccountObjectMac(account["_name"]), accounts)
             self._mAccounts[accountItem.mID] = accountItem
             if self._mOnReadItem is not None and \
-                    not self._mOnReadItem(None, None, accountItem):
+                    not self._mOnReadItem(None, None, accountItem, curIndex, totalCount):
                 return self._mAccounts, self._mFolders
             self._readFoldersMac(account["_folders"], accountItem)
         appModel.saveConfig(self.__class__.__name__, "OnlyCachedAccounts", cachedOnly)
@@ -324,7 +338,10 @@ class OutlookCtrl:
         Logger.i(appModel.getAppTag(), f"emails={len(emails)}")
 
         # filter mail
+        totalCount = len(emails)
+        curIndex = 0
         for emailInfo in emails:
+            curIndex += 1
             email = emailInfo["_mails"]
             receivedTime = EmailObjectMac.getReceivedTime(email["_receivedTime"]).timestamp()
             if emailFilter.beginDate != 0 and receivedTime < emailFilter.beginDate:
@@ -344,7 +361,7 @@ class OutlookCtrl:
             # special for mac end
             self._mFilterMails[emailItem.mID] = emailItem
             if self._mOnReadItem is not None and \
-                    not self._mOnReadItem(emailItem, folderItem, folderItem.mAccount):
+                    not self._mOnReadItem(emailItem, folderItem, folderItem.mAccount, curIndex, totalCount):
                 return self._mFilterMails
         Logger.i(appModel.getAppTag(), "end")
         return self._mFilterMails

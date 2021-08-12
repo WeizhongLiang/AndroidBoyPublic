@@ -85,15 +85,17 @@ class TreeItemInfo:
 class ActionType(IntEnum):
     startLoading = 0
     showUI = 1
-    analyzeTotal = 2
-    analyzeProgress = 3
-    analyzeUpdate = 4
-    selectItem = 5
-    requestLogin = 6
-    symbolTotal = 7
-    symbolProgress = 8
-    downloadTotal = 9
-    downloadProgress = 10
+    readMailTotal = 2
+    readMailProgress = 3
+    analyzeTotal = 4
+    analyzeProgress = 5
+    analyzeUpdate = 6
+    selectItem = 7
+    requestLogin = 8
+    symbolTotal = 9
+    symbolProgress = 10
+    downloadTotal = 11
+    downloadProgress = 12
 
 
 ActionColor = {
@@ -201,7 +203,7 @@ class ViewOutlookDetector(QWidget, Ui_Form):
         Logger.i(appModel.getAppTag(), "load begin")
         self.sEventOutlookState.emit(ActionType.startLoading, 0, 0, None)
         self._mThreadRunning = True
-        _mOutlookCtrl = OutlookCtrl(None)
+        _mOutlookCtrl = OutlookCtrl(self._onReadOutlookItem)
         _mOutlookCtrl.initAccounts()
         self._mFilterMails = _mOutlookCtrl.readFilterItems(self._mEmailFilter)
         Logger.i(appModel.getAppTag(), "load end")
@@ -331,12 +333,18 @@ class ViewOutlookDetector(QWidget, Ui_Form):
         Logger.i(appModel.getAppTag(), "translate thread end")
         return
 
-    def _onReadOutlookItem(self, email: EmailItem, folder: FolderItem, account: AccountItem) -> bool:
+    def _onReadOutlookItem(self, email: EmailItem, folder: FolderItem, account: AccountItem,
+                           index: int, count: int) -> bool:
         if email is not None:
+            if index == 1:
+                self.sEventOutlookState.emit(ActionType.readMailTotal, count, 0, None)
+            self.sEventOutlookState.emit(ActionType.readMailProgress, index, count, None)
             pass
         elif folder is not None:
+            Logger.d(appModel.getAppTag(), f"reading folder: {index}/{count}")
             pass
         elif account is not None:
+            Logger.d(appModel.getAppTag(), f"reading account: {index}/{count}")
             pass
         return self._mThreadRunning
 
@@ -355,6 +363,19 @@ class ViewOutlookDetector(QWidget, Ui_Form):
             self._showOutlookUI()
             self.setDisabled(False)
             self._mEventAnalyzeMail.set()
+        elif state == ActionType.readMailTotal:
+            Logger.i(appModel.getAppTag(), f"state={state}, param1={param1}, param2={param2}")
+            if param1 <= 0:
+                return
+            self.prog1.setOrientation(Qt.Horizontal)
+            self.prog1.setMaximum(param1)
+            self.lbProg1.setText("Reading")
+            QTHelper.showLayout(self.layoutProg1, True)
+        elif state == ActionType.readMailProgress:
+            self.prog1.setValue(param1)
+            if param1 == self.prog1.maximum():
+                Logger.i(appModel.getAppTag(), f"state={state}, param1={param1}, param2={param2}")
+                QTHelper.showLayout(self.layoutProg1, False)
         elif state == ActionType.analyzeTotal:
             Logger.i(appModel.getAppTag(), f"state={state}, param1={param1}, param2={param2}")
             if param1 <= 0:

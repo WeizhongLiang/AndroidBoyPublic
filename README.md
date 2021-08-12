@@ -49,5 +49,33 @@ src
   Please refer to run.bat or run.sh.
   
 3. To run Outlook detector in macOS, please install "JSON Helper for AppleScript" first.
+
+4. Config your IDE (if you like):
+Add "<-" and "-> :
+"Setting" -> "Appearance & Behavior" -> "Menus and Toolbars"
+	"Navigation Bar Toolbar" -> "CodeWithMeNavbarGroup" -> "+" -> "Add Action..."
+		"Main Menu" -> "Navigate", select "Back" and "Forward"
+
+Add qt designer:
+"Setting" -> "Tools" -> "External Tools" -> "+"
+	Name: QtDesigner
+	Description: Open in qt designer
+	Program: $PyInterpreterDirectory$\Scripts\designer.exe
+	Arguments: $FileDir$\$FileNameWithoutExtension$.ui
+	Working directory: $ProjectFileDir$
+"Setting" -> "Appearance & Behavior" -> "Menus and Toolbars"
+	"Scope View Popup Menu" -> "Project View Popup Menu" -> "New" -> "+" -> "Add Action..."
+		"External Tools" -> "External Tools" -> "QtDesigner"
+
+Add qt ui convert:
+"Setting" -> "Tools" -> "External Tools" -> "+"
+	Name: Qt ui2py
+	Description: Convert ui files to py
+	Program: $PyInterpreterDirectory$\python
+	Arguments: $ProjectFileDir$\Qt_ui2py.py $ProjectFileDir$ $PyInterpreterDirectory$
+	Working directory: $ProjectFileDir$
+"Setting" -> "Appearance & Behavior" -> "Menus and Toolbars"
+	"Navigation Bar Toolbar" -> "CodeWithMeNavbarGroup" -> "+" -> "Add Action..."
+		"External Tools" -> "External Tools" -> "Qt ui2py"
 ```
 

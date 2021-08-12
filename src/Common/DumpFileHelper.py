@@ -46,7 +46,7 @@ else:
 
 class DumpFileHelper:
     def __init__(self, onStackInfoUpdated, symbolFolder: str, dumpFilePath: str):
-        Logger.d(appModel.getAppTag(), "")
+        # Logger.d(appModel.getAppTag(), "")
         self._mOnStackInfoUpdated = onStackInfoUpdated
         self._mReadDumpOutput = ""
         self._mOpenError = ""
