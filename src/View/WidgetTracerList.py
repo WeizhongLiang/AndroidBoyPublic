@@ -457,7 +457,7 @@ class WidgetTracerList(QWidget, Ui_Form):
             trace: TracerLine = item.data(Qt.UserRole)
             if trace is None:
                 continue
-            hasFound = re.search(findMsg, trace.getFullText(), flags=findFlag)
+            hasFound = re.search(re.escape(findMsg), trace.getFullText(), flags=findFlag)
             if hasFound is not None:
                 Logger.i(appModel.getAppTag(), f"found: {row}")
                 self.listTrace.scrollToItem(item)  # ensure visuable
@@ -495,7 +495,7 @@ class WidgetTracerList(QWidget, Ui_Form):
             trace: TracerLine = item.data(Qt.UserRole)
             if trace is None:
                 continue
-            hasFound = re.search(findMsg, trace.getFullText(), flags=findFlag)
+            hasFound = re.search(re.escape(findMsg), trace.getFullText(), flags=findFlag)
             if hasFound is not None:
                 Logger.i(appModel.getAppTag(), f"found: {row}")
                 self.listTrace.scrollToItem(item)  # ensure visuable
@@ -769,11 +769,8 @@ class WidgetTracerList(QWidget, Ui_Form):
             trace.mVisual = trace.mMarked
             return
         # level or msg
-        hasFound = re.search(self._mFilterLogInclude,
-                             item.text(),
-                             flags=re.IGNORECASE)
-        if hasFound is None \
-                or trace.mLevel < self._mFilterLogLevel:
+        hasFound = self._mFilterLogInclude.lower() in item.text().lower()
+        if not hasFound or trace.mLevel < self._mFilterLogLevel:
             trace.mVisual = False
         else:
             trace.mVisual = True

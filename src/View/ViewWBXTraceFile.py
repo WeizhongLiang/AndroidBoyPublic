@@ -10,7 +10,6 @@ from src.Layout.viewWBXTraceFile import Ui_Form
 from src.Model.AppModel import appModel
 from src.View.DialogTraceViewSetting import DialogTraceViewSetting
 from src.View.WidgetTracerList import WidgetTracerList
-from src.View.WidgetTracerTabview import WidgetTracerTabview
 
 
 class ViewWBXTraceFile(QWidget, Ui_Form):
@@ -24,7 +23,7 @@ class ViewWBXTraceFile(QWidget, Ui_Form):
     DATA_WBT = 1
     DATA_LGF = 2
 
-    def __init__(self, parent=None, widget="List"):
+    def __init__(self, parent=None):
         super(ViewWBXTraceFile, self).__init__(parent)
         Logger.i(appModel.getAppTag(), "")
         self.setupUi(self)
@@ -33,10 +32,7 @@ class ViewWBXTraceFile(QWidget, Ui_Form):
         self._mTraceDataType = self.DATA_NONE
         self._mWBXTracerFile = None
         self._mLGFTracerFile = LogcatFile()
-        if widget == "List":
-            self._mTracerWidget = WidgetTracerList(self, __class__.__name__, False)
-        else:
-            self._mTracerWidget = WidgetTracerTabview(self, __class__.__name__, False)
+        self._mTracerWidget = WidgetTracerList(self, __class__.__name__, False)
         self.layoutTracer.addWidget(self._mTracerWidget)
         self._bindEvent()
         self._initLogLevel()

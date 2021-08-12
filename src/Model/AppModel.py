@@ -1,5 +1,4 @@
 import json
-import re
 import sys
 from datetime import datetime
 
@@ -184,8 +183,7 @@ class AppModel:
         retList = []
         if len(value) > 0:
             for text in arrayValues:
-                hasFound = re.search(value, text, flags=re.IGNORECASE)
-                if hasFound is not None:
+                if value.lower() in text.lower():
                     retList.append(text)
         return retList
 
