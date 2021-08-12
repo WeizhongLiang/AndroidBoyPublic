@@ -712,6 +712,38 @@
              </property>
             </widget>
            </item>
+           <item>
+            <widget class="QPushButton" name="btOpenLogFolder">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>28</width>
+               <height>24</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>28</width>
+               <height>24</height>
+              </size>
+             </property>
+             <property name="toolTip">
+              <string>Next marked</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="AndroidBoy.qrc">
+               <normaloff>:/icon/icons/folder.svg</normaloff>:/icon/icons/folder.svg</iconset>
+             </property>
+            </widget>
+           </item>
           </layout>
          </item>
          <item>

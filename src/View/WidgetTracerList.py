@@ -623,7 +623,7 @@ class WidgetTracerList(QWidget, Ui_Form):
             Logger.w(appModel.getAppTag(), f"ignore.")
         return
 
-    def beginLoad(self, initCount):
+    def beginLoad(self, initCount: int):
         self._mEventBeginLoad.emit(self, initCount)
         return
 
@@ -639,12 +639,30 @@ class WidgetTracerList(QWidget, Ui_Form):
         if item is not None:
             self.listTrace.scrollToItem(item)  # ensure visuable
             self.listTrace.setCurrentItem(item)
+        else:
+            Logger.w(appModel.getAppTag(), f"setSelectRow: {row} failed")
         return
 
-    def addTrace(self, timeStr: str, pid: str, tid: str, level: LoggerLevel, tag: str, message: str):
+    def getRowItemByLogIndex(self, logIndex: int) -> int:
+        for row in range(0, self.listTrace.count()):
+            item = self.listTrace.item(row)
+            if item is None:
+                continue
+            if item.isHidden():
+                continue
+            trace: TracerLine = item.data(Qt.UserRole)
+            if trace is None:
+                continue
+            if trace.mIndex == logIndex:
+                return row
+        return -1
+
+    def addTrace(self, index: int, timeStr: str, pid: str, tid: str, level: LoggerLevel, tag: str, message: str):
         color = self.getLevelColor.get(level)
         levelStr = self.getLevelStr.get(level)
-        trace = TracerLine(len(self._mAllTraceLines) + 1,
+        if index < 0:
+            index = len(self._mAllTraceLines) + 1
+        trace = TracerLine(index,
                            timeStr, pid, tid, level, levelStr, tag,
                            message, color)
         self._mAllTraceLines.append(trace)

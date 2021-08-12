@@ -304,7 +304,7 @@ class AndroidBoy(QWidget, Ui_Form):
                     view.openTraceData(fileData, view.DATA_WBT)
                 elif re.search(r".lgf|.txt$", subFileName, flags=re.IGNORECASE):
                     Logger.i(appModel.getAppTag(), f"will open: {subFileName} in {fileName}")
-                    fileData = zipFile.read(subFileName)
+                    fileData = zipFile.read(subFileName).decode("utf-8", "ignore")  # string only
                     view = ViewWBXTraceFile(self)
                     view.openTraceData(fileData, view.DATA_LGF)
                 elif re.search(r".dmp$", subFileName, flags=re.IGNORECASE):

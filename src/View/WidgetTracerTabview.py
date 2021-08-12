@@ -641,7 +641,7 @@ class WidgetTracerTabview(QWidget, Ui_Form):
         self._mAdded = 0
         return
 
-    def addTrace(self, timeStr: str, pid: str, tid: str, level: LoggerLevel, tag: str, message: str):
+    def addTrace(self, index: int, timeStr: str, pid: str, tid: str, level: LoggerLevel, tag: str, message: str):
         self._mEventAddRow.emit(timeStr, pid, tid, level.value, tag, message)
         self._mAdded += 1
         return

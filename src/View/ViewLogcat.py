@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import QWidget, QMenu, QFileDialog
 
-from src.Common import ADBHelper, QTHelper
+from src.Common import ADBHelper, QTHelper, SystemHelper
 from src.Common.ADBHelper import *
 from src.Common.LogcatFile import LogcatFile
 from src.Common.Logger import Logger
@@ -113,6 +113,7 @@ class ViewLogcat(QWidget, Ui_Form):
         self.btMark.clicked.connect(self._onMark)
         self.btPrevMark.clicked.connect(self._onPrevMark)
         self.btNextMark.clicked.connect(self._onNextMark)
+        self.btOpenLogFolder.clicked.connect(self._onBTOpenLogFolder)
         self.btFilter.clicked.connect(self._onFilterLogcat)
         self.btInstallAPK.clicked.connect(self._onBTInstallAPK)
         self.btPushText.clicked.connect(self._onBTPushText)
@@ -192,7 +193,7 @@ class ViewLogcat(QWidget, Ui_Form):
                       curDevice.mProductName,
                       curDevice.mProductBoard,
                       curDevice.mBuildVersionRelease,
-                      curDevice.mBuildversionSDK,
+                      curDevice.mBuildVersionSDK,
                       curDevice.mABIList,
                   )
         Logger.i(appModel.getAppTag(), f"index={index}, device={devInfo}")
@@ -272,7 +273,7 @@ class ViewLogcat(QWidget, Ui_Form):
             tag = logItem.getTag()
             message = logItem.getMsg()
             self._mLogcatFile.writeTraces(logItem.getFull())
-            self._mTracerWidget.addTrace(timeStr, pid, tid, level, tag, message)
+            self._mTracerWidget.addTrace(-1, timeStr, pid, tid, level, tag, message)
         self._mLogcatFileLock.release()
         return
 
@@ -363,6 +364,11 @@ class ViewLogcat(QWidget, Ui_Form):
     def _onNextMark(self):
         Logger.i(appModel.getAppTag(), f"{self}")
         self._mTracerWidget.nextMark()
+        return
+
+    def _onBTOpenLogFolder(self):
+        Logger.i(appModel.getAppTag(), f"{self}")
+        SystemHelper.openAtExplorer(appModel.getDefaultLogFolder())
         return
 
     def _onFilterLogcat(self):

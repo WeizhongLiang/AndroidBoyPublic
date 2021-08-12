@@ -34,3 +34,9 @@ def getTimestampString(timestamp: float, fmt: any) -> str:
     if fmt is None:
         fmt = '%Y-%m-%d %H:%M:%S.%f'
     return str(datetime.fromtimestamp(timestamp).strftime(fmt))
+
+
+def getDateFromStr(timeStr: str, fmt: any) -> datetime:
+    if fmt is None:
+        fmt = '%Y-%m-%d %H:%M:%S'
+    return datetime.strptime(timeStr, fmt)

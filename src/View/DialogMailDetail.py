@@ -292,12 +292,13 @@ class DialogMailDetail(QDialog, Ui_Dialog):
         if errorInfo[0] == _ErrorTypeInList.error:
             # locate file line
             fileName = errorInfo[1]["logFile"].split("?")[1]
+            logIndex = errorInfo[1]["logIndex"]
             for i in range(0, self.tabAttachments.count()):
                 tabTitle = self.tabAttachments.tabText(i)
                 if fileName == tabTitle:
                     view = self.tabAttachments.widget(i)
                     self.tabAttachments.setCurrentWidget(view)
-                    view.scrollToPreSelectItem()
+                    view.scrollToItemByLogIndex(logIndex)
                     break
             # scrollToPreSelectItem
         elif errorInfo[0] == _ErrorTypeInList.normal:
@@ -321,12 +322,21 @@ class DialogMailDetail(QDialog, Ui_Dialog):
             return
         result = self.mAnalyzer.mAnalyzeResult
 
-        wbtFiles = []
+        wbtFiles = {}
         for row in range(0, self.ltErrors.count()):
             item = self.ltErrors.item(row)
             errorInfo: [] = item.data(Qt.UserRole)
             if _ErrorTypeInList.error == errorInfo[0]:
-                wbtFiles.append([errorInfo[1]["logFile"].split("?")[1], int(errorInfo[1]["logIndex"])])
+                logFile = errorInfo[1]["logFile"].split("?")[1]
+                logIndex = int(errorInfo[1]["logIndex"])
+                beginIndex = logIndex - 200
+                endIndex = logIndex + 200
+                if logFile not in wbtFiles:
+                    wbtFiles[logFile] = {"beginIndex": 2147483647, "endIndex": 0, "preSelect": logIndex}
+                if wbtFiles[logFile]["beginIndex"] > beginIndex:
+                    wbtFiles[logFile]["beginIndex"] = beginIndex
+                if wbtFiles[logFile]["endIndex"] < endIndex:
+                    wbtFiles[logFile]["endIndex"] = endIndex
 
         fileName = os.path.basename(path)
         if re.search(r".zip$", path, flags=re.IGNORECASE):
@@ -337,21 +347,18 @@ class DialogMailDetail(QDialog, Ui_Dialog):
                 title = subFileName
                 tabCount = self.tabAttachments.count()
                 if re.search(r".wbt$", subFileName, flags=re.IGNORECASE):
-                    bNeedOpen = False
-                    wbtFile = []
-                    for wbtFile in wbtFiles:
-                        if subFileName == wbtFile[0]:
-                            bNeedOpen = True
-                            break
-                    if not bNeedOpen:
+                    if subFileName in wbtFiles:
+                        Logger.i(appModel.getAppTag(), f"will open: {subFileName} in {fileName}")
+                        fileData = zipFile.read(subFileName)
+                        view = ViewWBXTraceFile(self)
+                        view.setTraceRange(
+                            wbtFiles[subFileName]["beginIndex"],
+                            wbtFiles[subFileName]["endIndex"]
+                        )
+                        view.openTraceData(fileData, view.DATA_WBT)
+                    else:
                         continue
 
-                    Logger.i(appModel.getAppTag(), f"will open: {subFileName} in {fileName}")
-                    fileData = zipFile.read(subFileName)
-                    view = ViewWBXTraceFile(self)
-                    traceIndex = wbtFile[1]
-                    view.setTraceRange(traceIndex, traceIndex - 200, traceIndex + 200)
-                    view.openTraceData(fileData, view.DATA_WBT)
                 elif re.search(r".dmp$", subFileName, flags=re.IGNORECASE):
                     Logger.i(appModel.getAppTag(), f"will open: {subFileName} in {fileName}")
                     fileData = zipFile.read(subFileName)

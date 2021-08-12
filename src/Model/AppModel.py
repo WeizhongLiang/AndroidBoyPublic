@@ -93,9 +93,13 @@ class AppModel:
         FileUtility.makeFolder(self.mScriptPath)
         return os.path.join(self.mScriptPath, name)
 
-    def getLogcatFile(self, deviceID: str):
+    def getDefaultLogFolder(self) -> str:
         folder = os.path.join(self.mAssetsPath, "LogcatFiles")
         FileUtility.makeFolder(folder)
+        return folder
+
+    def getLogcatFile(self, deviceID: str):
+        folder = self.getDefaultLogFolder()
         nowString = datetime.now().strftime('%Y%m%d_%H%M%S')
         if deviceID is None or len(deviceID) == 0:
             return os.path.join(folder, f"{nowString}.lgf")
