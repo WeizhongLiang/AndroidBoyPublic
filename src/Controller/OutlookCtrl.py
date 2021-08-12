@@ -139,6 +139,7 @@ class OutlookCtrl:
         if folderItem is None:
             return 0
         folderItem.mItems.clear()
+        Logger.d(appModel.getAppTag(), f"[{folderItem.mName}] begin {len(folder.Items)} emails")
         for email in folder.Items:
             # object class type:
             # https://docs.microsoft.com/en-us/office/vba/api/outlook.olobjectclass
@@ -168,6 +169,7 @@ class OutlookCtrl:
                 readCount += 1
                 if readCount < 0:
                     return readCount  # to do test
+        Logger.d(appModel.getAppTag(), f"[{folderItem.mName}] end {readCount}/{len(folder.Items)} emails")
         return readCount
 
     def _readFilterFolders(self, folders, emailFilter: EmailFilter) -> int:
