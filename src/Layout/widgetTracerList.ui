@@ -254,23 +254,61 @@
       </layout>
      </item>
      <item>
-      <widget class="QListWidget" name="listTrace">
-       <property name="font">
-        <font>
-         <family>Courier New</family>
-         <pointsize>10</pointsize>
-        </font>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="leftMargin">
+        <number>0</number>
        </property>
-       <property name="frameShape">
-        <enum>QFrame::Box</enum>
+       <property name="topMargin">
+        <number>0</number>
        </property>
-       <property name="frameShadow">
-        <enum>QFrame::Plain</enum>
+       <property name="rightMargin">
+        <number>0</number>
        </property>
-       <property name="selectionMode">
-        <enum>QAbstractItemView::ContiguousSelection</enum>
+       <property name="bottomMargin">
+        <number>0</number>
        </property>
-      </widget>
+       <item>
+        <widget class="QListWidget" name="listTrace">
+         <property name="font">
+          <font>
+           <family>Courier New</family>
+           <pointsize>10</pointsize>
+          </font>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ContiguousSelection</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QListWidget" name="listImportant">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>150</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <widget class="QLabel" name="lbStatus">

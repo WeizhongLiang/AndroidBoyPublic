@@ -151,6 +151,8 @@ class WidgetTracerList(QWidget, Ui_Form):
         self.listTrace.itemSelectionChanged.connect(self._onSelectLogChanged)
         self.listTrace.doubleClicked.connect(self._onDoubleClickLog)
 
+        self.listImportant.doubleClicked.connect(self._onDoubleClickImportant)
+
         self.btFindNext.clicked.connect(self.nextFind)
         self.btFindPrev.clicked.connect(self.prevFind)
         self.btHideFindToolbar.clicked.connect(self._onHideFindToolbar)
@@ -346,6 +348,14 @@ class WidgetTracerList(QWidget, Ui_Form):
         message = trace.mMessage
         self._mDetailDlg.setTrace(timeStr, pid, tid, levelStr, tag, message)
         self._mDetailDlg.show()
+        return
+
+    def _onDoubleClickImportant(self, QModelIndex):
+        row = QModelIndex.row()
+        Logger.i(appModel.getAppTag(), f"at {row}")
+        traceRow = self.listImportant.item(row).data(Qt.UserRole)
+
+        self.setSelectRow(traceRow)
         return
 
     def _onSelectLogChanged(self):
@@ -717,6 +727,12 @@ class WidgetTracerList(QWidget, Ui_Form):
             item.setBackground(uiTheme.colorNormalBackground)
             item.setForeground(trace.mColor)
             self.listTrace.addItem(item)
+            if "Uncaught exception!!!" in trace.mMessage:
+                itemImportant = QListWidgetItem("Uncaught exception")
+                row = self.listTrace.indexFromItem(item).row()
+                itemImportant.setData(Qt.UserRole, row)
+                self.listImportant.addItem(itemImportant)
+
         self._mScrollToDlg.setRange(0, self.listTrace.count())
         if not self._mLoading and self.isAutoScroll():
             self.listTrace.scrollToBottom()

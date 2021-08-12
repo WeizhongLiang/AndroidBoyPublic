@@ -1,3 +1,5 @@
+import os
+
 import pyperclip
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog
@@ -21,12 +23,13 @@ class DialogTraceDetail(QDialog, Ui_Dialog):
 
     def setTrace(self, timeStr: str, pid: str, tid: str,
                  level: str, tag: str, message: str):
-        self.tbTime.setText(timeStr)
-        self.tbPID.setText(pid)
-        self.tbTID.setText(tid)
-        self.tbLevel.setText(level)
-        self.tbTag.setText(tag)
-        self.tbMessage.setText(message)
+        allMessage = f"Time: {timeStr}{os.linesep}"
+        allMessage += f"PID: {pid}{os.linesep}"
+        allMessage += f"TID: {tid}{os.linesep}"
+        allMessage += f"Level: {level}{os.linesep}"
+        allMessage += f"Tag: {tag}{os.linesep}"
+        allMessage += f"{os.linesep}{message}"
+        self.tbMessage.setText(allMessage)
         return
 
     def onCopy(self):
