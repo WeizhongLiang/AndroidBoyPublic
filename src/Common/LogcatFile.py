@@ -279,7 +279,7 @@ class LogcatFile:
     def openFile(self, path: str, encoding):
         Logger.i(appModel.getAppTag(), f"path = {path}")
         try:
-            file = open(path, mode="r", encoding=encoding)
+            file = open(path, mode="r", encoding=encoding, errors="ignore")
             file.seek(0, 2)
             fileLen = file.tell()
             file.seek(0, 0)
@@ -321,6 +321,8 @@ class LogcatFile:
         contentData = self._mFileContent
         lineStart = 0
         lineEnd = contentData.find("\n", lineStart)
+        if lineEnd < 0:
+            lineEnd = len(contentData)
         while lineEnd >= 0:
             if contentData.find("<tag>", lineStart, lineStart + 6) != lineStart:
                 logLine = contentData[lineStart:lineEnd]

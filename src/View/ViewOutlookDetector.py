@@ -144,8 +144,8 @@ class ViewOutlookDetector(QWidget, Ui_Form):
         week_ago = today - datetime.timedelta(days=filterDays)
         self.dateStart.setDate(week_ago)
         self.dateEnd.setDate(today)
-        self.dateStart.setDate(DateTimeHelper.getDateFromStr("2021-07-30 00:00:00", None))
-        self.dateEnd.setDate(DateTimeHelper.getDateFromStr("2021-07-30 10:20:30", None))
+        # self.dateStart.setDate(DateTimeHelper.getDateFromStr("2021-07-30 00:00:00", None))
+        # self.dateEnd.setDate(DateTimeHelper.getDateFromStr("2021-07-30 10:20:30", None))
         self.ckFilterDate.setChecked(True)
         self._onCheckFilterData()
         self.mErrorDefinition = {}
