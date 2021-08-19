@@ -327,7 +327,7 @@ class LogcatFile:
             if contentData.find("<tag>", lineStart, lineStart + 6) != lineStart:
                 logLine = contentData[lineStart:lineEnd]
                 fmtType, pattern = LogcatFile.detectFormat(logLine)
-                if fmtType > 0:
+                if fmtType >= 0:
                     logItem = LogcatFile.formatData(logLine, fmtType, pattern)
                     if onTrace is not None:
                         if not onTrace(logItem, param):
