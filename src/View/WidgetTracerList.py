@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, QTimer, QObject
 from PyQt5.QtGui import QColor, QKeyEvent, QContextMenuEvent, QFont
 from PyQt5.QtWidgets import QWidget, QListWidgetItem, QMenu, QAbstractItemView
 
-from src.Common import QTHelper, DateTimeHelper
+from src.Common import QTHelper, DateTimeHelper, FileUtility
 from src.Common.Logger import *
 from src.Common.QTHelper import ListForQLineEdit
 from src.Common.UITheme import uiTheme
@@ -127,8 +127,11 @@ class WidgetTracerList(QWidget, Ui_Form):
         self.listTrace.setFont(QFont('Courier New', uiTheme.widgetTracerListFontSize))
         self.listTrace.horizontalScrollBar().setHidden(True)
         self.listTrace.horizontalScrollBar().setDisabled(True)
+        if self._mAddable:
+            self.listImportant.hide()
 
         self._mLoading = False
+        self._mAdding = False
         self.pbLoading.setMinimum(0)
         self.pbLoading.setTextVisible(True)
         self.pbLoading.close()
@@ -633,6 +636,30 @@ class WidgetTracerList(QWidget, Ui_Form):
             Logger.w(appModel.getAppTag(), f"ignore.")
         return
 
+    def _onEndAdding(self):
+        if not self._mAddable:
+            errorDefinition = FileUtility.loadJsonFile(os.path.join(appModel.mAssetsPath, "WBTErrorDefinition.json"))
+            errorDefinition = errorDefinition["errorDefinition"]
+
+            procTime = DateTimeHelper.ProcessTime()
+            endFind = self.listTrace.count()
+            Logger.i(appModel.getAppTag(), f"begin with {endFind}")
+            for row in range(0, endFind):
+                item = self.listTrace.item(row)
+                if item is None:
+                    continue
+                trace: TracerLine = item.data(Qt.UserRole)
+                if trace is None:
+                    continue
+                for key, value in errorDefinition.items():
+                    if key in trace.mMessage:
+                        itemImportant = QListWidgetItem(value[0])
+                        row = self.listTrace.indexFromItem(item).row()
+                        itemImportant.setData(Qt.UserRole, row)
+                        self.listImportant.addItem(itemImportant)
+            Logger.i(appModel.getAppTag(), f"end with {endFind} in {procTime.getMicroseconds()}")
+        return
+
     def beginLoad(self, initCount: int):
         self._mEventBeginLoad.emit(self, initCount)
         return
@@ -676,6 +703,7 @@ class WidgetTracerList(QWidget, Ui_Form):
                            timeStr, pid, tid, level, levelStr, tag,
                            message, color)
         self._mAllTraceLines.append(trace)
+        self._mAdding = True
         return trace.mIndex
 
     def _onLoadProgress(self, value, total):
@@ -709,6 +737,9 @@ class WidgetTracerList(QWidget, Ui_Form):
             startLine = self._mLastReadLine
             endLine = len(self._mAllTraceLines)
             if startLine == endLine:
+                if self._mAdding:
+                    self._mAdding = False
+                    self._onEndAdding()
                 return
             self.listTrace.setUpdatesEnabled(False)
             self._onAddLines(startLine, endLine)
@@ -727,11 +758,12 @@ class WidgetTracerList(QWidget, Ui_Form):
             item.setBackground(uiTheme.colorNormalBackground)
             item.setForeground(trace.mColor)
             self.listTrace.addItem(item)
-            if "Uncaught exception!!!" in trace.mMessage:
-                itemImportant = QListWidgetItem("Uncaught exception")
-                row = self.listTrace.indexFromItem(item).row()
-                itemImportant.setData(Qt.UserRole, row)
-                self.listImportant.addItem(itemImportant)
+            # add something into itemImportant
+            # if "Uncaught exception!!!" in trace.mMessage:
+            #     itemImportant = QListWidgetItem("Uncaught exception")
+            #     row = self.listTrace.indexFromItem(item).row()
+            #     itemImportant.setData(Qt.UserRole, row)
+            #     self.listImportant.addItem(itemImportant)
 
         self._mScrollToDlg.setRange(0, self.listTrace.count())
         if not self._mLoading and self.isAutoScroll():

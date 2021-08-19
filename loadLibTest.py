@@ -8,7 +8,7 @@ from src.Common.WBXTracerHelper import *
 import src.Controller.WBXTraceAnalyzer as WBXAnalyzer
 
 selfPath = os.path.dirname(os.path.realpath(__file__))
-configPath = os.path.join(selfPath, "src", "Application", "Assets", "AndroidBoyCfg.json")
+configPath = os.path.join(selfPath, "src", "Application", "Assets", "WBTErrorDefinition.json")
 zipPath = os.path.join(selfPath, "webex-trace.zip")
 
 mAnalyzeResult = {"KeyError": {}}
@@ -34,7 +34,7 @@ def _onCheckErrorInTrace(item: WBXTraceItemV3, param: [any]):
 
 
 try:
-    needToCheck = json.load(open(configPath, 'r'))["ViewOutlookDetector"]["errorDefinition"]
+    needToCheck = json.load(open(configPath, 'r'))["errorDefinition"]
     errorDefine = json.dumps(needToCheck)
 
     procTime = DateTimeHelper.ProcessTime()
@@ -49,7 +49,7 @@ try:
         if WBXAnalyzer.isValid():
             print(WBXAnalyzer.analyzeData(fileData, fullSubFileName))
         else:
-            needToCheck = json.load(open(configPath, 'r'))["ViewOutlookDetector"]["errorDefinition"]
+            needToCheck = json.load(open(configPath, 'r'))["errorDefinition"]
             mAnalyzeResult = {"KeyError": {}}
             WBXTracerFile(fileData, False).readTraces(
                 _onCheckErrorInTrace, [needToCheck, "unknown file"])

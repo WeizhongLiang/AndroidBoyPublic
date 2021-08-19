@@ -36,7 +36,7 @@ class ViewPicture(QWidget, Ui_Form):
         self._mPressPos = QPoint(0, 0)
         self._mScaleRation = 1.0
         self._mOffsetPoint = QPoint(0, 0)
-        self._mRectLabel = self.lbPicture.geometry()
+        self._mRectLabel = self.saPicture.geometry()
         self._mRectImage = QRect(0, 0, self.mImage.width(), self.mImage.height())
         self._mScaledSize = QSize(self._mRectImage.width(), self._mRectImage.height())
         # self._mDlgPictureController = DialogPictureController(self)
@@ -49,7 +49,7 @@ class ViewPicture(QWidget, Ui_Form):
         return
 
     def resizeEvent(self, QResizeEvent):
-        self._mRectLabel = self.lbPicture.geometry()
+        self._mRectLabel = self.saPicture.geometry()
         self._updateImagePos()
         return
 

@@ -303,6 +303,8 @@ class MailAnalyzer:
             dumpState = self.mAnalyzeResult["DumpFile"]["state"]
             if DumpFileState.crashed.value == dumpState:
                 retAction = AnalyzerAction.crashed
+                if len(retString) > 0:
+                    retString += os.linesep
                 retString += dumpState
                 if "firstException" in self.mAnalyzeResult["DumpFile"]:
                     firstException = self.mAnalyzeResult["DumpFile"]["firstException"]
