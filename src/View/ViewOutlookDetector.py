@@ -152,7 +152,7 @@ class ViewOutlookDetector(QWidget, Ui_Form):
         self._onCheckFilterData()
         self.mErrorDefinition = {}
 
-        self._mThreadRunning = False
+        self._mThreadRunning = 0
         self._mThreadOutlook = threading.Thread(target=self._onOutlookThread)
         self._mThreadSymbol = threading.Thread(target=self._onSymbolThread)
         self._mThreadTranslate = threading.Thread(target=self._onTranslateThread)
@@ -171,7 +171,7 @@ class ViewOutlookDetector(QWidget, Ui_Form):
             colWidths.append(self.treeOutlook.columnWidth(i))
         appModel.saveConfig(self.__class__.__name__, "colWidths", colWidths)
 
-        self._mThreadRunning = False
+        self._mThreadRunning = 0
         MailAnalyzer.sStopAnalyze = True
         if self._mThreadOutlook.is_alive():
             self._mThreadOutlook.join()
@@ -202,7 +202,7 @@ class ViewOutlookDetector(QWidget, Ui_Form):
     def _onOutlookThread(self):
         Logger.i(appModel.getAppTag(), "load begin")
         self.sEventOutlookState.emit(ActionType.startLoading, 0, 0, None)
-        self._mThreadRunning = True
+        self._mThreadRunning += 1
         _mOutlookCtrl = OutlookCtrl(self._onReadOutlookItem)
         _mOutlookCtrl.initAccounts()
         self._mFilterMails = _mOutlookCtrl.readFilterItems(self._mEmailFilter)
@@ -219,9 +219,9 @@ class ViewOutlookDetector(QWidget, Ui_Form):
             self.sEventOutlookState.emit(ActionType.analyzeUpdate, 0, 0, analyzer)
             curIndex += 1
             self.sEventOutlookState.emit(ActionType.analyzeProgress, curIndex, totalCount, None)
-            if not self._mThreadRunning:
+            if self._mThreadRunning <= 0:
                 break
-        self._mThreadRunning = False
+        self._mThreadRunning -= 1
         Logger.i(appModel.getAppTag(), "analyze end")
         return
 
@@ -230,7 +230,7 @@ class ViewOutlookDetector(QWidget, Ui_Form):
         notExistCfgFile = os.path.join(self.sSymbolFolderBase, "notExistVersions.json")
         notExistVersions = FileUtility.loadJsonFile(notExistCfgFile)
         # check how many symbols need to be download
-        self._mThreadRunning = True
+        self._mThreadRunning += 1
         downloadVersions = []
         iterator = QTreeWidgetItemIterator(self.treeOutlook)
         while iterator.value():
@@ -254,10 +254,10 @@ class ViewOutlookDetector(QWidget, Ui_Form):
             from requests import auth
             if state == RequestState.succeed:
                 Logger.i(appModel.getAppTag(), f"state={state}")
-                return self._mThreadRunning
+                return self._mThreadRunning > 0
             elif state == RequestState.failed:
                 Logger.e(appModel.getAppTag(), f"state={state}")
-                return self._mThreadRunning
+                return self._mThreadRunning > 0
             elif state == RequestState.needAuthorization:
                 Logger.i(appModel.getAppTag(), f"state={state}")
                 self._mCCTGUser = None
@@ -292,7 +292,7 @@ class ViewOutlookDetector(QWidget, Ui_Form):
                     downloadUrl, localPath = cctgCtrl.getCurrentTask()
                     notExistVersions[version] = downloadUrl
                     return False
-            return self._mThreadRunning
+            return self._mThreadRunning > 0
 
         count = len(downloadVersions)
         index = 0
@@ -318,18 +318,20 @@ class ViewOutlookDetector(QWidget, Ui_Form):
             index += 1
             self.sEventOutlookState.emit(ActionType.symbolProgress, index, count, None)
         FileUtility.saveJsonFile(notExistCfgFile, notExistVersions)
-        self._mThreadRunning = False
+        self._mThreadRunning -= 1
         Logger.i(appModel.getAppTag(), "download end")
         return
 
     def _onTranslateThread(self):
         Logger.i(appModel.getAppTag(), "translate thread begin")
+        self._mThreadRunning += 1
         for emailID, emailItem in self._mFilterMails.items():
             if emailItem.mAnalyzer is not None:
                 analyzer: MailAnalyzer = cast(MailAnalyzer, emailItem.mAnalyzer)
                 analyzer.getTranslated(True)
-            if not self._mThreadRunning:
+            if self._mThreadRunning <= 0:
                 break
+        self._mThreadRunning -= 1
         Logger.i(appModel.getAppTag(), "translate thread end")
         return
 
@@ -341,12 +343,12 @@ class ViewOutlookDetector(QWidget, Ui_Form):
             self.sEventOutlookState.emit(ActionType.readMailProgress, index, count, None)
             pass
         elif folder is not None:
-            Logger.d(appModel.getAppTag(), f"reading folder: {index}/{count}")
+            Logger.d(appModel.getAppTag(), f"reading folder: {folder.mName} - {index}/{count}")
             pass
         elif account is not None:
-            Logger.d(appModel.getAppTag(), f"reading account: {index}/{count}")
+            Logger.d(appModel.getAppTag(), f"reading account: {account.mName} - {index}/{count}")
             pass
-        return self._mThreadRunning
+        return self._mThreadRunning > 0
 
     def _onEventOutlookState(self, state: int, param1: int, param2: int, paramObject: object):
         if state == ActionType.startLoading:

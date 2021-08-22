@@ -50,6 +50,8 @@ class DialogMailDetail(QDialog, Ui_Dialog):
         self.cbSummary.installEventFilter(self)
         self.cbAddition.installEventFilter(self)
 
+        self.ltErrors.setWordWrap(True)
+
         self.mTreeItems = treeItems
         self.mIndex = selIndex
         self.mTreeItem: TreeItemInfo = self.mTreeItems[self.mIndex]
@@ -157,6 +159,10 @@ class DialogMailDetail(QDialog, Ui_Dialog):
                 item.setBackground(uiTheme.colorNormalBackground)
                 item.setForeground(_ErrorColor.get(_ErrorTypeInList.error))
                 self.ltErrors.addItem(item)
+
+                errorKey = errorMsg["errType"]
+                if self.cbType.findText(errorKey) < 0:
+                    self.cbType.addItem(errorKey)
         if "DumpFile" in result:
             dumpState = result["DumpFile"]["state"]
             if DumpFileState.crashed.value == dumpState:
@@ -241,11 +247,11 @@ class DialogMailDetail(QDialog, Ui_Dialog):
                 os.path.join(ViewOutlookDetector.sLocalFolderBase, "SummaryHistory.json"),
                 self.mSummaryHistory)
 
-            if self.cbType.findText(newType) != 0:
+            if self.cbType.findText(newType) < 0:
                 self.cbType.addItem(newType)
-            if self.cbSummary.findText(newSummary) != 0:
+            if self.cbSummary.findText(newSummary) < 0:
                 self.cbSummary.addItem(newSummary)
-            if self.cbAddition.findText(newAddition) != 0:
+            if self.cbAddition.findText(newAddition) < 0:
                 self.cbAddition.addItem(newAddition)
 
         return

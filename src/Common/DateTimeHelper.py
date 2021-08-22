@@ -1,5 +1,8 @@
 from datetime import datetime
 
+timezoneOffset = datetime.now().astimezone()
+timezoneOffset = timezoneOffset.tzinfo.utcoffset(timezoneOffset).seconds
+
 
 class ProcessTime:
     def __init__(self):
@@ -33,7 +36,7 @@ def getNowString(fmt: any) -> str:
 def getTimestampString(timestamp: float, fmt: any) -> str:
     if fmt is None:
         fmt = '%Y-%m-%d %H:%M:%S.%f'
-    return str(datetime.fromtimestamp(timestamp).strftime(fmt))
+    return str(datetime.fromtimestamp(timestamp - timezoneOffset).strftime(fmt))
 
 
 def getDateFromStr(timeStr: str, fmt: any) -> datetime:

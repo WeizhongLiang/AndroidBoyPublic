@@ -111,6 +111,10 @@
     "on Native Crash ": [
       "Native crash 6",
       "in meeting"
+    ],
+    "getWCACertificates failed, error = ": [
+      "Get WCA failed",
+      "in meeting"
     ]
   }
 }

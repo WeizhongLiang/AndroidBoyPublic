@@ -127,6 +127,7 @@ class WidgetTracerList(QWidget, Ui_Form):
         self.listTrace.setFont(QFont('Courier New', uiTheme.widgetTracerListFontSize))
         self.listTrace.horizontalScrollBar().setHidden(True)
         self.listTrace.horizontalScrollBar().setDisabled(True)
+        self.listImportant.setWordWrap(True)
         if self._mAddable:
             self.listImportant.hide()
 

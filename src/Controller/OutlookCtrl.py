@@ -154,10 +154,11 @@ class OutlookCtrl:
             if (emailFilter.tos and email.To in emailFilter.tos) \
                     or (emailFilter.senders and email.Sender in emailFilter.senders) \
                     or (emailFilter.receivers and email.ReceivedByName in emailFilter.receivers):
-                # Logger.i(appModel.getAppTag(), f"add mail: to={email.To}, "
-                #                                f"sender={email.Sender}, "
-                #                                f"receiver={email.ReceivedByName}")
                 receivedTime = email.ReceivedTime.timestamp()
+                # Logger.i(appModel.getAppTag(),
+                #          f"receivedTime={DateTimeHelper.getTimestampString(receivedTime, None)}, "
+                #          f"sender={email.Sender}, "
+                #          f"subject={email.Subject}")
                 if emailFilter.beginDate != 0 and receivedTime < emailFilter.beginDate:
                     continue
                 if emailFilter.endDate != 0 and receivedTime > emailFilter.endDate:
@@ -373,6 +374,9 @@ class OutlookCtrl:
 
         self._mFilterMails.clear()
         if SystemHelper.isWindows():
+            # timezone offset
+            emailFilter.beginDate += DateTimeHelper.timezoneOffset
+            emailFilter.endDate += DateTimeHelper.timezoneOffset
             self._readFilterItemsWindows(emailFilter)
         elif SystemHelper.isMac():
             self._readFilterItemsMac(emailFilter)
