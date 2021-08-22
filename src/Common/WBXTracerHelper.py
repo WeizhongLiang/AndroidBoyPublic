@@ -1,8 +1,9 @@
+import os
 from datetime import datetime
 
 from Crypto.Cipher import AES
 
-from src.Common import DateTimeHelper
+from src.Common import DateTimeHelper, JavaMappingHelper
 from src.Common.Logger import Logger
 from src.Common.StructPointer import StructPointer
 from src.Model.AppModel import appModel
@@ -203,6 +204,8 @@ class WBXTracerFile:
         self._mFileContent = None
         self._mContentLen = 0
         self._mHeader = None
+        self.appInfo = {}
+        self._mMappingFilePath = ""
         if isPath:
             self._openByPath(pathOrData)
         else:
@@ -229,7 +232,20 @@ class WBXTracerFile:
         self._mFileContent = memoryview(fileContent)
         self._mHeader = self._readHeader(self._mFileContent)
         self._mContentLen = self._mHeader.mTotalSize - self._mHeader.mFree
+        self.readTracesRange(self._onReadAppInfo, None, 0, 1)
         return
+
+    def _onReadAppInfo(self, trace: WBXTraceItemV3, param: [any]) -> bool:
+        if "Application version" in trace.mMessage:
+            defs = trace.mMessage.split("; ")
+            for defValue in defs:
+                pair = defValue.split("=")
+                self.appInfo[pair[0].rstrip()] = pair[1].lstrip()
+            self._mMappingFilePath = os.path.join(
+                appModel.mAssetsPath, "WebexSymbols", self.appInfo["Application version"], "mapping.txt")
+            if not os.path.exists(self._mMappingFilePath):
+                self._mMappingFilePath = ""
+        return False
 
     @staticmethod
     def _calTraceCount(header: WBXTraceHeaderV3, contentData: memoryview):
@@ -312,6 +328,9 @@ class WBXTracerFile:
                 item = WBXTraceItemV3(itemData, curPosInData, itemCount, endian)
                 if item.size() <= 0:
                     break
+                if len(self._mMappingFilePath) > 0:
+                    if "Uncaught exception!!!" in item.mMessage:
+                        item.mMessage = JavaMappingHelper.translateTrace(self._mMappingFilePath, item.mMessage)
                 if onTrace is not None:
                     if not onTrace(item, param):
                         break
@@ -325,36 +344,6 @@ class WBXTracerFile:
             return True
         except Exception as e:
             Logger.e(appModel.getAppTag(), f"end read {itemCount - startIndex} rows "
-                                           f"in {procTime.getMicroseconds()} seconds "
-                                           f"exception: {e}")
-            return False
-
-    def readForFind(self, onTrace, param: [any]) -> bool:
-        Logger.d(appModel.getAppTag(), "begin")
-        if self._mFileContent is None:
-            return False
-        itemCount = 0
-        endian = self._mHeader.getEndian()
-        procTime = DateTimeHelper.ProcessTime()
-        curPosInData = 0
-        itemData = self._mFileContent[self._mHeader.size():]
-        curPosInData += self._mHeader.size()
-        try:
-            while len(itemData) > 0:
-                item = WBXTraceItemV3(itemData, curPosInData, itemCount, endian)
-                if item.size() <= 0:
-                    break
-                if onTrace is not None:
-                    if not onTrace(item, param):
-                        break
-                itemData = itemData[item.size():]
-                curPosInData += item.size()
-                itemCount += 1
-            Logger.d(appModel.getAppTag(), f"end read {itemCount} rows "
-                                           f"in {procTime.getMicroseconds()} seconds ")
-            return True
-        except Exception as e:
-            Logger.e(appModel.getAppTag(), f"end read {itemCount} rows "
                                            f"in {procTime.getMicroseconds()} seconds "
                                            f"exception: {e}")
             return False

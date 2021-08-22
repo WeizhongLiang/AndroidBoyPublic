@@ -300,12 +300,29 @@ class ViewOutlookDetector(QWidget, Ui_Form):
         cctg = CCTGDownloader(onRequestState, self.sSymbolFolderBase, "cctgToken")
         for version in downloadVersions:
             versionDir = appModel.getAppAbsolutePath(self.sSymbolFolderBase, [version], "")
+            # symbol file
             savePath = os.path.join(versionDir, version + "_release.tar")
             uncompressFile = os.path.join(versionDir, "arm64-v8a")
             if not os.path.exists(uncompressFile) or not os.path.exists(savePath):
                 # download it
                 self._mKeepDownloadFile = False
                 if not cctg.getMasterSymbol(version, True, savePath):
+                    if os.path.exists(savePath) and not self._mKeepDownloadFile:
+                        os.remove(savePath)
+                        continue
+                if not os.path.exists(uncompressFile) and os.path.exists(savePath):
+                    # uncompress it
+                    if tarfile.is_tarfile(savePath):
+                        compressedFile = tarfile.open(savePath)
+                        for tarinfo in compressedFile:
+                            compressedFile.extract(tarinfo, path=versionDir)
+            # mapping file
+            savePath = os.path.join(versionDir, version + "_release_mapping.tar")
+            uncompressFile = os.path.join(versionDir, "mapping.txt")
+            if not os.path.exists(uncompressFile) or not os.path.exists(savePath):
+                # download it
+                self._mKeepDownloadFile = False
+                if not cctg.getMasterMapping(version, True, savePath):
                     if os.path.exists(savePath) and not self._mKeepDownloadFile:
                         os.remove(savePath)
                         continue

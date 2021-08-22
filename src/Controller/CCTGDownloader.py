@@ -182,6 +182,15 @@ class CCTGDownloader:
         Logger.i(appModel.getAppTag(), f"start save {targetUrl} to {localPath}")
         return self._download(targetUrl, localPath)
 
+    def _downloadMapping(self, urlBase: str, suffix: str, release: str, localPath: str) -> bool:
+        mappingSuffix = '-'.join(suffix.rsplit('.', 1))
+        fileName = f"mapping-{release}-{mappingSuffix}.tar"
+        targetUrl = f"{urlBase}{fileName}"
+        if localPath is None or len(localPath) == 0:
+            localPath = os.path.join(self._mSaveDir, fileName)
+        Logger.i(appModel.getAppTag(), f"start save {targetUrl} to {localPath}")
+        return self._download(targetUrl, localPath)
+
     def getMasterAPK(self, version: str, isRelease: bool, localPath: str) -> bool:
         urlDir, suffix = self._getMasterURL(version)
         if len(urlDir) == 0:
@@ -198,11 +207,22 @@ class CCTGDownloader:
         if len(urlDir) == 0:
             Logger.e(appModel.getAppTag(), f"version={version}: failed to get url")
             return False
-        Logger.i(appModel.getAppTag(), f"start download version: {version} apk...")
+        Logger.i(appModel.getAppTag(), f"start download version: {version} symbol...")
         if isRelease:
             return self._downloadSymbol(urlDir, suffix, "pureRelease", localPath)
         else:
             return self._downloadSymbol(urlDir, suffix, "pureDebug", localPath)
+
+    def getMasterMapping(self, version: str, isRelease: bool, localPath: str) -> bool:
+        urlDir, suffix = self._getMasterURL(version)
+        if len(urlDir) == 0:
+            Logger.e(appModel.getAppTag(), f"version={version}: failed to get url")
+            return False
+        Logger.i(appModel.getAppTag(), f"start download version: {version} mapping...")
+        if isRelease:
+            return self._downloadMapping(urlDir, suffix, "release", localPath)
+        else:
+            return self._downloadMapping(urlDir, suffix, "debug", localPath)
 
     def getBranchAPK(self, version: str, branch: str, isRelease: bool, localPath: str) -> bool:
         urlDir, suffix = self._getBranchURL(version, branch)
@@ -220,8 +240,19 @@ class CCTGDownloader:
         if len(urlDir) == 0:
             Logger.e(appModel.getAppTag(), f"version={version}: failed to get url")
             return False
-        Logger.i(appModel.getAppTag(), f"start download version: {version} apk...")
+        Logger.i(appModel.getAppTag(), f"start download version: {version} symbol...")
         if isRelease:
             return self._downloadSymbol(urlDir, suffix, "pureRelease", localPath)
         else:
             return self._downloadSymbol(urlDir, suffix, "pureDebug", localPath)
+
+    def getBranchMapping(self, version: str, branch: str, isRelease: bool, localPath: str) -> bool:
+        urlDir, suffix = self._getBranchURL(version, branch)
+        if len(urlDir) == 0:
+            Logger.e(appModel.getAppTag(), f"version={version}: failed to get url")
+            return False
+        Logger.i(appModel.getAppTag(), f"start download version: {version} mapping...")
+        if isRelease:
+            return self._downloadMapping(urlDir, suffix, "release", localPath)
+        else:
+            return self._downloadMapping(urlDir, suffix, "debug", localPath)
