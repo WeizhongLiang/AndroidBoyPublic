@@ -115,6 +115,10 @@
     "getWCACertificates failed, error = ": [
       "Get WCA failed",
       "in meeting"
+    ],
+    "<serv:exceptionID>060034<": [
+      "invalid password",
+      "join meeting"
     ]
   }
 }
