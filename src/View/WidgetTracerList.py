@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, QTimer, QObject
 from PyQt5.QtGui import QColor, QKeyEvent, QContextMenuEvent, QFont
 from PyQt5.QtWidgets import QWidget, QListWidgetItem, QMenu, QAbstractItemView
 
-from src.Common import QTHelper, DateTimeHelper, FileUtility
+from src.Common import QTHelper, DateTimeHelper, FileUtility, SystemHelper
 from src.Common.Logger import *
 from src.Common.QTHelper import ListForQLineEdit
 from src.Common.UITheme import uiTheme
@@ -436,8 +436,9 @@ class WidgetTracerList(QWidget, Ui_Form):
         Logger.i(appModel.getAppTag(), f"{self}")
 
         if show and not self.btHideFindToolbar.isHidden():
-            self.tbFindContent.setText(pyperclip.paste())
-            self.tbFindContent.selectAll()
+            if not SystemHelper.isMac():
+                self.tbFindContent.setText(pyperclip.paste())
+                self.tbFindContent.selectAll()
         QTHelper.showLayout(self.findLayout, show)
 
         self.ckRegular.close()
