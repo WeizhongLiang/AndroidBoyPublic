@@ -86,6 +86,7 @@ class EmailItem:
         self.mSubject: str = emailObject.Subject
         self.mBody: str = emailObject.Body
         self.mReceivedTime: datetime = emailObject.ReceivedTime
+        # self.mReceivedTime -= timedelta(0, DateTimeHelper.timezoneOffset)            # timezone offset
         self.mSenderName: str = emailObject.SenderName
         self.mSenderEmail: str = emailObject.SenderEmailAddress
         self.mReceiveName: str = emailObject.ReceivedByName
@@ -96,7 +97,8 @@ class EmailItem:
         # local folder
         # for c in "/\\:*\"<>|?. ":
         #    senderName = self.mSenderName.replace(c, "_")
-        localFolder = self.mReceivedTime.strftime("%m%d%Y_%H%M%S_")
+        localFolder = DateTimeHelper.getTimestampString(self.mReceivedTime.timestamp(), "%m%d%Y_%H%M%S_")
+        # localFolder = self.mReceivedTime.strftime("%m%d%Y_%H%M%S_")
         localFolder += self.mSenderEmail
         self.mLocalFolder = os.path.join(localFolderBase, localFolder)
         FileUtility.makeFolder(self.mLocalFolder)

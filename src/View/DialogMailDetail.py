@@ -50,7 +50,7 @@ class DialogMailDetail(QDialog, Ui_Dialog):
         self.cbSummary.installEventFilter(self)
         self.cbAddition.installEventFilter(self)
 
-        self.ltErrors.setWordWrap(True)
+        # self.ltErrors.setWordWrap(True)
 
         self.mTreeItems = treeItems
         self.mIndex = selIndex
