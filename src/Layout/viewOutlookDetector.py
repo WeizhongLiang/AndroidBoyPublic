@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'viewOutlookDetector.ui'
+# Form implementation generated from reading ui file '/Users/weizlian/Desktop/MyPrj/github-repos/Python/AndroidBoyPublic/src/Layout/viewOutlookDetector.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.4
 #
@@ -97,12 +97,37 @@ class Ui_Form(object):
         self.btExportExcel.setMaximumSize(QtCore.QSize(28, 24))
         self.btExportExcel.setText("")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/icon/icons/excel.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(":/icon/icons/excel_export.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.btExportExcel.setIcon(icon1)
         self.btExportExcel.setObjectName("btExportExcel")
         self.layoutFilter.addWidget(self.btExportExcel)
-        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.btImportExcel = QtWidgets.QPushButton(Form)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.btImportExcel.sizePolicy().hasHeightForWidth())
+        self.btImportExcel.setSizePolicy(sizePolicy)
+        self.btImportExcel.setMinimumSize(QtCore.QSize(28, 24))
+        self.btImportExcel.setMaximumSize(QtCore.QSize(28, 24))
+        self.btImportExcel.setText("")
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(":/icon/icons/excel_import.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btImportExcel.setIcon(icon2)
+        self.btImportExcel.setObjectName("btImportExcel")
+        self.layoutFilter.addWidget(self.btImportExcel)
+        spacerItem3 = QtWidgets.QSpacerItem(5, 0, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
         self.layoutFilter.addItem(spacerItem3)
+        self.editFilter = QtWidgets.QLineEdit(Form)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.editFilter.sizePolicy().hasHeightForWidth())
+        self.editFilter.setSizePolicy(sizePolicy)
+        self.editFilter.setMinimumSize(QtCore.QSize(240, 0))
+        self.editFilter.setObjectName("editFilter")
+        self.layoutFilter.addWidget(self.editFilter)
+        spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.layoutFilter.addItem(spacerItem4)
         self.layoutOutlook.addLayout(self.layoutFilter)
         self.treeOutlook = QtWidgets.QTreeWidget(Form)
         self.treeOutlook.setMinimumSize(QtCore.QSize(800, 0))
@@ -162,6 +187,10 @@ class Ui_Form(object):
         self.ckFilterDate.setText(_translate("Form", "Filter Date"))
         self.lbStartDate.setText(_translate("Form", "From "))
         self.lbToDate.setText(_translate("Form", " to "))
+        self.btExportExcel.setToolTip(_translate("Form", "Export to excel"))
+        self.btImportExcel.setToolTip(_translate("Form", "Import from excel"))
+        self.editFilter.setToolTip(_translate("Form", "Filter"))
+        self.editFilter.setStatusTip(_translate("Form", "Filter"))
         self.lbProg1.setText(_translate("Form", "lbProg1"))
         self.lbProg2.setText(_translate("Form", "lbProg2"))
 import AndroidBoy_rc

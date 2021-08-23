@@ -9,7 +9,8 @@ from typing import cast
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QModelIndex
 from PyQt5.QtGui import QColor, QContextMenuEvent
-from PyQt5.QtWidgets import QWidget, QTreeWidgetItem, QAbstractItemView, QTreeWidgetItemIterator, QMessageBox, QMenu
+from PyQt5.QtWidgets import QWidget, QTreeWidgetItem, QAbstractItemView, QTreeWidgetItemIterator, QMessageBox, QMenu, \
+    QFileDialog
 from requests import Response
 
 from src.Common import QTHelper, Const, FileUtility, DateTimeHelper, SystemHelper
@@ -17,6 +18,7 @@ from src.Common.IntEnum import IntEnum
 from src.Common.Logger import Logger
 from src.Layout.viewOutlookDetector import Ui_Form
 
+from src.Common.QTHelper import ListForQLineEdit
 from src.Common.UITheme import uiTheme
 from src.Controller.CCTGDownloader import CCTGDownloader, RequestState
 from src.Controller.OutlookCtrl import OutlookCtrl, EmailFilter, EmailItem, FolderItem, AccountItem
@@ -41,7 +43,7 @@ def _setTreeItemColor(itemTree: QTreeWidgetItem, foreground: QColor, background:
 
 class TreeItemRole(IntEnum):
     itemType = QtCore.Qt.UserRole + 1
-    itemData = QtCore.Qt.UserRole + 2
+    itemData = QtCore.Qt.UserRole + 2  # TreeItemInfo
 
 
 class TreeItemType(IntEnum):
@@ -188,9 +190,34 @@ class ViewOutlookDetector(QWidget, Ui_Form):
         self.ckFilterDate.clicked.connect(self._onCheckFilterData)
         self.btQueryMails.clicked.connect(self._onQueryMails)
         self.btExportExcel.clicked.connect(self._onExportExcel)
+        self.btImportExcel.clicked.connect(self._onImportExcel)
         self.sEventOutlookState.connect(self._onEventOutlookState)
         self.treeOutlook.itemSelectionChanged.connect(self._onSelectedItem)
         self.treeOutlook.doubleClicked.connect(self._onMailDetail)
+
+        self.editFilter.textChanged.connect(self._onFilterTextChanged)
+        return
+
+    def _onFilterTextChanged(self, newText):
+        inputList = appModel.getRecentInputList(newText)
+        Logger.i(appModel.getAppTag(), f"newText={newText}, inputList={inputList}")
+        ListForQLineEdit.getInstance().showList(inputList, self.editFilter)
+
+        it = QTreeWidgetItemIterator(self.treeOutlook)
+        while it.value():
+            item = it.value()
+            itemType = item.data(0, TreeItemRole.itemType.value)
+            if itemType == TreeItemType.email:
+                # treeItemInfo: TreeItemInfo = item.data(0, TreeItemRole.itemData.value)
+                # emailItem: EmailItem = treeItemInfo.mData
+                # analyzer: MailAnalyzer = emailItem.mAnalyzer
+                for col in range(0, COL_COUNT):
+                    if len(newText) > 0 and newText in item.text(col):
+                        item.setBackground(col, uiTheme.colorMarkedBackground)
+                    else:
+                        item.setBackground(col, uiTheme.colorNormalBackground)
+            it += 1
+
         return
 
     def _expandFolder(self, item: QTreeWidgetItem):
@@ -535,6 +562,10 @@ class ViewOutlookDetector(QWidget, Ui_Form):
         return
 
     def _onExportExcel(self):
+        if len(self._mFilterMails.items()) <= 0:
+            QMessageBox().question(self, '', "No data to export.", QMessageBox.Yes)
+            return
+
         excelFiler = open('email_file.csv', mode='w', newline='', encoding='utf-8')
         excelWriter = csv.writer(excelFiler, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         for emailID, emailItem in self._mFilterMails.items():
@@ -551,6 +582,71 @@ class ViewOutlookDetector(QWidget, Ui_Form):
         ret = qm.question(self, '', "Do you want to show file in explorer?", qm.Yes | qm.No)
         if ret == qm.Yes:
             SystemHelper.openAtExplorer(excelFiler.name)
+        return
+
+    def _onImportExcel(self):
+        if len(self._mFilterMails.items()) <= 0:
+            QMessageBox().question(self, '', "No data need to be imported.", QMessageBox.Yes)
+            return
+
+        title = "Select excel file"
+        typeFilter = f"Excel Files (*.csv)"
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        files, _ = QFileDialog.getOpenFileNames(self,
+                                                caption=title,
+                                                directory=appModel.mAppPath,
+                                                filter=typeFilter,
+                                                options=options)
+        if len(files) <= 0:
+            return
+        selFile = files[0]
+        Logger.i(appModel.getAppTag(), f"Selected file: {selFile}")
+        excelFiler = open(selFile, mode='r', newline='', encoding='utf-8', errors="ignore")
+        excelReader = csv.reader(excelFiler, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        summaryArray = []
+        for csvRow in excelReader:
+            summaryArray.append({
+                "Sender": csvRow[0],
+                "Type": csvRow[1],
+                "Description": csvRow[2],
+                "Addition": csvRow[3]
+            })
+        excelFiler.close()
+
+        importedCount = 0
+        updatedCount = 0
+        for emailID, emailItem in self._mFilterMails.items():
+            treeItemInfo: TreeItemInfo = cast(TreeItemInfo, emailItem.mCustomerData)
+            treeItem: QTreeWidgetItem = treeItemInfo.mTreeItem
+            sender = treeItem.text(COL_SENDER)
+            analyzer: MailAnalyzer = cast(MailAnalyzer, emailItem.mAnalyzer)
+            for summary in summaryArray:
+                if summary["Sender"] == sender:
+                    analyzeSummary = {
+                        "Type": summary["Type"],
+                        "Description": summary["Description"],
+                        "Addition": summary["Addition"]
+                    }
+                    if "Summary" not in analyzer.mAnalyzeResult:
+                        analyzer.mAnalyzeResult["Summary"] = analyzeSummary
+                        importedCount += 1
+                    else:
+                        curSummary = analyzer.mAnalyzeResult["Summary"]
+                        if len(curSummary["Type"]) <= 0:
+                            curSummary["Type"] = analyzeSummary["Type"]
+                        if len(curSummary["Description"]) <= 0:
+                            curSummary["Description"] = analyzeSummary["Description"]
+                        if len(curSummary["Addition"]) <= 0:
+                            curSummary["Addition"] = analyzeSummary["Addition"]
+                        updatedCount += 1
+                    analyzer.saveResult()
+                    self._updateOutlookUI(analyzer)
+                    break
+
+        tipMessage = f"Imported {importedCount}, updated {updatedCount}," \
+                     f" total {len(summaryArray)} records in excel file"
+        QMessageBox().question(self, '', tipMessage, QMessageBox.Yes)
         return
 
     def _onMailDetail(self, index: QModelIndex):

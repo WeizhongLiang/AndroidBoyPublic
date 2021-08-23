@@ -1,7 +1,7 @@
 import copy
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Tuple
 from src.Common import SystemHelper, DateTimeHelper, FileUtility
 from src.Common.Logger import Logger
@@ -64,6 +64,7 @@ class EmailObjectMac:
         self.Subject = email["_subject"]
         self.Body = email["_body"]
         self.ReceivedTime = self.getReceivedTime(email["_receivedTime"])
+        self.ReceivedTime += timedelta(0, DateTimeHelper.timezoneOffset)            # timezone offset
         self.SenderName = email["_senderName"]
         self.SenderEmailAddress = email["_senderEmail"]
         self.ReceivedByName = "receivedByName"

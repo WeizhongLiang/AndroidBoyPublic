@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="icon">
+    <file>icons/excel_export.svg</file>
+    <file>icons/excel_import.svg</file>
     <file>icons/zoom_in.svg</file>
     <file>icons/rotate_anticlockwise.svg</file>
     <file>icons/rotate_clockwise.svg</file>
