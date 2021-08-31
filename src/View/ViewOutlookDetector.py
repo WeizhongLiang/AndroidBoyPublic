@@ -203,7 +203,9 @@ class ViewOutlookDetector(QWidget, Ui_Form):
         inputList = appModel.getRecentInputList(newText)
         Logger.i(appModel.getAppTag(), f"newText={newText}, inputList={inputList}")
         ListForQLineEdit.getInstance().showList(inputList, self.editFilter)
+        newText = newText.lower()
 
+        foundCount = 0
         it = QTreeWidgetItemIterator(self.treeOutlook)
         while it.value():
             item = it.value()
@@ -213,8 +215,11 @@ class ViewOutlookDetector(QWidget, Ui_Form):
                 # emailItem: EmailItem = treeItemInfo.mData
                 # analyzer: MailAnalyzer = emailItem.mAnalyzer
                 for col in range(0, COL_COUNT):
-                    if len(newText) > 0 and newText in item.text(col):
+                    if len(newText) > 0 and newText in item.text(col).lower():
                         item.setBackground(col, uiTheme.colorMarkedBackground)
+                        foundCount += 1
+                        if foundCount == 1:
+                            self.treeOutlook.scrollToItem(item)
                     else:
                         item.setBackground(col, uiTheme.colorNormalBackground)
             it += 1
