@@ -403,6 +403,30 @@ class WidgetTracerList(QWidget, Ui_Form):
         # self.emit()
         return
 
+    def setTraceBaseInfo(self, baseInfo: {}):
+        self.listBaseInfo.clear()
+        if "Application version" in baseInfo:
+            self.listBaseInfo.addItem("Version: " + baseInfo["Application version"])
+        if "Build.CPU_ABI" in baseInfo:
+            self.listBaseInfo.addItem("CPU ABI: " + baseInfo["Build.CPU_ABI"])
+        if "Build.MODEL" in baseInfo:
+            self.listBaseInfo.addItem("Model: " + baseInfo["Build.MODEL"])
+        if "Build.BRAND" in baseInfo:
+            self.listBaseInfo.addItem("Brand: " + baseInfo["Build.BRAND"])
+        if "Build.MANUFACTURER" in baseInfo:
+            self.listBaseInfo.addItem("Manufacturer: " + baseInfo["Build.MANUFACTURER"])
+        if "Build.VERSION.SDK" in baseInfo:
+            self.listBaseInfo.addItem("API Level: " + baseInfo["Build.VERSION.SDK"])
+        if "Build.VERSION.RELEASE" in baseInfo:
+            self.listBaseInfo.addItem("Android Release: " + baseInfo["Build.VERSION.RELEASE"])
+        if "TIMEZONE.ID" in baseInfo:
+            self.listBaseInfo.addItem("Timezone: " + baseInfo["TIMEZONE.ID"])
+        if self.listBaseInfo.count() <=0:
+            self.listBaseInfo.hide()
+        else:
+            self.listBaseInfo.show()
+        return
+
     def setColumnVisual(self, col, show):
         Logger.i(appModel.getAppTag(), f"{self}, col={col}, show={show}")
         return

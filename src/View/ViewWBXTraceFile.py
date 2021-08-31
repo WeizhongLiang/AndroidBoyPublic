@@ -151,6 +151,7 @@ class ViewWBXTraceFile(QWidget, Ui_Form):
             self._mWBXTracerFile.readTracesRange(self._onReadWBXTrace, None,
                                                  self._mStartTraceIndex, self._mEndTraceIndex)
             self._mTracerWidget.endLoad()
+            self._mTracerWidget.setTraceBaseInfo(self._mWBXTracerFile.appInfo)
             del self._mWBXTracerFile
         elif self._mTraceDataType == self.DATA_LGF:
             self._mTracerWidget.beginLoad(self._mLGFTracerFile.getTraceCount())
