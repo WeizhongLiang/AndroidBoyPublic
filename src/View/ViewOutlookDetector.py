@@ -29,9 +29,10 @@ from src.View.DialogMailDetail import DialogMailDetail
 
 COL_SENDER = 0
 COL_VERSION = 1
-COL_ANALYZER = 2
-COL_SUMMARY = 3
-COL_COUNT = 4
+COL_TIMEZONE = 2
+COL_ANALYZER = 3
+COL_SUMMARY = 4
+COL_COUNT = 5
 
 
 def _setTreeItemColor(itemTree: QTreeWidgetItem, foreground: QColor, background: QColor):
@@ -127,9 +128,9 @@ class ViewOutlookDetector(QWidget, Ui_Form):
 
         self._bindEvent()
         self.treeOutlook.setColumnCount(4)
-        self.treeOutlook.setHeaderLabels(["Sender", "Version", "Analyzer", "Summary"])
+        self.treeOutlook.setHeaderLabels(["Sender", "Version", "Timezone", "Analyzer", "Summary"])
         colWidths = appModel.readConfig(self.__class__.__name__, "colWidths", [330, 120, 100, 100])
-        for i in range(0, 3):
+        for i in range(0, min(COL_COUNT-1, len(colWidths))):
             self.treeOutlook.setColumnWidth(i, colWidths[i])
         self.treeOutlook.header().setStretchLastSection(True)
         # self.treeOutlook.header().hide()
@@ -525,6 +526,7 @@ class ViewOutlookDetector(QWidget, Ui_Form):
             return
         # emailTree.mTreeItem.setText(COL_SENDER, analyzerResult["BaseInfo"]["Sender"])
         emailTree.mTreeItem.setText(COL_VERSION, analyzerResult["BaseInfo"]["AppVersion"])
+        emailTree.mTreeItem.setText(COL_TIMEZONE, analyzerResult["BaseInfo"]["AppTimezone"])
 
         action, description = analyzer.getDescription()
         emailTree.mTreeItem.setText(COL_SUMMARY, analyzer.getSummary())

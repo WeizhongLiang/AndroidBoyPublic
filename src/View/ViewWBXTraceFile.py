@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget
 
-from src.Common import QTHelper
+from src.Common import QTHelper, DateTimeHelper
 from src.Common.ADBHelper import *
 from src.Common.LogcatFile import LogcatFile, LogcatItem
 from src.Common.Logger import Logger, LoggerLevel
@@ -30,7 +30,7 @@ class ViewWBXTraceFile(QWidget, Ui_Form):
         QTHelper.switchMacUI(self)
 
         self._mTraceDataType = self.DATA_NONE
-        self._mWBXTracerFile = None
+        self._mWBXTracerFile: WBXTracerFile = WBXTracerFile(None)
         self._mLGFTracerFile = LogcatFile()
         self._mTracerWidget = WidgetTracerList(self, __class__.__name__, False)
         self.layoutTracer.addWidget(self._mTracerWidget)
@@ -163,7 +163,8 @@ class ViewWBXTraceFile(QWidget, Ui_Form):
     def _onReadWBXTrace(self, trace: WBXTraceItemV3, param: [any]) -> bool:
         if param is not None:
             Logger.i(appModel.getAppTag(), f"param len: {len(param)}")
-        timeStr = trace.mDateTime.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        traceTimestamp = trace.mDateTime.timestamp() + self._mWBXTracerFile.getTimezoneOffset()
+        timeStr = DateTimeHelper.getTimestampString(traceTimestamp, "%Y-%m-%d %H:%M:%S.%f")[:-3]
         pid = f"{trace.mPID}"
         tid = f"{trace.mTID}"
         level = self.getWBXTraceLevel.get(trace.mLevel, LoggerLevel.Info)

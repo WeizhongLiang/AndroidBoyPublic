@@ -62,6 +62,7 @@ class MailAnalyzer:
         # self._translateBody()
         self._handleDumpFile()
         self._handleKeyError()
+        self._handleTimezone()
 
         # set pointer
         self.mMailItem.mAnalyzer = self
@@ -268,8 +269,8 @@ class MailAnalyzer:
                             errDetail = WBXAnalyzer.analyzeData(fileData, fullSubFileName)
                             self.mAnalyzeResult["KeyError"].update(json.loads(errDetail))
                         else:
-                            if not WBXTracerFile(fileData, False).readTraces(
-                                    self._onCheckErrorInTrace, [needToCheck, fullSubFileName]):
+                            tracerFile = WBXTracerFile(fileData, False)
+                            if not tracerFile.readTraces(self._onCheckErrorInTrace, [needToCheck, fullSubFileName]):
                                 Logger.e(appModel.getAppTag(), f"readTrace from {fullSubFileName} failed")
                     else:
                         continue
@@ -277,6 +278,36 @@ class MailAnalyzer:
         for err, name in self.mErrorDefinition.items():
             if err not in self.mAnalyzeResult["KeyError"]:
                 self.mAnalyzeResult["KeyError"][err] = {}
+        return True
+
+    def _handleTimezone(self) -> bool:
+        if "AppTimezone" in self.mAnalyzeResult["BaseInfo"]:
+            return True
+        self.mAnalyzeResult["BaseInfo"]["AppTimezone"] = "Unknown"
+        if "Attachment" not in self.mAnalyzeResult:
+            return False
+
+        for attachPath in self.mAnalyzeResult["Attachment"]:
+            if re.search(r".wbt$", attachPath, flags=re.IGNORECASE):
+                timezoneID = WBXTracerFile(attachPath, True).getTimezoneID()
+                if len(timezoneID) > 0:
+                    self.mAnalyzeResult["BaseInfo"]["AppTimezone"] = timezoneID
+                    return True
+            elif re.search(r".zip$", attachPath, flags=re.IGNORECASE):
+                if not zipfile.is_zipfile(attachPath):
+                    continue
+                zipFile = zipfile.ZipFile(attachPath)
+                for subFileName in zipFile.namelist():
+                    if self.sStopAnalyze:
+                        break
+                    if re.search(r".wbt$", subFileName, flags=re.IGNORECASE):
+                        fileData = zipFile.read(subFileName)
+                        timezoneID = WBXTracerFile(fileData, False).getTimezoneID()
+                        if len(timezoneID) > 0:
+                            self.mAnalyzeResult["BaseInfo"]["AppTimezone"] = timezoneID
+                            return True
+                    else:
+                        continue
         return True
 
     def getDescription(self) -> Tuple[AnalyzerAction, str]:

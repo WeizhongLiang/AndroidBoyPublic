@@ -3,10 +3,12 @@ from datetime import datetime
 
 from Crypto.Cipher import AES
 
-from src.Common import DateTimeHelper, JavaMappingHelper
+from src.Common import DateTimeHelper, JavaMappingHelper, FileUtility
 from src.Common.Logger import Logger
 from src.Common.StructPointer import StructPointer
 from src.Model.AppModel import appModel
+
+_AndroidTimezone = FileUtility.loadJsonFile(os.path.join(appModel.mAssetsPath, "AndroidTimezone.json"))
 
 
 def cryptoSimple(cryptoData: memoryview):
@@ -199,13 +201,14 @@ class WBXTraceItemV3(StructPointer):
 
 
 class WBXTracerFile:
-
     def __init__(self, pathOrData, isPath=True):
         self._mFileContent = None
         self._mContentLen = 0
         self._mHeader = None
         self.appInfo = {}
         self._mMappingFilePath = ""
+        if pathOrData is None:
+            return
         if isPath:
             self._openByPath(pathOrData)
         else:
@@ -245,6 +248,12 @@ class WBXTracerFile:
                 appModel.mAssetsPath, "WebexSymbols", self.appInfo["Application version"], "mapping.txt")
             if not os.path.exists(self._mMappingFilePath):
                 self._mMappingFilePath = ""
+            if "TIMEZONE.ID" in self.appInfo:
+                zoneID = self.appInfo["TIMEZONE.ID"].replace("/", "_")
+                if zoneID in _AndroidTimezone:
+                    self.appInfo["TIMEZONE.OFFSET"] = _AndroidTimezone[zoneID]
+                else:
+                    self.appInfo["TIMEZONE.OFFSET"] = 0
         return False
 
     @staticmethod
@@ -347,3 +356,13 @@ class WBXTracerFile:
                                            f"in {procTime.getMicroseconds()} seconds "
                                            f"exception: {e}")
             return False
+
+    def getTimezoneOffset(self) -> int:
+        return self.appInfo["TIMEZONE.OFFSET"]
+
+    def getTimezoneID(self) -> str:
+        # android time zone format: https://developer.android.com/reference/java/time/ZoneId
+        if "TIMEZONE.ID" in self.appInfo:
+            return self.appInfo["TIMEZONE.ID"]
+        else:
+            return ""
