@@ -31,7 +31,8 @@ class LogcatItem:
         return
 
     def getDateTimeStr(self) -> str:
-        return DateTimeHelper.getTimestampString(self.mDate, None)
+        traceTimestamp = self.mDate + DateTimeHelper.timezoneOffset
+        return DateTimeHelper.getTimestampString(traceTimestamp, "%Y-%m-%d %H:%M:%S.%f")[:-3]
 
     def getLoggerLevel(self) -> LoggerLevel:
         return LogcatItem.getLogLevelByStr.get(self.mLevel[0])

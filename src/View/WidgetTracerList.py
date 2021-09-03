@@ -357,9 +357,10 @@ class WidgetTracerList(QWidget, Ui_Form):
     def _onDoubleClickImportant(self, QModelIndex):
         row = QModelIndex.row()
         Logger.i(appModel.getAppTag(), f"at {row}")
-        traceRow = self.listImportant.item(row).data(Qt.UserRole)
+        traceItem: QListWidgetItem = self.listImportant.item(row).data(Qt.UserRole)
 
-        self.setSelectRow(traceRow)
+        # self.setSelectRow(traceRow)
+        self.setSelectItem(traceItem)
         return
 
     def _onSelectLogChanged(self):
@@ -565,6 +566,21 @@ class WidgetTracerList(QWidget, Ui_Form):
                 item.setBackground(uiTheme.colorMarkedBackground)
         return
 
+    @staticmethod
+    def setItemMarked(item: QListWidgetItem, marked: bool):
+        Logger.i(appModel.getAppTag(), f"setItemMarked set {item} to {marked}")
+        if item is None:
+            Logger.e(appModel.getAppTag(), f"setItemMarked, item is none.")
+            return
+        trace: TracerLine = item.data(Qt.UserRole)
+        if marked:
+            trace.mMarked = True
+            item.setBackground(uiTheme.colorMarkedBackground)
+        else:
+            trace.mMarked = False
+            item.setBackground(uiTheme.colorNormalBackground)
+        return
+
     def clearMark(self):
         self._mTracesModelLock.acquire()
         procTime = DateTimeHelper.ProcessTime()
@@ -680,9 +696,9 @@ class WidgetTracerList(QWidget, Ui_Form):
                 for key, value in errorDefinition.items():
                     if key in trace.mMessage:
                         itemImportant = QListWidgetItem(value[0])
-                        row = self.listTrace.indexFromItem(item).row()
-                        itemImportant.setData(Qt.UserRole, row)
+                        itemImportant.setData(Qt.UserRole, item)
                         self.listImportant.addItem(itemImportant)
+                        self.setItemMarked(item, True)
             Logger.i(appModel.getAppTag(), f"end with {endFind} in {procTime.getMicroseconds()}")
         return
 
@@ -692,6 +708,15 @@ class WidgetTracerList(QWidget, Ui_Form):
 
     def endLoad(self):
         self._mEventEndLoad.emit(self)
+        return
+
+    def setSelectItem(self, item: QListWidgetItem):
+        if item is not None:
+            if item.isHidden():
+                Logger.w(appModel.getAppTag(), f"setSelectItem: {item} is hidden.")
+            else:
+                self.listTrace.scrollToItem(item)  # ensure visuable
+                self.listTrace.setCurrentItem(item)
         return
 
     def setSelectRow(self, row: int):
@@ -766,10 +791,12 @@ class WidgetTracerList(QWidget, Ui_Form):
                 if self._mAdding:
                     self._mAdding = False
                     self._onEndAdding()
+                    self._onFilterTraces(True)
                 return
             self.listTrace.setUpdatesEnabled(False)
             self._onAddLines(startLine, endLine)
-            self._onFilterTraces()
+            if self._mAddable:
+                self._onFilterTraces()
             self.listTrace.setUpdatesEnabled(True)
             self.listTrace.update()
         return

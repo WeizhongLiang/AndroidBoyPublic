@@ -4,12 +4,12 @@
       "certificate expired",
       "certificate"
     ],
-    "aReason=31005": [
-      "no audio(31005)",
+    ", 31000005": [
+      "no audio(31000005)",
       "audio"
     ],
-    "aReason=31006": [
-      "no audio(31006)",
+    ", 31000006": [
+      "no audio(31000006)",
       "audio"
     ],
     "processJoinMeetingCommand, success=false": [
