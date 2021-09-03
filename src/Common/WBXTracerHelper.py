@@ -173,7 +173,7 @@ class WBXTraceItemV3(StructPointer):
         nameLen = self.mInstanceOffset - self.mNameOffset
         instanceLen = self.mMsgOffset - self.mInstanceOffset
         try:
-            self.mName = logData[0:nameLen].decode(decType)
+            self.mName = logData[0:nameLen-1].decode(decType)
             self.mInstance = logData[nameLen:instanceLen].decode(decType)
             # msgEnd = self.mSize - nameLen + instanceLen  # logData.find(b"\x00", nameLen + instanceLen)
             msgEnd = logData.find(b"\x00", nameLen + instanceLen)

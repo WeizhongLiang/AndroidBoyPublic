@@ -320,6 +320,18 @@ class DialogMailDetail(QDialog, Ui_Dialog):
                     view = self.tabAttachments.widget(i)
                     self.tabAttachments.setCurrentWidget(view)
                     break
+
+        # open wbt file
+        path = errorInfo[1]
+        zipFilePath = path.split("?")[0]
+        wbxFileName = path.split("?")[1]
+        if re.search(r".zip$", zipFilePath, flags=re.IGNORECASE) and re.search(r".wbt$", wbxFileName, flags=re.IGNORECASE):
+            zipFile = zipfile.ZipFile(zipFilePath)
+            fileData = zipFile.read(wbxFileName)
+            view = ViewWBXTraceFile(self)
+            view.openTraceData(fileData, view.DATA_WBT)
+            self.tabAttachments.insertTab(self.tabAttachments.count(), view, wbxFileName)
+
         return
 
     def _openAttachment(self, path):
