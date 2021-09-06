@@ -1,10 +1,11 @@
 set _dictFilterMails to {}
 set _attachmentsFolder to ""
 set _filterAccount to ""
-set _filterFolder to ""
-set _filterStartDate to current date
-set _filterEndDate to current date
+set _filterFolder to "Tickets"
+set _filterStartDate to (current date) - days * 7
+set _filterEndDate to (current date) - days * 5
 set _mailsFolder to ""
+set _filterMailIDs to {}
 
 on initParams(_fileName)
 	set srcFile to ((path to desktop) as text) & _fileName
@@ -26,6 +27,8 @@ on initParams(_fileName)
 			dateObject from ln into my _filterEndDate
 		else if _indexParam = 5 then
 			set my _mailsFolder to ln
+		else
+			set my _filterMailIDs's end to ln
 		end if
 		set _indexParam to _indexParam + 1
 	end repeat
@@ -79,6 +82,23 @@ on createFolder(_parent, _folderNmae)
 	return _newFolder
 end createFolder
 
+on removeFolder(_parent, _folderNmae)
+	set _folder to _parent & "/" & _folderNmae
+	set _exist to my isFolderExists(_folder)
+	if _exist then
+		set _cmd to "rm -r '" & _folder & "'"
+		do shell script _cmd
+	end if
+end removeFolder
+
+on removeFromList(_item, _list)
+	set _newList to {}
+	repeat with i from 1 to count _list
+		if _list's item i is not _item then set _newList's end to _list's item i
+	end repeat
+	return _newList
+end removeFromList
+
 my initParams("as_params.cfg")
 
 log "run with params:"
@@ -87,6 +107,7 @@ log "_filterFolder =" & _filterFolder
 log "_filterStartDate =" & _filterStartDate
 log "_filterEndDate =" & _filterEndDate
 log "_mailsFolder =" & _mailsFolder
+log "_filterMailIDs = " & _filterMailIDs
 
 -- run and output
 tell application "Microsoft Outlook"
@@ -148,6 +169,17 @@ end filterFolder
 
 on generateMailInfo(_message, _dictFolder, _folderID)
 	tell application "Microsoft Outlook"
+		set _removeMailID to false
+		if (count of my _filterMailIDs) > 0 then
+			set _mailID to _message's exchange id
+			if my _filterMailIDs contains _mailID then
+				log "Refresh " & _mailID
+				set _removeMailID to true
+			else
+				return 0
+			end if
+		end if
+		
 		set _receivedTime to _message's time received
 		if _receivedTime < my _filterStartDate then
 			return -1
@@ -155,9 +187,8 @@ on generateMailInfo(_message, _dictFolder, _folderID)
 		if _receivedTime > my _filterEndDate then
 			return 1
 		end if
-		
-		set _receivedTimeStr to my dateToString(_receivedTime)
 		set _mailID to _message's exchange id
+		set _receivedTimeStr to my dateToString(_receivedTime)
 		set _sender to _message's sender
 		set _senderName to _sender's name
 		set _senderAddress to _sender's address
@@ -169,6 +200,11 @@ on generateMailInfo(_message, _dictFolder, _folderID)
 		set _dictAttachments to my appendAttachments(_message, _dictMailInfo, _mailTmpFolder)
 		set _dictMailInfo to _dictMailInfo & {_attachments:_dictAttachments}
 		set end of _dictFolder to {_mails:_dictMailInfo}
+		
+		if _removeMailID then
+			set my _filterMailIDs to my removeFromList(_mailID, my _filterMailIDs)
+			if (count of my _filterMailIDs) = 0 then return -1
+		end if
 		return 0
 	end tell
 end generateMailInfo
@@ -185,7 +221,7 @@ on appendAttachments(_message, _dictMailInfo, _mailTmpFolder)
 				if my isFileExists(_savedPath) then
 				else
 					save _attachment in POSIX file _mailTmpFolder
-					(* 
+					(*
 					save _attachment in _tmpPath
 					tell application "Finder"
 						-- Move to correct folder
@@ -195,8 +231,8 @@ on appendAttachments(_message, _dictMailInfo, _mailTmpFolder)
 				end if
 				
 				set end of _dictAttachment to {_name:_attachmentName, _size:_attachment's file size, _path:_savedPath}
-			on error
-				log "save " & _tmpPath & " to " & _savedPath & " failed."
+			on error errStr number errorNumber
+				log "save " & _tmpPath & " to " & _savedPath & " failed: " & errStr & "errNumber: " & errorNumber
 			end try
 		end repeat
 		return _dictAttachment
