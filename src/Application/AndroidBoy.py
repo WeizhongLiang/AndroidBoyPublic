@@ -25,6 +25,7 @@ from src.View.ViewOutlookDetector import ViewOutlookDetector
 from src.View.ViewPicture import ViewPicture
 from src.View.ViewWBXTraceFile import ViewWBXTraceFile
 from src.View.ViewDumpFile import ViewDumpFile
+from src.View.ViewTraceParser import ViewTraceParser
 
 
 class AndroidBoy(QWidget, Ui_Form):
@@ -157,6 +158,7 @@ class AndroidBoy(QWidget, Ui_Form):
         actionClipboard = menu.addAction(uiTheme.iconLogFile, "Log From Clipboard")
         actionADBLogcat = menu.addAction(uiTheme.iconLogcat, "ADB Logcat")
         actionADBCommand = menu.addAction(uiTheme.iconCommand, "ADB Command")
+        actionTracerParser = menu.addAction(uiTheme.iconLogFile, "Trace Parser")
         action = menu.exec_(event.pos())
 
         view = None
@@ -180,6 +182,10 @@ class AndroidBoy(QWidget, Ui_Form):
             view = self._getViewByType(ViewADBCommands.__name__)
             if view is None:
                 self._addTabView(ViewADBCommands(self), uiTheme.iconCommand, "ADB Commands")
+        elif action == actionTracerParser:
+            view = self._getViewByType(ViewTraceParser.__name__)
+            if view is None:
+                self._addTabView(ViewTraceParser(self), uiTheme.iconLogcat, "Trace Parser")
         if view is not None:
             self.tabMain.setCurrentWidget(view)
         return
