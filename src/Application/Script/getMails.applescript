@@ -4,34 +4,34 @@ set _filterAccount to ""
 set _filterFolder to "Tickets"
 set _filterStartDate to (current date) - days * 7
 set _filterEndDate to (current date) - days * 5
-set _mailsFolder to ""
-set _filterMailIDs to {}
+set _mailsFolder to POSIX path of (((path to desktop) as text) & "_testGetMails")
+-- set _refreshMailIDs to {"AAMkAGNkOTY5MWE2LTEzNjUtNDM1Yy04MWZmLWIxMjY5ODFlMDQyMABGAAAAAACr5GmUSP4+T4WnrBDIitHLBwApiYhu7k/0Q5A+Qc7VjN16AAGaQ9qtAAApiYhu7k/0Q5A+Qc7VjN16AAJwfmFvAAA="}
+set _refreshMailIDs to {}
 
 on initParams(_fileName)
 	set srcFile to ((path to desktop) as text) & _fileName
 	if not my isFileExistsMac(srcFile) then
 		log "file: " & srcFile & " not exist, use default parameters."
-		return
+	else
+		set lns to paragraphs of (read file srcFile)
+		set _indexParam to 1
+		repeat with ln in lns
+			if _indexParam = 1 then
+				set my _filterAccount to ln as string
+			else if _indexParam = 2 then
+				set my _filterFolder to ln as string
+			else if _indexParam = 3 then
+				dateObject from ln into my _filterStartDate
+			else if _indexParam = 4 then
+				dateObject from ln into my _filterEndDate
+			else if _indexParam = 5 then
+				set my _mailsFolder to ln
+			else if (count of ln) > 0 then
+				set my _refreshMailIDs's end to lns's item _indexParam
+			end if
+			set _indexParam to _indexParam + 1
+		end repeat
 	end if
-	
-	set lns to paragraphs of (read file srcFile)
-	set _indexParam to 1
-	repeat with ln in lns
-		if _indexParam = 1 then
-			set my _filterAccount to ln as string
-		else if _indexParam = 2 then
-			set my _filterFolder to ln as string
-		else if _indexParam = 3 then
-			dateObject from ln into my _filterStartDate
-		else if _indexParam = 4 then
-			dateObject from ln into my _filterEndDate
-		else if _indexParam = 5 then
-			set my _mailsFolder to ln
-		else
-			set my _filterMailIDs's end to ln
-		end if
-		set _indexParam to _indexParam + 1
-	end repeat
 	
 	-- prepare download folder
 	tell application "Microsoft Outlook"
@@ -47,7 +47,9 @@ on initParams(_fileName)
 		if my isFolderExists(my _mailsFolder) then
 			log "folder exist: " & my _mailsFolder
 		else
-			log "folder not exist: " & my _mailsFolder
+			log "folder not exist: " & my _mailsFolder & ", will create it."
+			set _cmd to "mkdir '" & my _mailsFolder & "'"
+			do shell script _cmd
 		end if
 	end tell
 end initParams
@@ -99,6 +101,11 @@ on removeFromList(_item, _list)
 	return _newList
 end removeFromList
 
+on moveFile(_src, _tag)
+	set _cmd to "mv '" & _src & "' '" & _tag & "'"
+	do shell script _cmd
+end moveFile
+
 my initParams("as_params.cfg")
 
 log "run with params:"
@@ -107,7 +114,7 @@ log "_filterFolder =" & _filterFolder
 log "_filterStartDate =" & _filterStartDate
 log "_filterEndDate =" & _filterEndDate
 log "_mailsFolder =" & _mailsFolder
-log "_filterMailIDs = " & _filterMailIDs
+log "_refreshMailIDs = " & _refreshMailIDs
 
 -- run and output
 tell application "Microsoft Outlook"
@@ -170,9 +177,9 @@ end filterFolder
 on generateMailInfo(_message, _dictFolder, _folderID)
 	tell application "Microsoft Outlook"
 		set _removeMailID to false
-		if (count of my _filterMailIDs) > 0 then
+		if (count of my _refreshMailIDs) > 0 then
 			set _mailID to _message's exchange id
-			if my _filterMailIDs contains _mailID then
+			if my _refreshMailIDs contains _mailID then
 				log "Refresh " & _mailID
 				set _removeMailID to true
 			else
@@ -202,8 +209,9 @@ on generateMailInfo(_message, _dictFolder, _folderID)
 		set end of _dictFolder to {_mails:_dictMailInfo}
 		
 		if _removeMailID then
-			set my _filterMailIDs to my removeFromList(_mailID, my _filterMailIDs)
-			if (count of my _filterMailIDs) = 0 then return -1
+			-- yes, i know, there may be multi mails have the same mail ID, but I still only read the first one.
+			set my _refreshMailIDs to my removeFromList(_mailID, my _refreshMailIDs)
+			if (count of my _refreshMailIDs) = 0 then return -1
 		end if
 		return 0
 	end tell
@@ -218,11 +226,13 @@ on appendAttachments(_message, _dictMailInfo, _mailTmpFolder)
 			set _savedPath to _mailTmpFolder & "/" & _attachmentName
 			set _tmpPath to my _attachmentsFolder & ":" & _attachmentName
 			try
-				if my isFileExists(_savedPath) then
+				if my isFileExists(_savedPath) and false then
 				else
-					save _attachment in POSIX file _mailTmpFolder
-					(*
+					-- save _attachment in POSIX file _mailTmpFolder
 					save _attachment in _tmpPath
+					-- Move to correct folder
+					my moveFile(POSIX path of _tmpPath, _mailTmpFolder)
+					(*
 					tell application "Finder"
 						-- Move to correct folder
 						move _tmpPath to POSIX file _mailTmpFolder with replacing
