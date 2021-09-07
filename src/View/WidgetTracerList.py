@@ -872,13 +872,15 @@ class WidgetTracerList(QWidget, Ui_Form):
             return
         # level or msg
         hasFound = self._mFilterLogInclude.lower() in item.text().lower()
-        hasInTag = self._mFilterLogInclude.lower() in trace.mTag
+        hasInTag = self._mFilterLogInclude.lower() in trace.mTag.lower()
         if not hasFound or trace.mLevel < self._mFilterLogLevel:
             trace.mVisual = False
-        elif hasInTag:
-            trace.mVisual = True
         else:
             trace.mVisual = True
+
+        if hasInTag:
+            trace.mVisual = True
+
         return
 
     def getColsVisual(self):
