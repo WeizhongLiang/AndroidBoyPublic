@@ -179,9 +179,9 @@ class DialogMailDetail(QDialog, Ui_Dialog):
             for path in result["Attachment"]:
                 if zipfile.is_zipfile(path):
                     zipFile = zipfile.ZipFile(path)
-                    for subFileName in zipFile.namelist():
-                        pathData = path + "?" + subFileName
-                        item = QListWidgetItem(subFileName)
+                    for subfile in zipFile.filelist:
+                        pathData = path + "?" + subfile.filename
+                        item = QListWidgetItem(subfile.filename + "   [" + FileUtility.fileSizeFmt(subfile.file_size) + "]")
                         item.setData(Qt.UserRole, [_ErrorTypeInList.normal, pathData])
                         item.setBackground(uiTheme.colorNormalBackground)
                         item.setForeground(_ErrorColor.get(_ErrorTypeInList.normal))
