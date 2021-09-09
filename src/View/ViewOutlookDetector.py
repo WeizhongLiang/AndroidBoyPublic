@@ -579,10 +579,11 @@ class ViewOutlookDetector(QWidget, Ui_Form):
             treeItemInfo: TreeItemInfo = cast(TreeItemInfo, emailItem.mCustomerData)
             treeItem: QTreeWidgetItem = treeItemInfo.mTreeItem
             sender = treeItem.text(COL_SENDER)
+            version = treeItem.text(COL_VERSION)
             analyzer: MailAnalyzer = cast(MailAnalyzer, emailItem.mAnalyzer)
             if "Summary" in analyzer.mAnalyzeResult:
                 summary = analyzer.mAnalyzeResult["Summary"]
-                excelWriter.writerow([sender, summary["Type"], summary["Description"], summary["Addition"]])
+                excelWriter.writerow([sender, version, summary["Type"], summary["Description"], summary["Addition"]])
         excelFiler.close()
 
         qm = QMessageBox()

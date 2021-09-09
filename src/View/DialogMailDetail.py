@@ -179,9 +179,9 @@ class DialogMailDetail(QDialog, Ui_Dialog):
             for path in result["Attachment"]:
                 if zipfile.is_zipfile(path):
                     zipFile = zipfile.ZipFile(path)
-                    for subFileName in zipFile.namelist():
-                        pathData = path + "?" + subFileName
-                        item = QListWidgetItem(subFileName)
+                    for subfile in zipFile.filelist:
+                        pathData = path + "?" + subfile.filename
+                        item = QListWidgetItem(subfile.filename + "   [" + FileUtility.fileSizeFmt(subfile.file_size) + "]")
                         item.setData(Qt.UserRole, [_ErrorTypeInList.normal, pathData])
                         item.setBackground(uiTheme.colorNormalBackground)
                         item.setForeground(_ErrorColor.get(_ErrorTypeInList.normal))
@@ -193,6 +193,8 @@ class DialogMailDetail(QDialog, Ui_Dialog):
                     item.setBackground(uiTheme.colorNormalBackground)
                     item.setForeground(_ErrorColor.get(_ErrorTypeInList.normal))
                     self.ltErrors.addItem(item)
+
+        self.ltErrors.sortItems()
 
         if "Summary" in result:
             self.cbType.setCurrentText(result["Summary"]["Type"])
@@ -310,16 +312,34 @@ class DialogMailDetail(QDialog, Ui_Dialog):
         elif errorInfo[0] == _ErrorTypeInList.normal:
             # locate file line
             path = errorInfo[1]
-            if re.search(r".zip$", path, flags=re.IGNORECASE):
+            if re.search(r".zip.*wbt$", path, flags=re.IGNORECASE):
                 fileName = path.split("?")[1]
             else:
                 fileName = os.path.basename(path)
+
+            hasTabOpend = False
+            isWbtFile = re.search(r".wbt$", fileName, flags=re.IGNORECASE)
             for i in range(0, self.tabAttachments.count()):
                 tabTitle = self.tabAttachments.tabText(i)
-                if fileName == tabTitle:
+                if '['+fileName + ']' == tabTitle or (not isWbtFile and fileName == tabTitle):
                     view = self.tabAttachments.widget(i)
                     self.tabAttachments.setCurrentWidget(view)
+                    hasTabOpend = True
                     break
+
+            if not hasTabOpend and isWbtFile:
+                # open wbt file
+                path = errorInfo[1]
+                zipFilePath = path.split("?")[0]
+                wbxFileName = path.split("?")[1]
+                if re.search(r".zip$", zipFilePath, flags=re.IGNORECASE) and re.search(r".wbt$", wbxFileName, flags=re.IGNORECASE):
+                    zipFile = zipfile.ZipFile(zipFilePath)
+                    fileData = zipFile.read(wbxFileName)
+                    view = ViewWBXTraceFile(self)
+                    view.openTraceData(fileData, view.DATA_WBT)
+                    newTab = self.tabAttachments.insertTab(self.tabAttachments.count(), view, '['+wbxFileName + ']')
+                    self.tabAttachments.setCurrentIndex(newTab)
+
         return
 
     def _openAttachment(self, path):

@@ -127,6 +127,7 @@ class ViewWBXTraceFile(QWidget, Ui_Form):
         self.btFilter.clicked.connect(self._onFilterLogcat)
 
         self.editFilter.textChanged.connect(self._onEditorTextChanged)
+        self.editFilter.returnPressed.connect(self._onFilterLogcat)
         return
 
     def _stopReadTracesThread(self):

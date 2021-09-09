@@ -316,7 +316,7 @@ class WidgetTracerList(QWidget, Ui_Form):
         dataToCopy = ""
         for item in items:
             trace: TracerLine = item.data(Qt.UserRole)
-            dataToCopy += trace.mMessage
+            dataToCopy += trace.mMessage + os.linesep
         pyperclip.copy(dataToCopy)
         self._mNotifyWidget.notify(f"Copied {len(items)} messages to clipboard", 2)
         return
@@ -872,10 +872,12 @@ class WidgetTracerList(QWidget, Ui_Form):
             return
         # level or msg
         hasFound = self._mFilterLogInclude.lower() in item.text().lower()
-        if not hasFound or trace.mLevel < self._mFilterLogLevel:
+        hasInTag = self._mFilterLogInclude.lower() in trace.mTag.lower()
+        if (not hasFound and not hasInTag) or trace.mLevel < self._mFilterLogLevel:
             trace.mVisual = False
         else:
             trace.mVisual = True
+
         return
 
     def getColsVisual(self):
