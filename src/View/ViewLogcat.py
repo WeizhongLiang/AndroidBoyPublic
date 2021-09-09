@@ -2,7 +2,7 @@ import pyperclip
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCursor
-from PyQt5.QtWidgets import QWidget, QMenu, QFileDialog
+from PyQt5.QtWidgets import QWidget, QMenu, QFileDialog, QMessageBox
 
 from src.Common import ADBHelper, QTHelper, SystemHelper
 from src.Common.ADBHelper import *
@@ -113,6 +113,7 @@ class ViewLogcat(QWidget, Ui_Form):
         self.btFilter.clicked.connect(self._onFilterLogcat)
         self.btInstallAPK.clicked.connect(self._onBTInstallAPK)
         self.btPushText.clicked.connect(self._onBTPushText)
+        self.btADBWifi.clicked.connect(self._onBTADBWifi)
 
         self.editFilter.textChanged.connect(self._onEditorTextChanged)
 
@@ -427,4 +428,33 @@ class ViewLogcat(QWidget, Ui_Form):
         if self._mCurDevice is None:
             return
         self._mCurDevice.pushText(msg)
+        return
+
+    def _onBTADBWifi(self):
+        Logger.i(appModel.getAppTag(), f"{self._mCurDevice}")
+        if self._mCurDevice is None:
+            return
+
+        # get ipv4 first
+        wlan0 = adbReturn(self._mCurDevice.mID, f"shell ip addr show wlan0", True)
+        match = re.search(f".+inet (.+?)/", wlan0)
+        if match is None:
+            QMessageBox().warning(self, '', f"No ipv4 found:{os.linesep}{wlan0}", QMessageBox.Yes)
+            return
+        ipv4 = match.group(1)
+
+        # need to disconnect?
+        qm = QMessageBox()
+        ret = qm.question(self, '', f"Need to disconnect everything first?", qm.Yes | qm.No)
+        if ret == qm.Yes:
+            adbReturn(None, f"disconnect", True)
+        else:
+            adbReturn(None, f"disconnect {ipv4}", True)
+
+        # set wifi connect port
+        adbReturn(self._mCurDevice.mID, f"tcpip 5555", True)
+
+        # connect it
+        ret = adbReturn(None, f"connect {ipv4}:5555", True)
+        QMessageBox().information(self, '', f"Connected to {ipv4} via WIFI:{os.linesep}{ret}", QMessageBox.Yes)
         return

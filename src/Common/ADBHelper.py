@@ -15,7 +15,7 @@ _nowYear = datetime.now().year
 _adbLock: threading.RLock = threading.RLock()
 
 
-def _adbReturn(deviceId, params: str, needLog=False):
+def adbReturn(deviceId, params: str, needLog=False):
     shellParams = params.split(' ')
     shellParams.insert(0, "adb")
     if deviceId is not None:
@@ -170,13 +170,13 @@ class AndroidDevice:
     def __init__(self, deviceId):
         self.mIsValid = False
         self.mID = deviceId
-        self.mProductBrand = _adbReturn(self.mID, "shell getprop ro.product.brand")  # Xiaomi
-        self.mProductModel = _adbReturn(self.mID, "shell getprop ro.product.model")  # MI 8 UD
-        self.mProductName = _adbReturn(self.mID, "shell getprop ro.product.name")  # equuleus
-        self.mProductBoard = _adbReturn(self.mID, "shell getprop ro.product.board")  # sdm845
-        self.mBuildVersionRelease = _adbReturn(self.mID, "shell getprop ro.build.version.release")  # 10
-        self.mBuildVersionSDK = _adbReturn(self.mID, "shell getprop ro.build.version.sdk")  # 29
-        self.mABIList = _adbReturn(self.mID, "shell getprop ro.product.cpu.abilist")  # arm64-v8a,armeabi-v7a,armeabi
+        self.mProductBrand = adbReturn(self.mID, "shell getprop ro.product.brand")  # Xiaomi
+        self.mProductModel = adbReturn(self.mID, "shell getprop ro.product.model")  # MI 8 UD
+        self.mProductName = adbReturn(self.mID, "shell getprop ro.product.name")  # equuleus
+        self.mProductBoard = adbReturn(self.mID, "shell getprop ro.product.board")  # sdm845
+        self.mBuildVersionRelease = adbReturn(self.mID, "shell getprop ro.build.version.release")  # 10
+        self.mBuildVersionSDK = adbReturn(self.mID, "shell getprop ro.build.version.sdk")  # 29
+        self.mABIList = adbReturn(self.mID, "shell getprop ro.product.cpu.abilist")  # arm64-v8a,armeabi-v7a,armeabi
         self._mThreadLogcat = None
         self._mProcessLogcat = None  # subprocess.Popen
         self.mIsValid = True
@@ -286,7 +286,7 @@ class AndroidDevice:
     def getPackages(self) -> [AndroidPackage]:
         Logger.i(appModel.getAppTag(), "")
         packages = []
-        cmdReturn = _adbReturn(self.mID, "shell pm list packages -f -e -3 -U")
+        cmdReturn = adbReturn(self.mID, "shell pm list packages -f -e -3 -U")
 
         items = cmdReturn.split(os.linesep)
         for item in items:
@@ -299,7 +299,7 @@ class AndroidDevice:
     def getProcesses(self, UID) -> [AndroidProcess]:
         Logger.i(appModel.getAppTag(), "")
         processes = []
-        cmdReturn = _adbReturn(self.mID, f"shell ps -U {UID} -o USER,UID,PID,PPID,NAME")
+        cmdReturn = adbReturn(self.mID, f"shell ps -U {UID} -o USER,UID,PID,PPID,NAME")
 
         items = cmdReturn.split(os.linesep)
         for item in items[1:]:
@@ -310,11 +310,11 @@ class AndroidDevice:
         return processes
 
     def pushText(self, message):
-        _adbReturn(self.mID, f"shell input text '{message}'", True)
+        adbReturn(self.mID, f"shell input text '{message}'", True)
         return
 
     def installAPK(self, path: str):
-        _adbReturn(self.mID, f"install {path}", True)
+        adbReturn(self.mID, f"install {path}", True)
         return
 
 
@@ -378,7 +378,7 @@ class AndroidDeviceManager:
         return
 
     def _onDetectConnect(self):
-        cmdReturn = _adbReturn(None, "devices").split(os.linesep)
+        cmdReturn = adbReturn(None, "devices").split(os.linesep)
         if len(cmdReturn) <= 0:
             return
         getDevIds = []
@@ -401,7 +401,7 @@ class AndroidDeviceManager:
     def _onDetectProcess(self):
         deviceID = self._mProcessDeviceID
         packageID = self._mProcessPackageID
-        cmdReturn = _adbReturn(deviceID, f"shell ps -U {packageID} -o USER,UID,PID,PPID,NAME").split(os.linesep)
+        cmdReturn = adbReturn(deviceID, f"shell ps -U {packageID} -o USER,UID,PID,PPID,NAME").split(os.linesep)
         if len(cmdReturn) <= 0:
             return
 

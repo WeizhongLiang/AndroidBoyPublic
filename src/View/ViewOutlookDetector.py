@@ -593,7 +593,7 @@ class ViewOutlookDetector(QWidget, Ui_Form):
 
     def _onImportExcel(self):
         if len(self._mFilterMails.items()) <= 0:
-            QMessageBox().question(self, '', "No data need to be imported.", QMessageBox.Yes)
+            QMessageBox().warning(self, '', "No data need to be imported.", QMessageBox.Yes)
             return
 
         title = "Select excel file"
@@ -653,7 +653,7 @@ class ViewOutlookDetector(QWidget, Ui_Form):
 
         tipMessage = f"Imported {importedCount}, updated {updatedCount}," \
                      f" total {len(summaryArray)} records in excel file"
-        QMessageBox().question(self, '', tipMessage, QMessageBox.Yes)
+        QMessageBox().information(self, '', tipMessage, QMessageBox.Yes)
         return
 
     def _onMailDetail(self, index: QModelIndex):

@@ -239,6 +239,8 @@ class WBXTracerFile:
         return
 
     def _onReadAppInfo(self, trace: WBXTraceItemV3, param: [any]) -> bool:
+        if param is None:
+            pass
         if "Application version" in trace.mMessage:
             defs = trace.mMessage.split("; ")
             for defValue in defs:

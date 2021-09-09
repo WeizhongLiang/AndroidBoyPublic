@@ -129,6 +129,7 @@ class WidgetTracerList(QWidget, Ui_Form):
         self.listTrace.horizontalScrollBar().setDisabled(True)
         self.listImportant.setWordWrap(True)
         if self._mAddable:
+            self.listBaseInfo.hide()
             self.listImportant.hide()
 
         self._mLoading = False
@@ -422,7 +423,7 @@ class WidgetTracerList(QWidget, Ui_Form):
             self.listBaseInfo.addItem("Android Release: " + baseInfo["Build.VERSION.RELEASE"])
         if "TIMEZONE.ID" in baseInfo:
             self.listBaseInfo.addItem("Timezone: " + baseInfo["TIMEZONE.ID"])
-        if self.listBaseInfo.count() <=0:
+        if self.listBaseInfo.count() <= 0:
             self.listBaseInfo.hide()
         else:
             self.listBaseInfo.show()

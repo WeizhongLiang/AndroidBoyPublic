@@ -73,7 +73,7 @@ class PackageChecker:
 
     def _getPIPPathLinux(self) -> Tuple[bool, str]:
         try:
-            pipProcess = subprocess.Popen(["pip", "--version"],
+            pipProcess = subprocess.Popen(["pip3", "--version"],
                                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = pipProcess.communicate()
             if len(stderr) != 0:
@@ -83,7 +83,7 @@ class PackageChecker:
             # pip 21.1.3 from /abc/def/pip (python 3.9)
             pipVersion = stdout.decode().rstrip()
             if len(pipVersion) > 0:
-                return True, "pip"
+                return True, "pip3"
             else:
                 return False, ""
         except Exception as e:
@@ -163,7 +163,7 @@ class PackageChecker:
             tkTextOutput.insert(tkinter.END, self._mErrorMsg, "red")
             self._mExit = True
         tkWnd.mainloop()
-        tkWnd.destroy()
+        # tkWnd.destroy()
         if self._mExit:
             exit()
         return True
