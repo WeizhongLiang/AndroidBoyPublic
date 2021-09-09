@@ -33,6 +33,7 @@ def translateTrace(mappingFilePath: str, traceString: str) -> str:
     else:
         return traceString
 
+
 def translateTrace2(mappingFilePath: str, traceString: str) -> str:
     if len(traceString) <= 0:
         return ""

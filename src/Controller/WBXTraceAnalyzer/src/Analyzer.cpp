@@ -151,30 +151,33 @@ bool WBXTraceReader::readFrom(std::uint8_t* data, std::uint32_t len){
     curData += sHeaderLen;
     while (leftLen > sItemLen){
         wbxtraceitem_v3* lpItem = (wbxtraceitem_v3*)curData;
-        if (mIsLittleEnd){
+        if (mIsLittleEnd) {
             convert2Little(lpItem);
-            if (lpItem->version!=WBXTRA_VERSION_ITEM_V3){
+            if (lpItem->version != WBXTRA_VERSION_ITEM_V3) {
                 return false;
             }
-            decryptWbxTracerItemData(lpItem);
-            
-            std::uint32_t itemIndex = itemCount;
-            std::uint64_t itemTime = (std::uint64_t)lpItem->time * 1000 + (std::uint64_t)lpItem->millitm;
-            std::uint32_t itemPosInFile = (std::uint32_t)(curData - data);
-            int nameLen = lpItem->hintof - lpItem->nameof;
-            int instanceLen = lpItem->msgof - lpItem->hintof;
-            int msgLen = lpItem->size - lpItem->msgof;
-            if (nameLen<0 || instanceLen<0 || msgLen<0){
-                return false;
-            }
-            std::string name((const char*)(curData + lpItem->nameof), nameLen);
-            std::string instance((const char*)(curData + lpItem->hintof), instanceLen);
-            std::string message((const char*)(curData + lpItem->msgof), msgLen);
-            if (mFunOnRead(lpItem->level, lpItem->pid, lpItem->tid, lpItem->id, itemTime,
-                           name, instance, message, itemIndex, itemPosInFile,
-                           mUserData)==false){
-                return false;
-            }
+        }
+        if (lpItem->size > leftLen) {
+            lpItem->size = leftLen;
+        }
+        decryptWbxTracerItemData(lpItem);
+
+        std::uint32_t itemIndex = itemCount;
+        std::uint64_t itemTime = (std::uint64_t)lpItem->time * 1000 + (std::uint64_t)lpItem->millitm;
+        std::uint32_t itemPosInFile = (std::uint32_t)(curData - data);
+        int nameLen = lpItem->hintof - lpItem->nameof;
+        int instanceLen = lpItem->msgof - lpItem->hintof;
+        int msgLen = lpItem->size - lpItem->msgof;
+        if (nameLen < 0 || instanceLen < 0 || msgLen < 0) {
+            return false;
+        }
+        std::string name((const char*)(curData + lpItem->nameof), nameLen);
+        std::string instance((const char*)(curData + lpItem->hintof), instanceLen);
+        std::string message((const char*)(curData + lpItem->msgof), msgLen);
+        if (mFunOnRead(lpItem->level, lpItem->pid, lpItem->tid, lpItem->id, itemTime,
+            name, instance, message, itemIndex, itemPosInFile,
+            mUserData) == false) {
+            return false;
         }
         leftLen -= lpItem->size;
         curData += lpItem->size;

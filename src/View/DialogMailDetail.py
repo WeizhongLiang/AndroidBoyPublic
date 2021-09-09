@@ -179,9 +179,10 @@ class DialogMailDetail(QDialog, Ui_Dialog):
             for path in result["Attachment"]:
                 if zipfile.is_zipfile(path):
                     zipFile = zipfile.ZipFile(path)
-                    for subfile in zipFile.filelist:
-                        pathData = path + "?" + subfile.filename
-                        item = QListWidgetItem(subfile.filename + "   [" + FileUtility.fileSizeFmt(subfile.file_size) + "]")
+                    for subFile in zipFile.filelist:
+                        pathData = path + "?" + subFile.filename
+                        item = QListWidgetItem(subFile.filename +
+                                               "   [" + FileUtility.fileSizeFmt(subFile.file_size) + "]")
                         item.setData(Qt.UserRole, [_ErrorTypeInList.normal, pathData])
                         item.setBackground(uiTheme.colorNormalBackground)
                         item.setForeground(_ErrorColor.get(_ErrorTypeInList.normal))
@@ -317,22 +318,23 @@ class DialogMailDetail(QDialog, Ui_Dialog):
             else:
                 fileName = os.path.basename(path)
 
-            hasTabOpend = False
+            hasTabOpened = False
             isWbtFile = re.search(r".wbt$", fileName, flags=re.IGNORECASE)
             for i in range(0, self.tabAttachments.count()):
                 tabTitle = self.tabAttachments.tabText(i)
                 if '['+fileName + ']' == tabTitle or (not isWbtFile and fileName == tabTitle):
                     view = self.tabAttachments.widget(i)
                     self.tabAttachments.setCurrentWidget(view)
-                    hasTabOpend = True
+                    hasTabOpened = True
                     break
 
-            if not hasTabOpend and isWbtFile:
+            if not hasTabOpened and isWbtFile:
                 # open wbt file
                 path = errorInfo[1]
                 zipFilePath = path.split("?")[0]
                 wbxFileName = path.split("?")[1]
-                if re.search(r".zip$", zipFilePath, flags=re.IGNORECASE) and re.search(r".wbt$", wbxFileName, flags=re.IGNORECASE):
+                if re.search(r".zip$", zipFilePath, flags=re.IGNORECASE)\
+                        and re.search(r".wbt$", wbxFileName, flags=re.IGNORECASE):
                     zipFile = zipfile.ZipFile(zipFilePath)
                     fileData = zipFile.read(wbxFileName)
                     view = ViewWBXTraceFile(self)

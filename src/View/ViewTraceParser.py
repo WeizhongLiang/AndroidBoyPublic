@@ -2,7 +2,6 @@ from PyQt5.QtWidgets import QWidget, QFileDialog
 
 from src.Common import JavaMappingHelper, NativeTraceParseHelper
 from src.Common.Logger import Logger
-from src.Common.UITheme import uiTheme
 from src.Model.AppModel import appModel
 from src.Layout.traceParser import Ui_Form
 
@@ -12,14 +11,12 @@ SELECT_DIR_TYPE = "parserSelectType"
 
 
 class ViewTraceParser(QWidget, Ui_Form):
-
-
-    def __init__(self,parent=None):
+    def __init__(self, parent=None):
         super(ViewTraceParser, self).__init__(parent)
         self.setupUi(self)
 
         self.pushButton_parse.clicked.connect(self.onParseBtnClicked)
-        self.pushButton_browser.clicked.connect(self.onBrowerBtnClicked)
+        self.pushButton_browser.clicked.connect(self.onBrowserBtnClicked)
         self.lineEdit_path.returnPressed.connect(self.onParseBtnClicked)
 
         self.TAG = 'ViewTraceParser'
@@ -30,7 +27,7 @@ class ViewTraceParser(QWidget, Ui_Form):
 
         index = appModel.readConfig(self.__class__.__name__, SELECT_DIR_TYPE, 0)
         self.comboBox_type.setCurrentIndex(index)
-        self._initCommboxType(index)
+        self._initComboBoxType(index)
 
     def onParseBtnClicked(self):
         Logger.i(self.TAG, 'onParseBtnClicked')
@@ -58,25 +55,25 @@ class ViewTraceParser(QWidget, Ui_Form):
             self.lineEdit_path.setText(path)
             appModel.saveConfig(self.__class__.__name__, SELECT_DIR_JAVA, path)
 
-    def onBrowerBtnClicked(self):
+    def onBrowserBtnClicked(self):
         if self.comboBox_type.currentIndex() == 0:
             self._selectNativeSymbolPath()
         else:
             self._selectMappingFile()
 
-    def __loadDirOrFilePath(self, type):
-        if type == 0:
+    def __loadDirOrFilePath(self, fileType):
+        if fileType == 0:
             startDir = appModel.readConfig(self.__class__.__name__, SELECT_DIR_NATIVE, "")
-        elif type == 1:
+        elif fileType == 1:
             startDir = appModel.readConfig(self.__class__.__name__, SELECT_DIR_JAVA, "")
+        else:
+            startDir = appModel.readConfig(self.__class__.__name__, SELECT_DIR_NATIVE, "")
         return startDir
 
-    def _initCommboxType(self, index):
+    def _initComboBoxType(self, index):
         startDir = self.__loadDirOrFilePath(index)
         self.lineEdit_path.setText(startDir)
 
     def onTypeChanged(self, index):
-        self._initCommboxType(index)
+        self._initComboBoxType(index)
         appModel.saveConfig(self.__class__.__name__, SELECT_DIR_TYPE, index)
-
-

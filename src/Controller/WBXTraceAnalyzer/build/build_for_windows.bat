@@ -7,7 +7,7 @@ cd %fileDir%
 echo "start build from: %fileDir%"
 echo ""
 echo "========== begin =========="
-%devenv% ./windows/WBXTraceAnalyzer.vcxproj /rebuild "Release|x64" /Out
+%devenv% ./windows/WBXTraceAnalyzer.vcxproj /Project "WBXTraceAnalyzer" /rebuild "Release|x64" /Out
 echo "========== end =========="
 echo ""
 pause

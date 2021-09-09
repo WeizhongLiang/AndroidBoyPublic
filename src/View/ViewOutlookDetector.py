@@ -573,17 +573,19 @@ class ViewOutlookDetector(QWidget, Ui_Form):
             QMessageBox().question(self, '', "No data to export.", QMessageBox.Yes)
             return
 
-        excelFiler = open('email_file.csv', mode='w', newline='', encoding='utf-8')
+        excelFiler = open('email_file.csv', mode='w', newline='', encoding='utf-8', errors="ignore")
         excelWriter = csv.writer(excelFiler, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         for emailID, emailItem in self._mFilterMails.items():
             treeItemInfo: TreeItemInfo = cast(TreeItemInfo, emailItem.mCustomerData)
             treeItem: QTreeWidgetItem = treeItemInfo.mTreeItem
             sender = treeItem.text(COL_SENDER)
             version = treeItem.text(COL_VERSION)
+            timezone = treeItem.text(COL_TIMEZONE)
             analyzer: MailAnalyzer = cast(MailAnalyzer, emailItem.mAnalyzer)
             if "Summary" in analyzer.mAnalyzeResult:
                 summary = analyzer.mAnalyzeResult["Summary"]
-                excelWriter.writerow([sender, version, summary["Type"], summary["Description"], summary["Addition"]])
+                excelWriter.writerow([sender, version, timezone,
+                                      summary["Type"], summary["Description"], summary["Addition"]])
         excelFiler.close()
 
         qm = QMessageBox()
@@ -616,9 +618,11 @@ class ViewOutlookDetector(QWidget, Ui_Form):
         for csvRow in excelReader:
             summaryArray.append({
                 "Sender": csvRow[0],
-                "Type": csvRow[1],
-                "Description": csvRow[2],
-                "Addition": csvRow[3]
+                "Version": csvRow[1],
+                "Timezone": csvRow[2],
+                "Type": csvRow[3],
+                "Description": csvRow[4],
+                "Addition": csvRow[5]
             })
         excelFiler.close()
 

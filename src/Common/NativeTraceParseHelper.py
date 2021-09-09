@@ -3,7 +3,6 @@ import subprocess
 
 from src.Common import StringUtility
 from src.Common.DumpFileHelper import SYMBOLIZER_APP
-from src.Common.Logger import Logger
 from src.Model.AppModel import appModel
 
 
@@ -13,7 +12,7 @@ def translateTrace(nativeSymbolFilePath: str, traceString: str) -> str:
     if not os.path.exists(nativeSymbolFilePath):
         return traceString
 
-    ## format trace str
+    # format trace str
     tempAddresses = open(appModel.getTmpFile("dump.addr"), "w")
     lines = traceString.split(os.linesep)
     for line in lines:
@@ -24,7 +23,7 @@ def translateTrace(nativeSymbolFilePath: str, traceString: str) -> str:
         tempAddresses.write(f"===== \"{line}\"\n{filename} 0x{stackValues[2]}\n\n")
     tempAddresses.close()
 
-    ## parse
+    # parse
     tempAddresses = open(appModel.getTmpFile("dump.addr"), "r")
     symbolizer = appModel.getExtToolsFile("dump", SYMBOLIZER_APP)
     if not os.path.exists(symbolizer):
