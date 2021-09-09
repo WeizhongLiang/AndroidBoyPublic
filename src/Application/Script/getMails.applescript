@@ -189,6 +189,7 @@ on generateMailInfo(_message, _dictFolder, _folderID)
 		
 		set _receivedTime to _message's time received
 		if _receivedTime < my _filterStartDate then
+			log "Reach the end " & my dateToString(_receivedTime)
 			return -1
 		end if
 		if _receivedTime > my _filterEndDate then

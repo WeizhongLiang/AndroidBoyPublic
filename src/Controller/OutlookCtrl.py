@@ -1,6 +1,7 @@
 import copy
 import json
 import os
+import sys
 from datetime import datetime, timedelta
 from typing import Tuple
 from src.Common import SystemHelper, DateTimeHelper, FileUtility
@@ -64,7 +65,7 @@ class EmailObjectMac:
         self.Subject = email["_subject"]
         self.Body = email["_body"]
         self.ReceivedTime = self.getReceivedTime(email["_receivedTime"])
-        self.ReceivedTime += timedelta(0, DateTimeHelper.timezoneOffset)            # timezone offset
+        self.ReceivedTime += timedelta(0, DateTimeHelper.timezoneOffset)  # timezone offset
         self.SenderName = email["_senderName"]
         self.SenderEmailAddress = email["_senderEmail"]
         self.ReceivedByName = "receivedByName"
@@ -297,32 +298,32 @@ class OutlookCtrl:
         Logger.i(appModel.getAppTag(), "end")
         return self._mFilterMails
 
-    def _queryMailsViaAppleScript(self, emailFilter: EmailFilter) -> [str, EmailItem]:
+    def _queryMailsViaAppleScript(self, emailFilter: EmailFilter, existBegin: float, existEnd: float)\
+            -> [str, EmailItem]:
         cachedOnly = appModel.readConfig(self.__class__.__name__, "OnlyCachedMails", False)
-        if cachedOnly:
-            emailsFromAS = []
-        else:
+        emailsFromASs = []
+        if not cachedOnly:
             import applescript
             scriptFile = appModel.getScriptFile("getMails.applescript")
             # write filter params
-            emailFilterForAS = copy.deepcopy(emailFilter)
-            self._correctFilter(emailFilterForAS)
-            appleParams = [
-                "" + os.linesep,                             # account filter: abc@def.com
-                emailFilterForAS.folders[0] + os.linesep,    # folder filter: abc@def.com
-                DateTimeHelper.getTimestampString(emailFilterForAS.beginDate, "%Y-%m-%d %H:%M:%S") + os.linesep,
-                DateTimeHelper.getTimestampString(emailFilterForAS.endDate, "%Y-%m-%d %H:%M:%S") + os.linesep,
-                self.sLocalFolderBase + os.linesep,
+            emailFilterForASs = self._splitFilter(emailFilter, existBegin, existEnd)
+            for filterSec in emailFilterForASs:
+                appleParams = [
+                    "" + os.linesep,  # account filter: abc@def.com
+                    filterSec.folders[0] + os.linesep,  # folder filter: abc@def.com
+                    DateTimeHelper.getTimestampString(filterSec.beginDate, "%Y-%m-%d %H:%M:%S") + os.linesep,
+                    DateTimeHelper.getTimestampString(filterSec.endDate, "%Y-%m-%d %H:%M:%S") + os.linesep,
+                    self.sLocalFolderBase + os.linesep,
                 ]
-            fw = open(os.path.join(SystemHelper.desktopPath(), "as_params.cfg"), "w")
-            fw.writelines(appleParams)
-            Logger.i(appModel.getAppTag(), f"appleParams={appleParams}")
-            fw.close()
-            asRead = applescript.run(scriptFile)
-            os.remove(fw.name)
-            emailsFromAS = json.loads(asRead.out)
+                fw = open(os.path.join(SystemHelper.desktopPath(), "as_params.cfg"), "w")
+                fw.writelines(appleParams)
+                Logger.i(appModel.getAppTag(), f"appleParams={appleParams}")
+                fw.close()
+                asRead = applescript.run(scriptFile)
+                os.remove(fw.name)
+                emailsFromASs += json.loads(asRead.out)
         appModel.saveConfig(self.__class__.__name__, "OnlyCachedMails", cachedOnly)
-        return emailsFromAS
+        return emailsFromASs
 
     def _readFilterItemsMac(self, emailFilter: EmailFilter) -> dict[str, EmailItem]:
         Logger.i(appModel.getAppTag(), "begin")
@@ -331,10 +332,20 @@ class OutlookCtrl:
         # first, load cache from file
         emailsFromCache = FileUtility.loadJsonFile(cacheFilePath)
         Logger.i(appModel.getAppTag(), f"emailsFromCache={len(emailsFromCache)}")
+        existBegin = sys.float_info.max
+        existEnd = 0.0
         if len(emailsFromCache) == 0:
             emailsFromCache = []
+        else:
+            for emailInfo in emailsFromCache:
+                email = emailInfo["_mails"]
+                receivedTime = EmailObjectMac.getReceivedTime(email["_receivedTime"]).timestamp()
+                if receivedTime < existBegin:
+                    existBegin = receivedTime
+                if receivedTime > existEnd:
+                    existEnd = receivedTime
         # second, read new record via applescript
-        emailsFromAS = self._queryMailsViaAppleScript(emailFilter)
+        emailsFromAS = self._queryMailsViaAppleScript(emailFilter, existBegin, existEnd)
         Logger.i(appModel.getAppTag(), f"emailsFromAS={len(emailsFromAS)}")
         # merge them
         emails = emailsFromAS + emailsFromCache
@@ -383,7 +394,6 @@ class OutlookCtrl:
             self._readFilterItemsWindows(emailFilter)
         elif SystemHelper.isMac():
             self._readFilterItemsMac(emailFilter)
-            self._saveFilterMailsSummary(emailFilter)
         else:
             Logger.e(appModel.getAppTag(), "Unsupported OS.")
             return {}
@@ -401,51 +411,44 @@ class OutlookCtrl:
     def getFolders(self) -> dict[str, FolderItem]:
         return self._mFolders
 
-    def _saveFilterMailsSummary(self, emailFilter: EmailFilter):
-        filterSummary = {
-            "mailCount": len(self._mFilterMails),
-            "filterFolders": emailFilter.folders,
-            "filterTos": emailFilter.tos,
-            "filterSenders": emailFilter.senders,
-            "filterReceivers": emailFilter.receivers}
-        if len(self._mFilterMails) > 0:
-            mailsList = list(self._mFilterMails.items())
-            filterSummary["filterBegin"] = mailsList[len(mailsList)-1][1].mReceivedTime.timestamp()
-            filterSummary["filterEnd"] = mailsList[0][1].mReceivedTime.timestamp()
-        else:
-            filterSummary["filterBegin"] = emailFilter.beginDate
-            filterSummary["filterEnd"] = emailFilter.endDate
-        FileUtility.saveJsonFile(os.path.join(self.sLocalFolderBase, "emailFilter.json"), filterSummary)
-        return
+    @staticmethod
+    def _splitFilter(emailFilter: EmailFilter, existBegin: float, existEnd: float) -> []:
+        if existEnd < existBegin:
+            return [emailFilter]
 
-    def _correctFilter(self, emailFilter: EmailFilter) -> bool:
-        # all mails have been stored if return False
-        filterSummary = FileUtility.loadJsonFile(os.path.join(self.sLocalFolderBase, "emailFilter.json"))
-        if "filterBegin" not in filterSummary or "filterEnd" not in filterSummary:
-            return True
-
-        filterBegin = filterSummary["filterBegin"]
-        filterEnd = filterSummary["filterEnd"]
-        if filterEnd < filterBegin:
-            return True
-
-        if emailFilter.endDate > filterEnd:
-            if emailFilter.beginDate > filterEnd:
-                # all mails have not been stored
-                return True
-            elif emailFilter.beginDate >= filterBegin:
-                emailFilter.beginDate = filterEnd + 1
+        Logger.i(appModel.getAppTag(), "existBegin = " +
+                 DateTimeHelper.getTimestampString(existBegin, "%Y-%m-%d %H:%M:%S"))
+        Logger.i(appModel.getAppTag(), "existEnd = " +
+                 DateTimeHelper.getTimestampString(existEnd, "%Y-%m-%d %H:%M:%S"))
+        if emailFilter.beginDate < existBegin:
+            # exist filter:         |---------------|
+            # new filter:   |-A-|----C---|-----B-------|
+            if emailFilter.endDate < existBegin:
+                # case A
+                return [emailFilter]
             else:
-                # beyond range...
-                emailFilter.beginDate = filterEnd + 1
-        elif emailFilter.endDate >= filterBegin:
-            if emailFilter.beginDate >= filterBegin:
-                # all mails have not been stored, return False
-                return False
-            else:
-                emailFilter.endDate = filterBegin - 1
+                emailFilterSec1 = copy.deepcopy(emailFilter)
+                emailFilterSec1.endDate = existBegin - 1
+                if emailFilter.endDate > existEnd:
+                    # case B
+                    emailFilterSec2 = copy.deepcopy(emailFilter)
+                    emailFilterSec2.beginDate = existEnd + 1
+                    return [emailFilterSec1, emailFilterSec2]
+                else:
+                    # case C
+                    return [emailFilterSec1]
+        elif emailFilter.beginDate > existEnd:
+            # exist filter: |----|
+            # new filter:           |-------|
+            return [emailFilter]
         else:
-            # all mails have not been stored
-            return True
-
-        return False
+            # exist filter: |---------------|
+            # new filter:           |-A-|----B---|
+            if emailFilter.endDate < existEnd:
+                # case A
+                return []
+            else:
+                # case B
+                emailFilterSec1 = copy.deepcopy(emailFilter)
+                emailFilterSec1.beginDate = existEnd + 1
+                return [emailFilterSec1]
