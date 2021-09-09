@@ -194,6 +194,8 @@ class DialogMailDetail(QDialog, Ui_Dialog):
                     item.setForeground(_ErrorColor.get(_ErrorTypeInList.normal))
                     self.ltErrors.addItem(item)
 
+        self.ltErrors.sortItems()
+
         if "Summary" in result:
             self.cbType.setCurrentText(result["Summary"]["Type"])
             self.cbSummary.setCurrentText(result["Summary"]["Description"])
@@ -319,7 +321,7 @@ class DialogMailDetail(QDialog, Ui_Dialog):
             isWbtFile = re.search(r".wbt$", fileName, flags=re.IGNORECASE)
             for i in range(0, self.tabAttachments.count()):
                 tabTitle = self.tabAttachments.tabText(i)
-                if fileName+'t' == tabTitle or (not isWbtFile and fileName == tabTitle):
+                if '['+fileName + ']' == tabTitle or (not isWbtFile and fileName == tabTitle):
                     view = self.tabAttachments.widget(i)
                     self.tabAttachments.setCurrentWidget(view)
                     hasTabOpend = True
@@ -335,7 +337,7 @@ class DialogMailDetail(QDialog, Ui_Dialog):
                     fileData = zipFile.read(wbxFileName)
                     view = ViewWBXTraceFile(self)
                     view.openTraceData(fileData, view.DATA_WBT)
-                    newTab = self.tabAttachments.insertTab(self.tabAttachments.count(), view, wbxFileName + 't')
+                    newTab = self.tabAttachments.insertTab(self.tabAttachments.count(), view, '['+wbxFileName + ']')
                     self.tabAttachments.setCurrentIndex(newTab)
 
         return
