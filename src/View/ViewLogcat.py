@@ -113,6 +113,7 @@ class ViewLogcat(QWidget, Ui_Form):
         self.btFilter.clicked.connect(self._onFilterLogcat)
         self.btInstallAPK.clicked.connect(self._onBTInstallAPK)
         self.btPushText.clicked.connect(self._onBTPushText)
+        self.btClipperText.clicked.connect(self._onBTClipperText)
         self.btADBWifi.clicked.connect(self._onBTADBWifi)
 
         self.editFilter.textChanged.connect(self._onEditorTextChanged)
@@ -428,6 +429,51 @@ class ViewLogcat(QWidget, Ui_Form):
         if self._mCurDevice is None:
             return
         self._mCurDevice.pushText(msg)
+        return
+
+    def _onBTClipperText(self):
+        Logger.i(appModel.getAppTag(), f"{self._mCurDevice}")
+        if self._mCurDevice is None:
+            return
+
+        # installed clipper.apk?
+        # download apk: https://github.com/majido/clipper/releases/download/v1.2.1/clipper.apk
+        # open it in device and set it to auto run
+        # call "adb shell am broadcast -a clipper.get" to get the clipper data
+
+        devID = self._mCurDevice.mID
+        apkName = "ca.zgrs.clipper"
+
+        # find clipper
+        clipperPackage: AndroidPackage = self._mCurDevice.findPackage(apkName)
+        if clipperPackage is None:
+            Logger.i(appModel.getAppTag(), f"{self._mCurDevice} will install clipper.apk first.")
+            # install it
+            clipperAPK = appModel.getExtToolsFile("android_clipper", "clipper.apk")
+            # clipperAPK = appModel.getExtToolsFile("android_clipper", "Clipper_v2.4.17.apk")
+            self._mCurDevice.installAPK(clipperAPK)
+            # find again
+            clipperPackage = self._mCurDevice.findPackage(apkName)
+            if clipperPackage is None:
+                Logger.e(appModel.getAppTag(), f"{self._mCurDevice} install clipper.apk failed.")
+                return
+
+        # open clipper
+        # processes = self._mCurDevice.getProcesses(clipperPackage.mUID)
+        # if len(processes) == 0:
+        adbReturn(devID, f"shell am start -n ca.zgrs.clipper/ca.zgrs.clipper.Main", True)
+
+        # call get clipper
+        clipperText = adbReturn(devID, f"shell am broadcast -a clipper.get", True)
+        if "Broadcast completed: result=0" in clipperText:
+            # try again
+            time.sleep(1)
+            clipperText = adbReturn(devID, f"shell am broadcast -a clipper.get", True)
+        qm = QMessageBox()
+        qm.information(self,
+                       f"Get clipper data from device",
+                       f"{clipperText}",
+                       qm.Ok)
         return
 
     def _onBTADBWifi(self):

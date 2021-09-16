@@ -283,6 +283,13 @@ class AndroidDevice:
                 thread.join()
         return
 
+    def findPackage(self, packName):  # -> AndroidPackage:
+        packages = self.getPackages()
+        for pack in packages:
+            if packName == pack.mAPK:
+                return pack
+        return None
+
     def getPackages(self) -> [AndroidPackage]:
         Logger.i(appModel.getAppTag(), "")
         packages = []
@@ -309,13 +316,11 @@ class AndroidDevice:
         processes.sort()
         return processes
 
-    def pushText(self, message):
-        adbReturn(self.mID, f"shell input text '{message}'", True)
-        return
+    def pushText(self, message) -> str:
+        return adbReturn(self.mID, f"shell input text '{message}'", True)
 
-    def installAPK(self, path: str):
-        adbReturn(self.mID, f"install {path}", True)
-        return
+    def installAPK(self, path: str) -> str:
+        return adbReturn(self.mID, f"install {path}", True)
 
 
 class AndroidDeviceManager:

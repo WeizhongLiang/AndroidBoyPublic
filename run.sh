@@ -1,7 +1,7 @@
 #!/bin/bash
 
 python=/usr/local/bin/python3.9
-pip=/Library/Frameworks/Python.framework/Versions/3.9/bin/pip
+pip=/Library/Frameworks/Python.framework/Versions/3.9/bin/pip3
 fileDir=$(dirname "$0")
 # fileDir=$(pwd)
 echo "$fileDir"
