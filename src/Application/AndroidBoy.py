@@ -7,10 +7,10 @@ import zipfile
 
 import pyperclip
 from PyQt5 import QtCore
-from PyQt5.QtCore import QObject, Qt, QTimer, QByteArray, QMimeData
+from PyQt5.QtCore import QObject, Qt, QTimer, QMimeData
 from PyQt5.QtGui import QMouseEvent, QPalette, QDragEnterEvent, QContextMenuEvent, QCursor, QIcon, QEnterEvent, \
     QKeyEvent
-from PyQt5.QtWidgets import QApplication, QWidget, QDesktopWidget, QFileDialog, QMenu, QTabBar, QPushButton, QLineEdit
+from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMenu, QTabBar, QPushButton, QLineEdit
 
 from src.Common import QTHelper
 from src.Common.Logger import *
@@ -42,6 +42,7 @@ class AndroidBoy(QWidget, Ui_Form):
 
         self.mTabBar = self.tabMain.tabBar()
         self.mTabBar.setMouseTracking(True)
+        self.mViewPath = {}
         self.mEditTabName = QLineEdit(self.mTabBar)
         self.mEditTabName.hide()
 
@@ -55,16 +56,16 @@ class AndroidBoy(QWidget, Ui_Form):
         self.mLastHoverIndex = -1
 
         if appModel.readConfig(self.__class__.__name__, "enableLogcatView", False):
-            self._addTabView(ViewLogcat(self), uiTheme.iconLogcat, "LogcatView")
+            self._addTabView(ViewLogcat(self), uiTheme.iconLogcat, "LogcatView", "")
         if appModel.readConfig(self.__class__.__name__, "enableADBCommandsView", False):
-            self._addTabView(ViewADBCommands(self), uiTheme.iconCommand, "ADB Commands")
+            self._addTabView(ViewADBCommands(self), uiTheme.iconCommand, "ADB Commands", "")
         if appModel.readConfig(self.__class__.__name__, "enableOutlookDetector", False):
-            self._addTabView(ViewOutlookDetector(self), uiTheme.iconOutlook, "OutlookDetector")
+            self._addTabView(ViewOutlookDetector(self), uiTheme.iconOutlook, "OutlookDetector", "")
 
         self.tabMain.currentChanged.connect(self._onChangeTab)
         self.mTabBar.installEventFilter(self)
         self.mEditTabName.installEventFilter(self)
-        self._handleWndPos(True)
+        QTHelper.handleWndPos(self, True)
         self._bindEvent()
 
         QTHelper.showLayout(self.TestButtonsLayout, False)
@@ -77,6 +78,11 @@ class AndroidBoy(QWidget, Ui_Form):
 
     def _onChangeTab(self, index):
         Logger.i(appModel.getAppTag(), f"cur sel= {index} - {self}")
+        view = self.tabMain.widget(index)
+        if view in self.mViewPath:
+            self.setWindowTitle(appModel.getAppName() + " - " + self.mViewPath[view])
+        else:
+            self.setWindowTitle(appModel.getAppName())
         return
 
     def _setHoverItem(self, index):
@@ -167,25 +173,25 @@ class AndroidBoy(QWidget, Ui_Form):
         elif action == actionOutlook:
             view = self._getViewByType(ViewOutlookDetector.__name__)
             if view is None:
-                self._addTabView(ViewOutlookDetector(self), uiTheme.iconOutlook, "OutlookDetector")
+                self._addTabView(ViewOutlookDetector(self), uiTheme.iconOutlook, "OutlookDetector", "")
         elif action == actionLogFile:
             self._openSelectTraceFileDialog()
         elif action == actionClipboard:
             view = ViewWBXTraceFile(self)
             view.openTraceData(pyperclip.paste(), view.DATA_LGF)
-            self._addTabView(view, uiTheme.iconLogcat, "Clipboard")
+            self._addTabView(view, uiTheme.iconLogcat, "Clipboard", "")
         elif action == actionADBLogcat:
             view = self._getViewByType(ViewLogcat.__name__)
             if view is None:
-                self._addTabView(ViewLogcat(self), uiTheme.iconLogcat, "LogcatView")
+                self._addTabView(ViewLogcat(self), uiTheme.iconLogcat, "LogcatView", "")
         elif action == actionADBCommand:
             view = self._getViewByType(ViewADBCommands.__name__)
             if view is None:
-                self._addTabView(ViewADBCommands(self), uiTheme.iconCommand, "ADB Commands")
+                self._addTabView(ViewADBCommands(self), uiTheme.iconCommand, "ADB Commands", "")
         elif action == actionTracerParser:
             view = self._getViewByType(ViewTraceParser.__name__)
             if view is None:
-                self._addTabView(ViewTraceParser(self), uiTheme.iconLogcat, "Trace Parser")
+                self._addTabView(ViewTraceParser(self), uiTheme.iconLogcat, "Trace Parser", "")
         if view is not None:
             self.tabMain.setCurrentWidget(view)
         return
@@ -195,26 +201,6 @@ class AndroidBoy(QWidget, Ui_Form):
         pal.setColor(QPalette.Background, Qt.white)
         # self.setAutoFillBackground(True)
         self.setPalette(pal)
-        return
-
-    def _handleWndPos(self, read: bool):
-        if read:
-            winGeometry = appModel.readConfig(self.__class__.__name__, "winGeometry", None)
-            if winGeometry:
-                geo = QByteArray.fromBase64(bytes(winGeometry, "utf-8"))
-                self.restoreGeometry(geo)
-            else:
-                cp = QDesktopWidget().availableGeometry()
-                width = 1024
-                height = 768
-                x = (cp.width() - width) / 2
-                y = (cp.height() - height) / 2
-                self.setGeometry(int(x), int(y), int(width), int(height))
-                self.update()
-        else:
-            geo = self.saveGeometry()
-            geoStr = str(geo.toBase64().data(), encoding="utf-8")
-            appModel.saveConfig(self.__class__.__name__, "winGeometry", geoStr)
         return
 
     def _bindEvent(self):
@@ -257,7 +243,7 @@ class AndroidBoy(QWidget, Ui_Form):
                             "enableOutlookDetector", self._getViewByType(ViewOutlookDetector.__name__) is not None)
 
         self._removeAllTabViews()
-        self._handleWndPos(False)
+        QTHelper.handleWndPos(self, False)
 
         appModel.storeConfig()
         super(AndroidBoy, self).closeEvent(event)
@@ -325,7 +311,7 @@ class AndroidBoy(QWidget, Ui_Form):
                     view.openPictureData(fileData)
                 else:
                     continue
-                self._addTabView(view, uiTheme.iconLogFile, title)
+                self._addTabView(view, uiTheme.iconLogFile, title, path + "?" + subFileName)
         else:
             title = fileName
             if re.search(r".wbt$", path, flags=re.IGNORECASE):
@@ -344,10 +330,10 @@ class AndroidBoy(QWidget, Ui_Form):
             else:
                 Logger.e(appModel.getAppTag(), f"unknown file type: {path}")
                 return
-            self._addTabView(view, uiTheme.iconLogFile, title)
+            self._addTabView(view, uiTheme.iconLogFile, title, path)
         return
 
-    def _addTabView(self, view: QWidget, icon: QIcon, title: str):
+    def _addTabView(self, view: QWidget, icon: QIcon, title: str, viewPath: str):
         index = self.tabMain.count() - 1
         if index < 0:
             index = 0
@@ -361,6 +347,11 @@ class AndroidBoy(QWidget, Ui_Form):
         btClose.clicked.connect(partial(self._onTabClose, view))
         self.mTabBar.setTabButton(index, QTabBar.RightSide, btClose)
         btClose.hide()
+        if len(viewPath) == 0:
+            viewPath = title
+        viewPath = viewPath.replace(appModel.mAppPath, ".")
+        self.mViewPath[view] = viewPath
+        self.setWindowTitle(appModel.getAppName() + " - " + self.mViewPath[view])
         return view
 
     def _removeTabView(self, index):
@@ -370,6 +361,8 @@ class AndroidBoy(QWidget, Ui_Form):
             return
         view = self.tabMain.widget(index)
         view.close()
+        if view in self.mViewPath:
+            del self.mViewPath[view]
         self.tabMain.removeTab(index)
         if index-1 < 0:
             self.tabMain.setCurrentIndex(index)
@@ -381,6 +374,8 @@ class AndroidBoy(QWidget, Ui_Form):
         for index in range(0, self.tabMain.count()):
             view = self.tabMain.widget(index)
             view.close()
+            if view in self.mViewPath:
+                del self.mViewPath[view]
         self.tabMain.clear()
         return
 

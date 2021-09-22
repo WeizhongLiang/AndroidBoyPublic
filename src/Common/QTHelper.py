@@ -1,11 +1,12 @@
 from typing import cast
 
-from PyQt5.QtCore import QRect, QObject, QEvent, Qt
+from PyQt5.QtCore import QRect, QObject, QEvent, Qt, QByteArray
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QDesktopWidget, QWidget, QListWidget, QListWidgetItem, QLineEdit, QPushButton, QTabWidget
 
 from src.Common import SystemHelper
 from src.Common.UITheme import uiTheme
+from src.Model.AppModel import appModel
 
 
 def getCenterOf(width, height, parent: QWidget):
@@ -67,6 +68,27 @@ def switchMacUI(widget: QWidget):
     #     type = child.__class__.__name__
     #     if type == "QPushButton":
     #         pass
+    return
+
+
+def handleWndPos(wndObject: QObject, read: bool):
+    if read:
+        winGeometry = appModel.readConfig(wndObject.__class__.__name__, "winGeometry", None)
+        if winGeometry:
+            geo = QByteArray.fromBase64(bytes(winGeometry, "utf-8"))
+            wndObject.restoreGeometry(geo)
+        else:
+            cp = QDesktopWidget().availableGeometry()
+            width = 1024
+            height = 768
+            x = (cp.width() - width) / 2
+            y = (cp.height() - height) / 2
+            wndObject.setGeometry(int(x), int(y), int(width), int(height))
+            wndObject.update()
+    else:
+        geo = wndObject.saveGeometry()
+        geoStr = str(geo.toBase64().data(), encoding="utf-8")
+        appModel.saveConfig(wndObject.__class__.__name__, "winGeometry", geoStr)
     return
 
 

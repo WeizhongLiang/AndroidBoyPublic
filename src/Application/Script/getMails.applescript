@@ -27,7 +27,7 @@ on initParams(_fileName)
 			else if _indexParam = 5 then
 				set my _mailsFolder to ln
 			else if (count of ln) > 0 then
-				set my _refreshMailIDs's end to lns's item _indexParam
+				set end of my _refreshMailIDs to lns's item _indexParam
 			end if
 			set _indexParam to _indexParam + 1
 		end repeat
@@ -96,7 +96,7 @@ end removeFolder
 on removeFromList(_item, _list)
 	set _newList to {}
 	repeat with i from 1 to count _list
-		if _list's item i is not _item then set _newList's end to _list's item i
+		if _list's item i is not _item then set end of _newList to _list's item i
 	end repeat
 	return _newList
 end removeFromList

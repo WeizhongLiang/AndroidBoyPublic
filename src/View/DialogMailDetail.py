@@ -3,9 +3,9 @@ import re
 import zipfile
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import Qt, QByteArray, QObject
+from PyQt5.QtCore import Qt, QObject
 from PyQt5.QtGui import QKeyEvent
-from PyQt5.QtWidgets import QDialog, QListWidgetItem, QDesktopWidget
+from PyQt5.QtWidgets import QDialog, QListWidgetItem
 from src.Layout.dialogMailDetail import Ui_Dialog
 
 from src.Common import QTHelper, SystemHelper, FileUtility, Const
@@ -16,6 +16,7 @@ from src.Common.UITheme import uiTheme
 from src.Controller.OutlookCtrl import EmailItem
 from src.Controller.TicketEmailAnalyzer import DumpFileState
 from src.Model.AppModel import appModel
+from src.View.DialogNormalLogs import DialogNormalLogs
 from src.View.ViewDumpFile import ViewDumpFile
 from src.View.ViewPicture import ViewPicture
 from src.View.ViewWBXTraceFile import ViewWBXTraceFile
@@ -43,12 +44,13 @@ class DialogMailDetail(QDialog, Ui_Dialog):
 
         self.setWindowModality(Qt.ApplicationModal)
         self.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
-        self._handleWndPos(True)
+        QTHelper.handleWndPos(self, True)
         self._bindEvent()
         self.installEventFilter(self)
         self.cbType.installEventFilter(self)
         self.cbSummary.installEventFilter(self)
         self.cbAddition.installEventFilter(self)
+        self._mNormalLogsDialog = DialogNormalLogs(self)
 
         # self.ltErrors.setWordWrap(True)
 
@@ -80,7 +82,7 @@ class DialogMailDetail(QDialog, Ui_Dialog):
     def closeEvent(self, event):
         Logger.i(appModel.getAppTag(), "")
         self._saveSummary()
-        self._handleWndPos(False)
+        QTHelper.handleWndPos(self, False)
         ListForQLineEdit.closeInstance()
         return
 
@@ -99,26 +101,6 @@ class DialogMailDetail(QDialog, Ui_Dialog):
                     self._onNextMail()
 
         return super(DialogMailDetail, self).eventFilter(source, event)
-
-    def _handleWndPos(self, read: bool):
-        if read:
-            winGeometry = appModel.readConfig(self.__class__.__name__, "winGeometry", None)
-            if winGeometry:
-                geo = QByteArray.fromBase64(bytes(winGeometry, "utf-8"))
-                self.restoreGeometry(geo)
-            else:
-                cp = QDesktopWidget().availableGeometry()
-                width = 1024
-                height = 768
-                x = (cp.width() - width) / 2
-                y = (cp.height() - height) / 2
-                self.setGeometry(int(x), int(y), int(width), int(height))
-                self.update()
-        else:
-            geo = self.saveGeometry()
-            geoStr = str(geo.toBase64().data(), encoding="utf-8")
-            appModel.saveConfig(self.__class__.__name__, "winGeometry", geoStr)
-        return
 
     def _showEmailDetail(self):
         email: EmailItem = self.mTreeItem.mData
@@ -313,35 +295,8 @@ class DialogMailDetail(QDialog, Ui_Dialog):
         elif errorInfo[0] == _ErrorTypeInList.normal:
             # locate file line
             path = errorInfo[1]
-            if re.search(r".zip.*wbt$", path, flags=re.IGNORECASE):
-                fileName = path.split("?")[1]
-            else:
-                fileName = os.path.basename(path)
-
-            hasTabOpened = False
-            isWbtFile = re.search(r".wbt$", fileName, flags=re.IGNORECASE)
-            for i in range(0, self.tabAttachments.count()):
-                tabTitle = self.tabAttachments.tabText(i)
-                if '['+fileName + ']' == tabTitle or (not isWbtFile and fileName == tabTitle):
-                    view = self.tabAttachments.widget(i)
-                    self.tabAttachments.setCurrentWidget(view)
-                    hasTabOpened = True
-                    break
-
-            if not hasTabOpened and isWbtFile:
-                # open wbt file
-                path = errorInfo[1]
-                zipFilePath = path.split("?")[0]
-                wbxFileName = path.split("?")[1]
-                if re.search(r".zip$", zipFilePath, flags=re.IGNORECASE)\
-                        and re.search(r".wbt$", wbxFileName, flags=re.IGNORECASE):
-                    zipFile = zipfile.ZipFile(zipFilePath)
-                    fileData = zipFile.read(wbxFileName)
-                    view = ViewWBXTraceFile(self)
-                    view.openTraceData(fileData, view.DATA_WBT)
-                    newTab = self.tabAttachments.insertTab(self.tabAttachments.count(), view, '['+wbxFileName + ']')
-                    self.tabAttachments.setCurrentIndex(newTab)
-
+            self._mNormalLogsDialog.addFileView(path)
+            self._mNormalLogsDialog.show()
         return
 
     def _openAttachment(self, path):
