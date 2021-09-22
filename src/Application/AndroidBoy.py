@@ -28,6 +28,7 @@ from src.View.ViewPicture import ViewPicture
 from src.View.ViewWBXTraceFile import ViewWBXTraceFile
 from src.View.ViewDumpFile import ViewDumpFile
 from src.View.ViewTraceParser import ViewTraceParser
+from src.View.ViewJsonFormat import ViewJsonFormat
 
 
 class AndroidBoy(QWidget, Ui_Form):
