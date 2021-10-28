@@ -32,6 +32,7 @@ class ViewWBXTraceFile(QWidget, Ui_Form):
         self._mTraceDataType = self.DATA_NONE
         self._mWBXTracerFile: WBXTracerFile = WBXTracerFile(None)
         self._mLGFTracerFile = LogcatFile()
+        self.ckUsingRegx.setChecked(appModel.readConfig(self.__class__.__name__, f"FilterUsingRegx", False))
         self._mTracerWidget = WidgetTracerList(self, __class__.__name__, False)
         self.layoutTracer.addWidget(self._mTracerWidget)
         self._bindEvent()
@@ -125,6 +126,7 @@ class ViewWBXTraceFile(QWidget, Ui_Form):
         self.btPrevMark.clicked.connect(self._onPrevMark)
         self.btNextMark.clicked.connect(self._onNextMark)
         self.btFilter.clicked.connect(self._onFilterLogcat)
+        self.ckUsingRegx.clicked.connect(self._onFilterLogcat)
 
         self.editFilter.textChanged.connect(self._onEditorTextChanged)
         self.editFilter.returnPressed.connect(self._onFilterLogcat)
@@ -194,7 +196,7 @@ class ViewWBXTraceFile(QWidget, Ui_Form):
         curLogLevel = self.cbLogLevel.itemData(index)
         appModel.saveConfig(self.__class__.__name__, "selLogLevel", curLogLevel.name)
         Logger.i(appModel.getAppTag(), f"index={index}, logLevel={curLogLevel}")
-        self._mTracerWidget.setFilter(curLogLevel)
+        self._mTracerWidget.setFilter(logLevel=curLogLevel)
         return
 
     def _onClearLog(self):
@@ -250,6 +252,7 @@ class ViewWBXTraceFile(QWidget, Ui_Form):
         filterMsg = self.editFilter.text()
         appModel.addRecentInput(filterMsg)
         Logger.i(appModel.getAppTag(), f"filter {filterMsg} begin")
-        self._mTracerWidget.setFilter(logInclude=filterMsg)
+        self._mTracerWidget.setFilter(logInclude=filterMsg, usingRegx=self.ckUsingRegx.isChecked())
+        appModel.saveConfig(self.__class__.__name__, f"FilterUsingRegx", self.ckUsingRegx.isChecked())
         Logger.i(appModel.getAppTag(), f"filter {filterMsg} end")
         return

@@ -111,6 +111,7 @@ class WidgetTracerList(QWidget, Ui_Form):
         self._mFilterLogLevel = LoggerLevel.Verbose  # base filter
         self._mFilterLogInclude = ""
         self._mFilterLogExclude = ""
+        self._mFilterWithRegx = False
         self._mFilterMarkedOnly = False
 
         self._mAutoScrollToBottom = True
@@ -276,6 +277,7 @@ class WidgetTracerList(QWidget, Ui_Form):
         else:
             markedOnly = menu.addAction("Marked only")
             noMarkedOnly = None
+        self.setFocus()
         action = menu.exec_(self.mapToGlobal(event.pos()))
 
         if action is None:
@@ -437,17 +439,26 @@ class WidgetTracerList(QWidget, Ui_Form):
         Logger.i(appModel.getAppTag(), f"{self}, col={col}")
         return True
 
-    def setFilter(self, logLevel=None, logInclude=None, logExclude=None):
+    def setFilter(self, logLevel=None, logInclude=None, logExclude=None, usingRegx=None):
         if logLevel is None and logInclude is None and logExclude is None:
             return
 
         self._mTracesModelLock.acquire()
+        if usingRegx is None:
+            usingRegx = self._mFilterWithRegx
+        self._mFilterWithRegx = usingRegx
         if logLevel is not None:
             self._mFilterLogLevel = logLevel
         if logInclude is not None:
-            self._mFilterLogInclude = logInclude
+            if self._mFilterWithRegx:
+                self._mFilterLogInclude = logInclude
+            else:
+                self._mFilterLogInclude = logInclude.lower()
         if logExclude is not None:
-            self._mFilterLogExclude = logExclude
+            if self._mFilterWithRegx:
+                self._mFilterLogExclude = logExclude
+            else:
+                self._mFilterLogExclude = logExclude.lower()
         self._onFilterTraces(True)
         self._mTracesModelLock.release()
         return
@@ -871,8 +882,12 @@ class WidgetTracerList(QWidget, Ui_Form):
             trace.mVisual = trace.mMarked
             return
         # level or msg
-        hasFound = self._mFilterLogInclude.lower() in item.text().lower()
-        hasInTag = self._mFilterLogInclude.lower() in trace.mTag.lower()
+        if self._mFilterWithRegx:
+            hasFound = re.search(self._mFilterLogInclude, trace.getFullText(), flags=re.IGNORECASE)
+            hasInTag = False
+        else:
+            hasFound = self._mFilterLogInclude in item.text().lower()
+            hasInTag = self._mFilterLogInclude in trace.mTag.lower()
         if (not hasFound and not hasInTag) or trace.mLevel < self._mFilterLogLevel:
             trace.mVisual = False
         else:

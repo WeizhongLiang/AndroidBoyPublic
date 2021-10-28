@@ -39,6 +39,7 @@ class ViewLogcat(QWidget, Ui_Form):
         self.setupUi(self)
         QTHelper.switchMacUI(self)
 
+        self.ckUsingRegx.setChecked(appModel.readConfig(self.__class__.__name__, f"FilterUsingRegx", False))
         self._mTracerWidget = WidgetTracerList(self, __class__.__name__, True)
         self.layoutTracer.addWidget(self._mTracerWidget)
         self._mNotifyWidget = WidgetNotify(self)
@@ -111,6 +112,7 @@ class ViewLogcat(QWidget, Ui_Form):
         self.btNextMark.clicked.connect(self._onNextMark)
         self.btOpenLogFolder.clicked.connect(self._onBTOpenLogFolder)
         self.btFilter.clicked.connect(self._onFilterLogcat)
+        self.ckUsingRegx.clicked.connect(self._onFilterLogcat)
         self.btInstallAPK.clicked.connect(self._onBTInstallAPK)
         self.btPushText.clicked.connect(self._onBTPushText)
         self.btClipperText.clicked.connect(self._onBTClipperText)
@@ -247,7 +249,7 @@ class ViewLogcat(QWidget, Ui_Form):
         curLogLevel = self.cbLogLevel.itemData(index)
         appModel.saveConfig(self.__class__.__name__, "selLogLevel", curLogLevel.name)
         Logger.i(appModel.getAppTag(), f"index={index}, logLevel={curLogLevel}")
-        self._mTracerWidget.setFilter(curLogLevel)
+        self._mTracerWidget.setFilter(logLevel=curLogLevel)
         return
 
     def _onPreFilterLog(self, logItem: AndroidLogItem):
@@ -373,7 +375,8 @@ class ViewLogcat(QWidget, Ui_Form):
         filterMsg = self.editFilter.text()
         appModel.addRecentInput(filterMsg)
         Logger.i(appModel.getAppTag(), f"filter {filterMsg} begin")
-        self._mTracerWidget.setFilter(logInclude=filterMsg)
+        self._mTracerWidget.setFilter(logInclude=filterMsg, usingRegx=self.ckUsingRegx.isChecked())
+        appModel.saveConfig(self.__class__.__name__, f"FilterUsingRegx", self.ckUsingRegx.isChecked())
         Logger.i(appModel.getAppTag(), f"filter {filterMsg} end")
         return
 

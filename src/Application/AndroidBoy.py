@@ -252,6 +252,23 @@ class AndroidBoy(QWidget, Ui_Form):
     def dragEnterEvent(self, event: QDragEnterEvent):
         mime: QMimeData = event.mimeData()
         if not mime.hasUrls():
+            bas = mime.dynamicPropertyNames()
+            for by in bas:
+                Logger.i(appModel.getAppTag(), f"bytearray by={by}")
+
+            if mime.hasImage():
+                Logger.i(appModel.getAppTag(), f"mime.hasImage")
+            elif mime.hasHtml():
+                Logger.i(appModel.getAppTag(), f"mime.hasHtml")
+            elif mime.hasFormat("message/rfc822"):
+                Logger.i(appModel.getAppTag(), f"mime.has message/rfc822")
+            elif mime.hasFormat("FileGroupDescriptorW"):
+                Logger.i(appModel.getAppTag(), f"mime.has FileGroupDescriptorW")
+            elif mime.hasFormat("application/x-qt-windows-mime;value=\"FileGroupDescriptorW\""):
+                Logger.i(appModel.getAppTag(), f"application/x-qt-windows-mime;value=\"FileGroupDescriptorW\"")
+            else:
+                Logger.i(appModel.getAppTag(), f"mime Cannot display data")
+            event.ignore()
             return
         for url in mime.urls():
             path = url.toLocalFile()
