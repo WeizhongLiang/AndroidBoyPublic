@@ -31,8 +31,8 @@ src
 
 2. This App relies  on the following packages:
   psutil
-  PyQt5
-  PyQt5-stubs
+  PyQt6
+  PyQt6-stubs
   requests
   pyperclip
   colorama
@@ -60,7 +60,8 @@ Add qt designer:
 "Setting" -> "Tools" -> "External Tools" -> "+"
 	Name: QtDesigner
 	Description: Open in qt designer
-	Program: $PyInterpreterDirectory$\Scripts\designer.exe
+	Program(Windows): $PyInterpreterDirectory$\Scripts\designer.exe
+	Program(Mac): /Applications/Qt Designer.app
 	Arguments: $FileDir$\$FileNameWithoutExtension$.ui
 	Working directory: $ProjectFileDir$
 "Setting" -> "Appearance & Behavior" -> "Menus and Toolbars"
@@ -71,8 +72,10 @@ Add qt ui convert:
 "Setting" -> "Tools" -> "External Tools" -> "+"
 	Name: Qt ui2py
 	Description: Convert ui files to py
-	Program: $PyInterpreterDirectory$\python
-	Arguments: $ProjectFileDir$\Qt_ui2py.py $ProjectFileDir$ $PyInterpreterDirectory$
+	Program(Windows): $PyInterpreterDirectory$\python
+	Arguments(Windows): $ProjectFileDir$\Qt_ui2py.py $ProjectFileDir$ $PyInterpreterDirectory$
+	Program(Mac): $ModuleSdkPath$
+	Arguments(Mac): $ProjectFileDir$/Qt_ui2py.py $ProjectFileDir$ 
 	Working directory: $ProjectFileDir$
 "Setting" -> "Appearance & Behavior" -> "Menus and Toolbars"
 	"Navigation Bar Toolbar" -> "CodeWithMeNavbarGroup" -> "+" -> "Add Action..."

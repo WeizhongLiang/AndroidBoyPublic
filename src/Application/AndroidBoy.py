@@ -252,10 +252,15 @@ class AndroidBoy(QWidget, Ui_Form):
     def dragEnterEvent(self, event: QDragEnterEvent):
         mime: QMimeData = event.mimeData()
         if not mime.hasUrls():
-            for fmt in mime.formats():
-                content: QByteArray = mime.data(fmt)
-                Logger.i(appModel.getAppTag(), f"  {fmt} data len = {len(content)}")
-            event.ignore()
+            fmts = mime.formats()
+            if len(fmts) == 0:
+                Logger.i(appModel.getAppTag(), f"No format data.")
+                event.accept()
+            else:
+                for fmt in mime.formats():
+                    content: QByteArray = mime.data(fmt)
+                    Logger.i(appModel.getAppTag(), f"  {fmt} data len = {len(content)}")
+                event.ignore()
             return
         for url in mime.urls():
             path = url.toLocalFile()

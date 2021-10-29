@@ -1,5 +1,6 @@
 import os
 import sys
+import sysconfig
 
 
 def printSystem(cmdStr: str) -> int:
@@ -9,14 +10,21 @@ def printSystem(cmdStr: str) -> int:
     return systemRet
 
 
+print("sys.argv=" + sys.argv.__str__())
+pythonDir = sysconfig.get_config_vars("prefix")[0]
 if len(sys.argv) < 2:
-    print("call me like: BaseDir PythonDir")
+    print("call me like: BaseDir")
     exit()
+else:
+    pythonDir = sys.argv[2]
 
 baseDir = sys.argv[1]
-pythonDir = sys.argv[2]
-pyuic = os.path.join(pythonDir, "Scripts", "pyuic5")
-pyrcc = os.path.join(pythonDir, "Scripts", "pyrcc5")
+if sys.platform == "win32":
+    pyuic = os.path.join(pythonDir, "Scripts", "pyuic5")
+    pyrcc = os.path.join(pythonDir, "Scripts", "pyrcc5")
+else:
+    pyuic = os.path.join(pythonDir, "bin", "pyuic5")
+    pyrcc = os.path.join(pythonDir, "bin", "pyrcc5")
 layoutDir = os.path.join(baseDir, "src", "Layout")
 
 print(f"pyuic = {pyuic}")
@@ -49,5 +57,3 @@ if uiFailedCount > 0 or rcFailedCount > 0:
     print(f"Convert rc success: {rcSuccessCount}, failed: {rcFailedCount}")
 else:
     print(f"Success convert ui: {uiSuccessCount}, rc: {rcSuccessCount}")
-
-
