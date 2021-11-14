@@ -33,6 +33,15 @@ def showLayout(layout, show):
     return
 
 
+def setEditorReadOnly(editor, readOnly: bool):
+    if readOnly:
+        editor.setReadOnly(True)
+        editor.setStyleSheet("color: grey")
+    else:
+        editor.setReadOnly(False)
+        editor.setStyleSheet("color: black")
+
+
 def enableLayout(layout, enable):
     for i in range(layout.count()):
         child = layout.itemAt(i)

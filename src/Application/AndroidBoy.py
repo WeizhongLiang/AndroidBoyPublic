@@ -12,13 +12,15 @@ from PyQt5.QtGui import QMouseEvent, QPalette, QDragEnterEvent, QContextMenuEven
     QKeyEvent
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMenu, QTabBar, QPushButton, QLineEdit
 
-from src.Common import QTHelper
+from src.Common import QTHelper, SystemHelper
 from src.Common.Logger import *
 from src.Common.SystemHelper import SelfProcessInfo
 from src.Common.UITheme import uiTheme
 from src.Model.AppModel import appModel
 
 from src.Layout.androidBoy import Ui_Form
+
+from src.View.ViewCCTGManager import ViewCCTGManager
 from src.View.ViewLogcat import ViewLogcat
 from src.View.ViewADBCommands import ViewADBCommands
 from src.View.ViewOutlookDetector import ViewOutlookDetector
@@ -55,6 +57,7 @@ class AndroidBoy(QWidget, Ui_Form):
         self.tabMain.addTab(viewLogo, "+")
         self.mLastHoverIndex = -1
 
+        self._addTabView(ViewCCTGManager(self), uiTheme.iconLogcat, "CCTGManager", "")
         if appModel.readConfig(self.__class__.__name__, "enableLogcatView", False):
             self._addTabView(ViewLogcat(self), uiTheme.iconLogcat, "LogcatView", "")
         if appModel.readConfig(self.__class__.__name__, "enableADBCommandsView", False):
@@ -165,6 +168,12 @@ class AndroidBoy(QWidget, Ui_Form):
         actionADBLogcat = menu.addAction(uiTheme.iconLogcat, "ADB Logcat")
         actionADBCommand = menu.addAction(uiTheme.iconCommand, "ADB Command")
         actionTracerParser = menu.addAction(uiTheme.iconLogFile, "Trace Parser")
+
+        menuFolder = menu.addMenu(uiTheme.iconFolder, "Folders")
+        actionAssetsFolder = menuFolder.addAction(uiTheme.iconFolder, "Assets Folder")
+        actionLogsFolder = menuFolder.addAction(uiTheme.iconFolder, "Log Folder")
+        actionOutlookFolder = menuFolder.addAction(uiTheme.iconFolder, "Outlook Detector Folder")
+        actionSymbolsFolder = menuFolder.addAction(uiTheme.iconFolder, "Symbols Folder")
         action = menu.exec_(event.pos())
 
         view = None
@@ -192,6 +201,18 @@ class AndroidBoy(QWidget, Ui_Form):
             view = self._getViewByType(ViewTraceParser.__name__)
             if view is None:
                 self._addTabView(ViewTraceParser(self), uiTheme.iconLogcat, "Trace Parser", "")
+        elif action == actionAssetsFolder:
+            SystemHelper.openAtExplorer(appModel.mAssetsPath)
+            return
+        elif action == actionLogsFolder:
+            SystemHelper.openAtExplorer(appModel.getDefaultLogFolder())
+            return
+        elif action == actionOutlookFolder:
+            SystemHelper.openAtExplorer(ViewOutlookDetector.sLocalFolderBase)
+            return
+        elif action == actionSymbolsFolder:
+            SystemHelper.openAtExplorer(ViewOutlookDetector.sSymbolFolderBase)
+            return
         if view is not None:
             self.tabMain.setCurrentWidget(view)
         return

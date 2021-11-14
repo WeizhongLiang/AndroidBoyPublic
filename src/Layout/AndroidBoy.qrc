@@ -1,5 +1,15 @@
 <RCC>
   <qresource prefix="icon">
+    <file>icons/ie_logo.svg</file>
+    <file>icons/mapping_file.svg</file>
+    <file>icons/symbol_file.svg</file>
+    <file>icons/tools.svg</file>
+    <file>icons/apk_file.svg</file>
+    <file>icons/state_error.svg</file>
+    <file>icons/state_not_exist.svg</file>
+    <file>icons/state_ready.svg</file>
+    <file>icons/state_running.svg</file>
+    <file>icons/state_stop.svg</file>
     <file>icons/excel_export.svg</file>
     <file>icons/excel_import.svg</file>
     <file>icons/zoom_in.svg</file>

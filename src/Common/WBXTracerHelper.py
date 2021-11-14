@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from typing import Tuple
 
 from Crypto.Cipher import AES
 
@@ -9,6 +10,18 @@ from src.Common.StructPointer import StructPointer
 from src.Model.AppModel import appModel
 
 _AndroidTimezone = FileUtility.loadJsonFile(os.path.join(appModel.mAssetsPath, "AndroidTimezone.json"))
+_JAVAException = "Uncaught exception!!!"
+
+
+def getMappingFileFolder() -> str:
+    return os.path.join(appModel.mAssetsPath, "WebexSymbols")
+
+
+def checkMappingFile(appVersion: str, fileName: str) -> Tuple[bool, str]:
+    folder = getMappingFileFolder()
+    mappingFilePath = os.path.join(folder, appVersion, fileName)
+    mappingFileExist = os.path.exists(mappingFilePath)
+    return mappingFileExist, mappingFilePath
 
 
 def cryptoSimple(cryptoData: memoryview):
@@ -207,6 +220,7 @@ class WBXTracerFile:
         self._mHeader = None
         self.appInfo = {}
         self._mMappingFilePath = ""
+        self._mHasMappingFile = False
         if pathOrData is None:
             return
         if isPath:
@@ -246,16 +260,18 @@ class WBXTracerFile:
             for defValue in defs:
                 pair = defValue.split("=")
                 self.appInfo[pair[0].rstrip()] = pair[1].lstrip()
-            self._mMappingFilePath = os.path.join(
-                appModel.mAssetsPath, "WebexSymbols", self.appInfo["Application version"], "mapping.txt")
-            if not os.path.exists(self._mMappingFilePath):
-                self._mMappingFilePath = ""
+            self._mHasMappingFile, self._mMappingFilePath = checkMappingFile(
+                self.appInfo["Application version"], "mapping.txt")
             if "TIMEZONE.ID" in self.appInfo:
                 zoneID = self.appInfo["TIMEZONE.ID"].replace("/", "_")
                 if zoneID in _AndroidTimezone:
                     self.appInfo["TIMEZONE.OFFSET"] = _AndroidTimezone[zoneID]
                 else:
                     self.appInfo["TIMEZONE.OFFSET"] = 0
+            if self._mHasMappingFile:
+                Logger.i(appModel.getAppTag(), f"open file with mapping: {self._mMappingFilePath}")
+            else:
+                Logger.w(appModel.getAppTag(), f"open file without mapping: {self._mMappingFilePath}")
         return False
 
     @staticmethod
@@ -339,8 +355,8 @@ class WBXTracerFile:
                 item = WBXTraceItemV3(itemData, curPosInData, itemCount, endian)
                 if item.size() <= 0:
                     break
-                if len(self._mMappingFilePath) > 0:
-                    if "Uncaught exception!!!" in item.mMessage:
+                if self._mHasMappingFile:
+                    if _JAVAException in item.mMessage:
                         item.mMessage = JavaMappingHelper.translateTrace(self._mMappingFilePath, item.mMessage)
                 if onTrace is not None:
                     if not onTrace(item, param):

@@ -230,7 +230,7 @@ class ViewWBXTraceFile(QWidget, Ui_Form):
             cols[3] = setting.showTID()
             cols[4] = setting.showLevel()
             cols[5] = setting.showTag()
-        tracerWidget.setColsVisual(cols)
+            tracerWidget.setColsVisual(cols)
         return
 
     def _onMark(self):
