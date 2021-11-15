@@ -123,6 +123,10 @@
     "<serv:exceptionID>060034<": [
       "invalid password",
       "join meeting"
+    ],
+    "errNo=31000": [
+      "get meeting list failed",
+      "in meeting"
     ]
   }
 }

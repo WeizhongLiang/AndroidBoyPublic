@@ -76,6 +76,9 @@ class AppModel:
         else:
             return folder
 
+    def getWebexSymbolsFolder(self):
+        return self.getAppAbsolutePath(self.mAssetsPath, ["WebexSymbols"], "")
+
     def getSrcFile(self, name):
         FileUtility.makeFolder(self.mSrcPath)
         return os.path.join(self.mSrcPath, name)

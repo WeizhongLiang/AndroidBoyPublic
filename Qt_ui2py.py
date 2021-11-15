@@ -15,7 +15,7 @@ pythonDir = sysconfig.get_config_vars("prefix")[0]
 if len(sys.argv) < 2:
     print("call me like: BaseDir")
     exit()
-else:
+elif len(sys.argv) > 2:
     pythonDir = sys.argv[2]
 
 baseDir = sys.argv[1]

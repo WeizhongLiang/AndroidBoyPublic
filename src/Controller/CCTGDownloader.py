@@ -20,6 +20,7 @@ class RequestState(IntEnum):
     needAuthorization = 3
     progress = 4
     httpCode = 5
+    cancel = 6
 
 
 class CCTGDownloader:
@@ -113,7 +114,7 @@ class CCTGDownloader:
         else:
             return "", ""
 
-    def _download(self, targetUrl: str, localPath: str):
+    def startDownload(self, targetUrl: str, localPath: str):
         self._mDownloadUrl = targetUrl
         self._mLocalPath = localPath
         try:
@@ -155,6 +156,11 @@ class CCTGDownloader:
         downloaded = 0
         fSave = open(localPath, "wb")
         for data in response.iter_content(chunk_size=40960):
+            if self._mState == RequestState.cancel:
+                Logger.i(appModel.getAppTag(), f"request has been canceled: downloaded={downloaded}/{totalLength}")
+                self._setState(RequestState.cancel, response)
+                return True
+
             fSave.write(data)
             downloaded += len(data)
             self._mProgress = downloaded
@@ -166,13 +172,17 @@ class CCTGDownloader:
         self._setState(RequestState.succeed, response)
         return True
 
+    def stopDownload(self):
+        self._setState(RequestState.cancel, Response())
+        return
+
     def _downloadAPK(self, urlBase: str, suffix: str, release: str, localPath: str) -> bool:
         fileName = f"mc-{release}-{suffix}.apk"
         targetUrl = f"{urlBase}{fileName}"
         if localPath is None or len(localPath) == 0:
             localPath = os.path.join(self._mSaveDir, fileName)
         Logger.i(appModel.getAppTag(), f"start save {targetUrl} to {localPath}")
-        return self._download(targetUrl, localPath)
+        return self.startDownload(targetUrl, localPath)
 
     def _downloadSymbol(self, urlBase: str, suffix: str, release: str, localPath: str) -> bool:
         fileName = f"symbol-{release}-{suffix}.tar"
@@ -180,7 +190,7 @@ class CCTGDownloader:
         if localPath is None or len(localPath) == 0:
             localPath = os.path.join(self._mSaveDir, fileName)
         Logger.i(appModel.getAppTag(), f"start save {targetUrl} to {localPath}")
-        return self._download(targetUrl, localPath)
+        return self.startDownload(targetUrl, localPath)
 
     def _downloadMapping(self, urlBase: str, suffix: str, release: str, localPath: str) -> bool:
         mappingSuffix = '-'.join(suffix.rsplit('.', 1))
@@ -189,7 +199,7 @@ class CCTGDownloader:
         if localPath is None or len(localPath) == 0:
             localPath = os.path.join(self._mSaveDir, fileName)
         Logger.i(appModel.getAppTag(), f"start save {targetUrl} to {localPath}")
-        return self._download(targetUrl, localPath)
+        return self.startDownload(targetUrl, localPath)
 
     def getMasterAPK(self, version: str, isRelease: bool, localPath: str) -> bool:
         urlDir, suffix = self._getMasterURL(version)

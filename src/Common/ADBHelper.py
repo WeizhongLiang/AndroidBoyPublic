@@ -21,21 +21,19 @@ def adbReturn(deviceId, params: str, needLog=False):
     if deviceId is not None:
         shellParams.insert(1, "-s")
         shellParams.insert(2, deviceId)
-    _adbLock.acquire()
-    try:
-        if needLog:
-            Logger.i(appModel.getAppTag(), f"shellParams={shellParams}")
-        ret = subprocess.check_output(shellParams)
-        if ret is not None:
-            ret = ret.decode("utf-8").rstrip(os.linesep)
-        else:
-            ret = ""
-        _adbLock.release()
-        return ret
-    except Exception as e:
-        _adbLock.release()
-        Logger.i(appModel.getAppTag(), f"shellParams={shellParams}, exception={e}")
-        return ""
+    with _adbLock:
+        try:
+            if needLog:
+                Logger.i(appModel.getAppTag(), f"shellParams={shellParams}")
+            ret = subprocess.check_output(shellParams)
+            if ret is not None:
+                ret = ret.decode("utf-8").rstrip(os.linesep)
+            else:
+                ret = ""
+            return ret
+        except Exception as e:
+            Logger.i(appModel.getAppTag(), f"shellParams={shellParams}, exception={e}")
+            return ""
 
 
 class AndroidLogItem:
@@ -351,34 +349,30 @@ class AndroidDeviceManager:
 
     def detectConnect(self, connectListener):
         Logger.i(appModel.getAppTag(), "begin")
-        self._mLockerDetect.acquire()
-        self._mConnectListener = connectListener
-        self._mConnectPrev = []
-        self._onDetectHandler()     # do first
-        self._mLockerDetect.release()
+        with self._mLockerDetect:
+            self._mConnectListener = connectListener
+            self._mConnectPrev = []
+            self._onDetectHandler()     # do first
         Logger.i(appModel.getAppTag(), "end")
         return
 
     def detectProcess(self, deviceID, packageID, processListener):
         Logger.i(appModel.getAppTag(), "begin")
-        self._mLockerDetect.acquire()
-        self._mProcessListener = processListener
-        self._mProcessDeviceID = deviceID
-        self._mProcessPackageID = packageID
-        self._mProcessPrev = []
-        self._mLockerDetect.release()
+        with self._mLockerDetect:
+            self._mProcessListener = processListener
+            self._mProcessDeviceID = deviceID
+            self._mProcessPackageID = packageID
+            self._mProcessPrev = []
         Logger.i(appModel.getAppTag(), "end")
         return
 
     def _onDetectHandler(self):
         # Logger.i(appModel.getAppTag(), "begin")
-        self._mLockerDetect.acquire()
         if self._mConnectListener is not None:
             self._onDetectConnect()
         if self._mProcessListener is not None:
             self._onDetectProcess()
         self._mTimerCount += 1
-        self._mLockerDetect.release()
         # Logger.i(appModel.getAppTag(), "end")
         return
 
@@ -395,12 +389,13 @@ class AndroidDeviceManager:
                 if lineWords is not None and lineWords[1] == "device":
                     getDevIds.append(lineWords[0])
 
-        added, removed = MathUtility.getDiffInLists(self._mConnectPrev, getDevIds)
-        if len(added) == 0 and len(removed) == 0:
-            return
-        if self._mConnectListener is not None:
-            self._mConnectListener(added, removed)
-        self._mConnectPrev = getDevIds
+        with self._mLockerDetect:
+            added, removed = MathUtility.getDiffInLists(self._mConnectPrev, getDevIds)
+            if len(added) == 0 and len(removed) == 0:
+                return
+            if self._mConnectListener is not None:
+                self._mConnectListener(added, removed)
+            self._mConnectPrev = getDevIds
         return
 
     def _onDetectProcess(self):
@@ -414,10 +409,11 @@ class AndroidDeviceManager:
         for lineText in cmdReturn[1:]:
             getProcessIds.append(lineText)
 
-        added, removed = MathUtility.getDiffInLists(self._mProcessPrev, getProcessIds)
-        if len(added) == 0 and len(removed) == 0:
-            return
-        if self._mProcessListener is not None:
-            self._mProcessListener(added, removed)
-        self._mProcessPrev = getProcessIds
+        with self._mLockerDetect:
+            added, removed = MathUtility.getDiffInLists(self._mProcessPrev, getProcessIds)
+            if len(added) == 0 and len(removed) == 0:
+                return
+            if self._mProcessListener is not None:
+                self._mProcessListener(added, removed)
+            self._mProcessPrev = getProcessIds
         return

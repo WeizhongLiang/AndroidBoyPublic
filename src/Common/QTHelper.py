@@ -2,7 +2,8 @@ from typing import cast
 
 from PyQt5.QtCore import QRect, QObject, QEvent, Qt, QByteArray
 from PyQt5.QtGui import QKeyEvent
-from PyQt5.QtWidgets import QDesktopWidget, QWidget, QListWidget, QListWidgetItem, QLineEdit, QPushButton, QTabWidget
+from PyQt5.QtWidgets import QDesktopWidget, QWidget, QListWidget, QListWidgetItem, QLineEdit, QPushButton, QTabWidget, \
+    QTreeWidget
 
 from src.Common import SystemHelper
 from src.Common.UITheme import uiTheme
@@ -99,6 +100,20 @@ def handleWndPos(wndObject: QObject, read: bool):
         geoStr = str(geo.toBase64().data(), encoding="utf-8")
         appModel.saveConfig(wndObject.__class__.__name__, "winGeometry", geoStr)
     return
+
+
+def getAllTreeItems(treeWidget: QTreeWidget):
+    def getSubtreeNodes(treeWidgetItem):
+        nodes = [treeWidgetItem]
+        for childIndex in range(treeWidgetItem.childCount()):
+            nodes.extend(getSubtreeNodes(treeWidgetItem.child(childIndex)))
+        return nodes
+
+    allItems = []
+    for topIndex in range(treeWidget.topLevelItemCount()):
+        topItem = treeWidget.topLevelItem(topIndex)
+        allItems.extend(getSubtreeNodes(topItem))
+    return allItems
 
 
 class ListForQLineEdit(QListWidget):

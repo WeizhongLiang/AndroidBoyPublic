@@ -331,15 +331,14 @@ class WidgetTracerList(QWidget, Ui_Form):
 
     def clearLog(self, clearLines=True):
         Logger.i(appModel.getAppTag(), "")
-        self._mTracesModelLock.acquire()
-        self.listTrace.clear()
-        self._mLastReadLine = 0
-        self._mLastFilterRow = 0
-        self._mVisualCount = 0
-        if clearLines:
-            self._mAllTraceLines = []
-        self.lbStatus.clear()
-        self._mTracesModelLock.release()
+        with self._mTracesModelLock:
+            self.listTrace.clear()
+            self._mLastReadLine = 0
+            self._mLastFilterRow = 0
+            self._mVisualCount = 0
+            if clearLines:
+                self._mAllTraceLines = []
+            self.lbStatus.clear()
         return
 
     def _onDoubleClickLog(self, QModelIndex):
@@ -443,24 +442,23 @@ class WidgetTracerList(QWidget, Ui_Form):
         if logLevel is None and logInclude is None and logExclude is None:
             return
 
-        self._mTracesModelLock.acquire()
-        if usingRegx is None:
-            usingRegx = self._mFilterWithRegx
-        self._mFilterWithRegx = usingRegx
-        if logLevel is not None:
-            self._mFilterLogLevel = logLevel
-        if logInclude is not None:
-            if self._mFilterWithRegx:
-                self._mFilterLogInclude = logInclude
-            else:
-                self._mFilterLogInclude = logInclude.lower()
-        if logExclude is not None:
-            if self._mFilterWithRegx:
-                self._mFilterLogExclude = logExclude
-            else:
-                self._mFilterLogExclude = logExclude.lower()
-        self._onFilterTraces(True)
-        self._mTracesModelLock.release()
+        with self._mTracesModelLock:
+            if usingRegx is None:
+                usingRegx = self._mFilterWithRegx
+            self._mFilterWithRegx = usingRegx
+            if logLevel is not None:
+                self._mFilterLogLevel = logLevel
+            if logInclude is not None:
+                if self._mFilterWithRegx:
+                    self._mFilterLogInclude = logInclude
+                else:
+                    self._mFilterLogInclude = logInclude.lower()
+            if logExclude is not None:
+                if self._mFilterWithRegx:
+                    self._mFilterLogExclude = logExclude
+                else:
+                    self._mFilterLogExclude = logExclude.lower()
+            self._onFilterTraces(True)
         return
 
     def _onEditorTextChanged(self, newText):
@@ -594,13 +592,12 @@ class WidgetTracerList(QWidget, Ui_Form):
         return
 
     def clearMark(self):
-        self._mTracesModelLock.acquire()
-        procTime = DateTimeHelper.ProcessTime()
-        count = self.listTrace.count()
-        for row in range(0, count):
-            trace: TracerLine = self.listTrace.item(row).data(Qt.UserRole)
-            trace.mMarked = False
-        self._mTracesModelLock.release()
+        with self._mTracesModelLock:
+            procTime = DateTimeHelper.ProcessTime()
+            count = self.listTrace.count()
+            for row in range(0, count):
+                trace: TracerLine = self.listTrace.item(row).data(Qt.UserRole)
+                trace.mMarked = False
         Logger.i(appModel.getAppTag(),
                  f"end with {count} "
                  f"in {procTime.getMicroseconds()} seconds ")

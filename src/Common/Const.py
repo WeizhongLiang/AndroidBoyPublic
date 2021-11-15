@@ -10,6 +10,7 @@ maxRecentCommands = 20
 isDebugMode = sys.gettrace() is not None
 
 apkFileSuffix = "*.apk"
+mappingFileSuffix = "*.txt"
 logFileSuffix = "*.txt *.wbt *.lgf *.dmp"
 logFileRegular = r".txt|.wbt|.lgf|.dmp"
 zipFileSuffix = "*.zip"

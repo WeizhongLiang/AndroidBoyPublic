@@ -13,12 +13,8 @@ _AndroidTimezone = FileUtility.loadJsonFile(os.path.join(appModel.mAssetsPath, "
 _JAVAException = "Uncaught exception!!!"
 
 
-def getMappingFileFolder() -> str:
-    return os.path.join(appModel.mAssetsPath, "WebexSymbols")
-
-
 def checkMappingFile(appVersion: str, fileName: str) -> Tuple[bool, str]:
-    folder = getMappingFileFolder()
+    folder = appModel.getWebexSymbolsFolder()
     mappingFilePath = os.path.join(folder, appVersion, fileName)
     mappingFileExist = os.path.exists(mappingFilePath)
     return mappingFileExist, mappingFilePath

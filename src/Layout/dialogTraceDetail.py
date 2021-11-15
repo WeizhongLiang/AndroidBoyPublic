@@ -32,6 +32,16 @@ class Ui_Dialog(object):
         self.tbMessage.setReadOnly(True)
         self.tbMessage.setObjectName("tbMessage")
         self.verticalLayout.addWidget(self.tbMessage)
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_2.setContentsMargins(5, 5, 5, 5)
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.tbMappingPath = QtWidgets.QLineEdit(Dialog)
+        self.tbMappingPath.setObjectName("tbMappingPath")
+        self.horizontalLayout_2.addWidget(self.tbMappingPath)
+        self.btMappingPath = QtWidgets.QPushButton(Dialog)
+        self.btMappingPath.setObjectName("btMappingPath")
+        self.horizontalLayout_2.addWidget(self.btMappingPath)
+        self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.btOK = QtWidgets.QPushButton(Dialog)
@@ -55,6 +65,7 @@ class Ui_Dialog(object):
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Trace detail"))
+        self.btMappingPath.setText(_translate("Dialog", "Browser"))
         self.btOK.setText(_translate("Dialog", "OK"))
         self.btCopy.setText(_translate("Dialog", "Copy"))
 import AndroidBoy_rc

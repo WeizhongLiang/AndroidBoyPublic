@@ -112,7 +112,7 @@ class ViewOutlookDetector(QWidget, Ui_Form):
     sEventOutlookState = QtCore.pyqtSignal(ActionType, int, int, object)  # state: sEventOutlookState
 
     sLocalFolderBase = appModel.getAppAbsolutePath(appModel.mAssetsPath, ["OutlookDetector"], "")
-    sSymbolFolderBase = appModel.getAppAbsolutePath(appModel.mAssetsPath, ["WebexSymbols"], "")
+    sSymbolFolderBase = appModel.getWebexSymbolsFolder()
     OutlookCtrl.sLocalFolderBase = sLocalFolderBase
     MailAnalyzer.sBaseSymbolFolder = sSymbolFolderBase
 

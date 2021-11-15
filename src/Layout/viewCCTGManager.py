@@ -14,12 +14,13 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(400, 300)
+        Form.resize(602, 529)
         self.gridLayout = QtWidgets.QGridLayout(Form)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.gridLayout.setSpacing(0)
         self.gridLayout.setObjectName("gridLayout")
         self.verticalLayout = QtWidgets.QVBoxLayout()
+        self.verticalLayout.setContentsMargins(2, 2, 2, 2)
         self.verticalLayout.setObjectName("verticalLayout")
         self._treeTasks = QtWidgets.QTreeWidget(Form)
         self._treeTasks.setObjectName("_treeTasks")
@@ -71,6 +72,8 @@ class Ui_Form(object):
         self._btClear.setIcon(icon2)
         self._btClear.setObjectName("_btClear")
         self.horizontalLayout.addWidget(self._btClear)
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
 

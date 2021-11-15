@@ -2,9 +2,9 @@ import os
 
 import pyperclip
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog
+from PyQt5.QtWidgets import QDialog, QFileDialog
 
-from src.Common import Const
+from src.Common import Const, JavaMappingHelper
 from src.Common.Logger import Logger
 from src.Layout.dialogTraceDetail import Ui_Dialog
 from src.Model.AppModel import appModel
@@ -18,6 +18,7 @@ class DialogTraceDetail(QDialog, Ui_Dialog):
 
         self.btOK.clicked.connect(lambda: self.done(Const.EXIT_OK))
         self.btCopy.clicked.connect(self.onCopy)
+        self.btMappingPath.clicked.connect(self.onMappingPath)
         self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
         return
 
@@ -35,4 +36,27 @@ class DialogTraceDetail(QDialog, Ui_Dialog):
     def onCopy(self):
         message = self.tbMessage.toPlainText()
         pyperclip.copy(message)
+        return
+
+    def onMappingPath(self):
+        title = "Select mapping file"
+        startDir = appModel.mAssetsPath
+        typeFilter = f"All Files ({Const.mappingFileSuffix})"
+        typeFilter += f";;Mapping Files ({Const.mappingFileSuffix})"
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        mappingFile, _ = QFileDialog.getOpenFileName(self,
+                                                     caption=title,
+                                                     directory=startDir,
+                                                     filter=typeFilter,
+                                                     options=options)
+
+        if len(mappingFile) == 0:
+            return
+
+        self.tbMappingPath.setText(mappingFile)
+        message = self.tbMessage.toPlainText()
+        if "Uncaught exception!!!" in message:
+            message = JavaMappingHelper.translateTrace(mappingFile, message)
+            self.tbMessage.setText(message)
         return

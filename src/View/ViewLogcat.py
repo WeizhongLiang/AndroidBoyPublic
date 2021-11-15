@@ -235,9 +235,8 @@ class ViewLogcat(QWidget, Ui_Form):
         Logger.i(appModel.getAppTag(), f"index={index}, process={curProcess}")
         appModel.saveConfig(self.__class__.__name__, "selProcess", curProcess.mNAME)
 
-        self._mLogcatFileLock.acquire()
-        self._mLogcatFile.writePIDName(curProcess.mPID, curProcess.mNAME)
-        self._mLogcatFileLock.release()
+        with self._mLogcatFileLock:
+            self._mLogcatFile.writePIDName(curProcess.mPID, curProcess.mNAME)
         self._mPreFilterPID = curProcess.mPID
         self._mPreFilterCount = 0
         return
@@ -264,17 +263,16 @@ class ViewLogcat(QWidget, Ui_Form):
             return False
 
     def _onLogcat(self, logItems: [AndroidLogItem]):
-        self._mLogcatFileLock.acquire()
-        for logItem in logItems:
-            timeStr = logItem.getDateTimeStr()
-            pid = logItem.getPID()
-            tid = logItem.getTID()
-            level = logItem.getLogLevel()
-            tag = logItem.getTag()
-            message = logItem.getMsg()
-            self._mLogcatFile.writeTraces(logItem.getFull())
-            self._mTracerWidget.addTrace(-1, timeStr, pid, tid, level, tag, message)
-        self._mLogcatFileLock.release()
+        with self._mLogcatFileLock:
+            for logItem in logItems:
+                timeStr = logItem.getDateTimeStr()
+                pid = logItem.getPID()
+                tid = logItem.getTID()
+                level = logItem.getLogLevel()
+                tag = logItem.getTag()
+                message = logItem.getMsg()
+                self._mLogcatFile.writeTraces(logItem.getFull())
+                self._mTracerWidget.addTrace(-1, timeStr, pid, tid, level, tag, message)
         return
 
     def _onStartLogcat(self):
@@ -299,20 +297,19 @@ class ViewLogcat(QWidget, Ui_Form):
         return
 
     def _onSaveToFile(self):
-        self._mLogcatFileLock.acquire()
-        if self.btSaveToFile.isChecked():
-            logcatPath = appModel.getLogcatFile("")
-            self._mLogcatFile.createFile(logcatPath, "utf-8")
-            if len(logcatPath) > 0:
-                self._mNotifyWidget.notify(f"Write log into file:{logcatPath}", 2)
-        else:
-            logcatPath, traceCount = self._mLogcatFile.closeWrite()
-            if len(logcatPath) > 0:
-                if traceCount > 0:
-                    self._mNotifyWidget.notify(f"Saved to file:{logcatPath}", 2)
-                else:
-                    self._mNotifyWidget.notify(f"No record was saved to file:{logcatPath}", 2)
-        self._mLogcatFileLock.release()
+        with self._mLogcatFileLock:
+            if self.btSaveToFile.isChecked():
+                logcatPath = appModel.getLogcatFile("")
+                self._mLogcatFile.createFile(logcatPath, "utf-8")
+                if len(logcatPath) > 0:
+                    self._mNotifyWidget.notify(f"Write log into file:{logcatPath}", 2)
+            else:
+                logcatPath, traceCount = self._mLogcatFile.closeWrite()
+                if len(logcatPath) > 0:
+                    if traceCount > 0:
+                        self._mNotifyWidget.notify(f"Saved to file:{logcatPath}", 2)
+                    else:
+                        self._mNotifyWidget.notify(f"No record was saved to file:{logcatPath}", 2)
         return
 
     def _onClearLog(self):

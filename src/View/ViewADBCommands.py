@@ -129,9 +129,8 @@ class ViewADBCommands(QWidget, Ui_Form):
             self._mAutoEcho = os.linesep + ""
 
         if self._mADBCommands.open(self._mSyncMode, self._mTerminalCmd):
-            self._mOutputLock.acquire()
-            self._mOutputContent.append([uiTheme.cmdTipsColor, self._mAutoEcho])
-            self._mOutputLock.release()
+            with self._mOutputLock:
+                self._mOutputContent.append([uiTheme.cmdTipsColor, self._mAutoEcho])
             self._mEventConnectState.emit(ViewADBCommands.StateConnected)
         else:
             self._mEventConnectState.emit(ViewADBCommands.StateDisconnected)
@@ -166,18 +165,17 @@ class ViewADBCommands(QWidget, Ui_Form):
         return
 
     def _onUpdateTimer(self):
-        self._mOutputLock.acquire()
-        if len(self._mOutputContent) > 0:
-            Logger.d(appModel.getAppTag(), "begin")
-            for color, content in self._mOutputContent:
-                self._editorOutput.moveCursor(QTextCursor.End)
-                self._editorOutput.setTextColor(color)
-                self._editorOutput.insertPlainText(content)
-            scrollBar = self._editorOutput.verticalScrollBar()
-            scrollBar.setValue(scrollBar.maximum())
-            self._mOutputContent.clear()
-            Logger.d(appModel.getAppTag(), "end")
-        self._mOutputLock.release()
+        with self._mOutputLock:
+            if len(self._mOutputContent) > 0:
+                Logger.d(appModel.getAppTag(), "begin")
+                for color, content in self._mOutputContent:
+                    self._editorOutput.moveCursor(QTextCursor.End)
+                    self._editorOutput.setTextColor(color)
+                    self._editorOutput.insertPlainText(content)
+                scrollBar = self._editorOutput.verticalScrollBar()
+                scrollBar.setValue(scrollBar.maximum())
+                self._mOutputContent.clear()
+                Logger.d(appModel.getAppTag(), "end")
 
         begin = self._mProcessingStart
         cur = datetime.now().timestamp()
@@ -189,37 +187,33 @@ class ViewADBCommands(QWidget, Ui_Form):
     def _onInput(self, cmd: str):
         Logger.d(appModel.getAppTag(), "begin")
         self._mEventConnectState.emit(ViewADBCommands.StateProcessing)
-        self._mOutputLock.acquire()
-        self._mOutputContent.append([uiTheme.cmdInputColor, cmd])
-        self._mOutputLock.release()
+        with self._mOutputLock:
+            self._mOutputContent.append([uiTheme.cmdInputColor, cmd])
         Logger.d(appModel.getAppTag(), "end")
         return
 
     def _onOutput(self, out: str):
         Logger.d(appModel.getAppTag(), "begin")
-        self._mOutputLock.acquire()
-        self._mOutputContent.append([uiTheme.cmdOutputColor, out])
-        self._mOutputContent.append([uiTheme.cmdTipsColor, self._mAutoEcho])
-        self._mOutputLock.release()
+        with self._mOutputLock:
+            self._mOutputContent.append([uiTheme.cmdOutputColor, out])
+            self._mOutputContent.append([uiTheme.cmdTipsColor, self._mAutoEcho])
         self._mEventConnectState.emit(ViewADBCommands.StateWaiting)
         Logger.d(appModel.getAppTag(), "end")
         return
 
     def _onError(self, error: str):
         Logger.d(appModel.getAppTag(), "begin")
-        self._mOutputLock.acquire()
-        self._mOutputContent.append([uiTheme.cmdErrorColor, error])
-        self._mOutputContent.append([uiTheme.cmdTipsColor, self._mAutoEcho])
-        self._mOutputLock.release()
+        with self._mOutputLock:
+            self._mOutputContent.append([uiTheme.cmdErrorColor, error])
+            self._mOutputContent.append([uiTheme.cmdTipsColor, self._mAutoEcho])
         self._mEventConnectState.emit(ViewADBCommands.StateWaiting)
         Logger.d(appModel.getAppTag(), "end")
         return
 
     def _onExit(self):
         Logger.w(appModel.getAppTag(), "begin")
-        self._mOutputLock.acquire()
-        self._mOutputContent.append([uiTheme.cmdErrorColor, f"{os.linesep}Conversation has terminated.{os.linesep}"])
-        self._mOutputLock.release()
+        with self._mOutputLock:
+            self._mOutputContent.append([uiTheme.cmdErrorColor, f"{os.linesep}Conversation has terminated.{os.linesep}"])
         self._mEventConnectState.emit(ViewADBCommands.StateDisconnected)
         Logger.w(appModel.getAppTag(), "end")
         return
