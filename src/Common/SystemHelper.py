@@ -46,9 +46,15 @@ def desktopPath():
 
 def openAtExplorer(path: str):
     if isWindows():
-        os.startfile(path)
-    else:
-        subprocess.call(["open", "-R", path])
+        while not os.path.exists(path):
+            path = os.path.dirname(path)
+            if len(path) == 0:
+                return
+        subprocess.call(["explorer.exe", "/select,", f"{path}"])
+    elif isMac():
+        subprocess.call(["open", "--", path])
+    elif isLinux():
+        subprocess.call(["xdg-open", path])
     return
 
 

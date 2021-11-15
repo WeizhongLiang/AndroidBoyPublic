@@ -56,26 +56,26 @@ class WidgetCCTGOperation(QWidget, Ui_Form):
             self._btStart.setVisible(True)
             self._btStop.hide()
             self._lbProgress.setVisible(False)
-        if state == TaskState.notExist:
+        elif state == TaskState.notExist:
             self._btStart.setEnabled(True)
             self._btStop.setEnabled(False)
             self._btStart.setVisible(True)
             self._btStop.hide()
             self._pgDownload.setValue(0)
             self._lbProgress.setVisible(False)
-        if state == TaskState.ready:
+        elif state == TaskState.ready:
             self._btStart.setEnabled(False)
             self._btStop.setEnabled(False)
             self._btStart.setVisible(True)
             self._btStop.hide()
             self._lbProgress.setVisible(False)
-        if state == TaskState.running:
+        elif state == TaskState.running:
             self._btStart.setEnabled(False)
             self._btStop.setEnabled(True)
             self._btStart.hide()
             self._btStop.setVisible(True)
             self._lbProgress.setVisible(True)
-        if state == TaskState.stop:
+        elif state == TaskState.stop:
             self._btStart.setEnabled(True)
             self._btStop.setEnabled(False)
             self._btStart.setVisible(True)
@@ -88,7 +88,7 @@ class WidgetCCTGOperation(QWidget, Ui_Form):
         self._pgDownload.setMaximum(totalLen)
         self._mLastProcess = 0
         self._mLastTime = time.time()
-        self._lbProgress.setText("")
+        self._lbProgress.setText("0% at 0KB/s")
         return
 
     def setCurProgress(self, curProgress: int):

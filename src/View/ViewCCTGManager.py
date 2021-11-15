@@ -1,4 +1,5 @@
 import os
+import tarfile
 import threading
 
 from PyQt5 import QtCore
@@ -126,21 +127,22 @@ class CCTGTask(QObject):
 
     @pyqtSlot(CCTGDownloader)
     def _onSignalLoginCCTG(self, cctgCtrl: CCTGDownloader):
-        if CCTGTask._sIsWaitingLogin:
-            # add into list
-            CCTGTask._sCCTGDownloader.append(cctgCtrl)
-            return
-        else:
-            _sIsWaitingLogin = True
+        Logger.i(appModel.getAppTag(),
+                 f"_sIsWaitingLogin = {CCTGTask._sIsWaitingLogin}, size = {len(CCTGTask._sCCTGDownloader)}")
+        # add into list
+        CCTGTask._sCCTGDownloader.append(cctgCtrl)
+        if not CCTGTask._sIsWaitingLogin:
+            CCTGTask._sIsWaitingLogin = True
             CCTGTask._sCCTGDownloader.append(cctgCtrl)
             dlgLogin = DialogLogin(self._mParentView, "Login CCTG")
             if Const.EXIT_OK == dlgLogin.exec_():
                 cctgUser = dlgLogin.getLoginInfo()
                 for ctrl in CCTGTask._sCCTGDownloader:
                     ctrl.setAuth(auth.HTTPBasicAuth(cctgUser[0], cctgUser[1]))
-                _sLoginSuccess = True
+                CCTGTask._sCCTGDownloader = []
+                CCTGTask._sLoginSuccess = True
             else:
-                _sLoginSuccess = False
+                CCTGTask._sLoginSuccess = False
             CCTGTask._sEventLoginCCTG.set()
         return
 
@@ -157,6 +159,7 @@ class CCTGTask(QObject):
             self.mTreeItem.setIcon(colIndex, uiTheme.iconStateNotExist)
         if self.mState == TaskState.ready:
             self.mTreeItem.setIcon(colIndex, uiTheme.iconStateReady)
+            self._uncompress()
         if self.mState == TaskState.running:
             self.mTreeItem.setIcon(colIndex, uiTheme.iconStateRunning)
         if self.mState == TaskState.stop:
@@ -186,6 +189,8 @@ class CCTGTask(QObject):
             Logger.i(appModel.getAppTag(), f"state={state}")
             self._mSignalLoginCCTG.emit(cctgCtrl)
             CCTGTask._sEventLoginCCTG.wait()
+            if not CCTGTask._sLoginSuccess:
+                self._mSignalSetTaskState.emit(TaskState.error)
             return CCTGTask._sLoginSuccess
         elif state == RequestState.progress:
             self._mSignalSetTaskState.emit(TaskState.running)
@@ -196,6 +201,7 @@ class CCTGTask(QObject):
                     # check the size of localPath
                     if totalLen == os.path.getsize(localPath):
                         self._mSignalSetTaskProgress.emit(totalLen, totalLen)
+                        self._mSignalSetTaskState.emit(TaskState.ready)
                         return False
                 self._mSignalSetTaskProgress.emit(totalLen, -1)
             self._mSignalSetTaskProgress.emit(-1, curProgress)
@@ -211,6 +217,31 @@ class CCTGTask(QObject):
             self._mSignalSetTaskState.emit(TaskState.notExist)
             return False
         return self.mState != TaskState.stop
+
+    def _uncompress(self):
+        colIndex = TreeCol.file.value
+        itemType: TreeItemType = self.mTreeItem.data(colIndex, TreeItemRole.itemType)
+        if itemType == TreeItemType.symbol:
+            # symbol file
+            savePath = self.mSavePath
+            uncompressFile = os.path.join(self.mSaveFolder, "arm64-v8a")
+            if not os.path.exists(uncompressFile) and os.path.exists(savePath):
+                # uncompress it
+                if tarfile.is_tarfile(savePath):
+                    compressedFile = tarfile.open(savePath)
+                    for tarinfo in compressedFile:
+                        compressedFile.extract(tarinfo, path=self.mSaveFolder)
+        elif itemType == TreeItemType.mapping:
+            # mapping file
+            savePath = self.mSavePath
+            uncompressFile = os.path.join(self.mSaveFolder, "mapping.txt")
+            if not os.path.exists(uncompressFile) and os.path.exists(savePath):
+                # uncompress it
+                if tarfile.is_tarfile(savePath):
+                    compressedFile = tarfile.open(savePath)
+                    for tarinfo in compressedFile:
+                        compressedFile.extract(tarinfo, path=self.mSaveFolder)
+        return
 
     def isChecked(self):
         if self.mOperator is not None:

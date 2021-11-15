@@ -93,6 +93,7 @@ class Ui_Form(object):
         self._pgDownload.setMinimumSize(QtCore.QSize(0, 24))
         self._pgDownload.setMaximumSize(QtCore.QSize(16777215, 24))
         self._pgDownload.setProperty("value", 24)
+        self._pgDownload.setTextVisible(False)
         self._pgDownload.setObjectName("_pgDownload")
         self.horizontalLayout.addWidget(self._pgDownload)
         self._lbProgress = QtWidgets.QLabel(Form)
