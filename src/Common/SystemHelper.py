@@ -52,7 +52,7 @@ def openAtExplorer(path: str):
                 return
         subprocess.call(["explorer.exe", "/select,", f"{path}"])
     elif isMac():
-        subprocess.call(["open", "--", path])
+        subprocess.call(["open", "-R", path])
     elif isLinux():
         subprocess.call(["xdg-open", path])
     return
