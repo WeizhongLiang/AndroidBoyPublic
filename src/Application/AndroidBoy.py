@@ -57,7 +57,8 @@ class AndroidBoy(QWidget, Ui_Form):
         self.tabMain.addTab(viewLogo, "+")
         self.mLastHoverIndex = -1
 
-        self._addTabView(ViewCCTGManager(self), uiTheme.iconLogcat, "CCTGManager", "")
+        if appModel.readConfig(self.__class__.__name__, "enableCCTGManagerView", False):
+            self._addTabView(ViewCCTGManager(self), uiTheme.iconWebex, "CCTGManager", "")
         if appModel.readConfig(self.__class__.__name__, "enableLogcatView", False):
             self._addTabView(ViewLogcat(self), uiTheme.iconLogcat, "LogcatView", "")
         if appModel.readConfig(self.__class__.__name__, "enableADBCommandsView", False):
@@ -168,6 +169,7 @@ class AndroidBoy(QWidget, Ui_Form):
         actionADBLogcat = menu.addAction(uiTheme.iconLogcat, "ADB Logcat")
         actionADBCommand = menu.addAction(uiTheme.iconCommand, "ADB Command")
         actionTracerParser = menu.addAction(uiTheme.iconLogFile, "Trace Parser")
+        actionCCTGDownloader = menu.addAction(uiTheme.iconWebex, "CCTGDownloader")
 
         menuFolder = menu.addMenu(uiTheme.iconFolder, "Folders")
         actionAssetsFolder = menuFolder.addAction(uiTheme.iconFolder, "Assets Folder")
@@ -201,6 +203,10 @@ class AndroidBoy(QWidget, Ui_Form):
             view = self._getViewByType(ViewTraceParser.__name__)
             if view is None:
                 self._addTabView(ViewTraceParser(self), uiTheme.iconLogcat, "Trace Parser", "")
+        elif action == actionCCTGDownloader:
+            view = self._getViewByType(ViewCCTGManager.__name__)
+            if view is None:
+                self._addTabView(ViewCCTGManager(self), uiTheme.iconWebex, "CCTGManager", "")
         elif action == actionAssetsFolder:
             SystemHelper.openAtExplorer(appModel.mAssetsPath)
             return
@@ -256,6 +262,8 @@ class AndroidBoy(QWidget, Ui_Form):
 
     def closeEvent(self, event):
         Logger.i(appModel.getAppTag(), "")
+        appModel.saveConfig(self.__class__.__name__,
+                            "enableCCTGManagerView", self._getViewByType(ViewCCTGManager.__name__) is not None)
         appModel.saveConfig(self.__class__.__name__,
                             "enableLogcatView", self._getViewByType(ViewLogcat.__name__) is not None)
         appModel.saveConfig(self.__class__.__name__,

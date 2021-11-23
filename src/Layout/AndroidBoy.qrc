@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icon">
+    <file>icons/webex.svg</file>
     <file>icons/ie_logo.svg</file>
     <file>icons/mapping_file.svg</file>
     <file>icons/symbol_file.svg</file>

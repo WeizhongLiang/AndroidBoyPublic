@@ -1,29 +1,19 @@
-<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg">
-
- <g>
-  <title>Layer 1</title>
-  <g stroke="null">
-   <metadata stroke="null">Svg Vector Icons : http://www.onlinewebfonts.com/icon</metadata>
-   <g stroke="null">
-    <g stroke="null">
-     <path stroke="null" d="m30.25001,24.13686l0,-20.13686l-28.25001,0l0,20.13356l11.77852,0l0,2.01236l-2.33783,0l0,1.34158l9.36862,0l0,-1.34158l-2.34648,0l0,-2.01236l11.78717,0l0,0.0033zm-27.07965,-1.34158l0,-17.45041l25.90929,0l0,17.45041l-25.90929,0zm2.97778,-8.72685l0.34304,-1.22592l1.9948,0l0.35457,1.22592l0.5823,0l0.5823,0l-1.85931,-6.02388l-0.63707,0l-0.63707,0l-1.85931,6.02388l0.57077,0l0.565,0zm1.3462,-4.6823l0.6976,2.4188l-1.3952,0l0.6976,-2.4188zm3.31217,-1.30192l16.66174,0l0,1.34158l-16.66174,0l0,-1.34158zm0,3.59846l16.66174,0l0,1.34158l-16.66174,0l0,-1.34158zm-6.03916,3.59846l22.7009,0l0,1.34158l-22.7009,0l0,-1.34158zm0,3.59846l22.7009,0l0,1.34158l-22.7009,0l0,-1.34158z"/>
-    </g>
-    <g stroke="null"/>
-    <g stroke="null"/>
-    <g stroke="null"/>
-    <g stroke="null"/>
-    <g stroke="null"/>
-    <g stroke="null"/>
-    <g stroke="null"/>
-    <g stroke="null"/>
-    <g stroke="null"/>
-    <g stroke="null"/>
-    <g stroke="null"/>
-    <g stroke="null"/>
-    <g stroke="null"/>
-    <g stroke="null"/>
-    <g stroke="null"/>
-   </g>
-  </g>
- </g>
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-147 -70 294 345">
+<g fill="#a4c639">
+<use stroke-width="14.4" xlink:href="#b" stroke="#FFF"/>
+<use xlink:href="#a" transform="scale(-1,1)"/>
+<g id="a" stroke="#FFF" stroke-width="7.2">
+<rect rx="6.5" transform="rotate(29)" height="86" width="13" y="-86" x="14"/>
+<rect id="c" rx="24" height="133" width="48" y="41" x="-143"/>
+<use y="97" x="85" xlink:href="#c"/>
+</g>
+<g id="b">
+<ellipse cy="41" rx="91" ry="84"/>
+<rect rx="22" height="182" width="182" y="20" x="-91"/>
+</g>
+</g>
+<g stroke="#FFF" stroke-width="7.2" fill="#FFF">
+<path d="m-95 44.5h190"/><circle cx="-42" r="4"/><circle cx="42" r="4"/>
+</g>
 </svg>

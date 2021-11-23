@@ -55,6 +55,8 @@ class UITheme:
         self.iconRotateClockwise = None
         self.iconRotateAnticlockwise = None
 
+        self.iconWebex = None
+
         self.iconOutlook = None
         self.iconOutlookAccount = None
         self.iconOutlookFolder = None
@@ -100,6 +102,8 @@ class UITheme:
         self.iconZoomOut = QIcon(QPixmap(":/icon/icons/zoom_out.svg"))
         self.iconRotateClockwise = QIcon(QPixmap(":/icon/icons/rotate_clockwise.svg"))
         self.iconRotateAnticlockwise = QIcon(QPixmap(":/icon/icons/rotate_anticlockwise.svg"))
+
+        self.iconWebex = QIcon(QPixmap(":/icon/icons/webex.svg"))
 
         self.iconOutlook = QIcon(QPixmap(":/icon/icons/outlook.svg"))
         self.iconOutlookAccount = QIcon(QPixmap(":/icon/icons/outlook_account.svg"))
