@@ -191,6 +191,7 @@ class Ui_Form(object):
         self.btImportExcel.setToolTip(_translate("Form", "Import from excel"))
         self.editFilter.setToolTip(_translate("Form", "Filter"))
         self.editFilter.setStatusTip(_translate("Form", "Filter"))
+        self.treeOutlook.setSortingEnabled(True)
         self.lbProg1.setText(_translate("Form", "lbProg1"))
         self.lbProg2.setText(_translate("Form", "lbProg2"))
 import AndroidBoy_rc

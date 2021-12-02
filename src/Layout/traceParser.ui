@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>858</width>
+    <width>950</width>
     <height>669</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
      <item>
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>Select parse type</string>
+        <string>Select parser type</string>
        </property>
       </widget>
      </item>
@@ -34,12 +34,24 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit_path">
+      <widget class="QComboBox" name="comboBox_paths">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
          <width>0</width>
          <height>30</height>
         </size>
+       </property>
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+       <property name="insertPolicy">
+        <enum>QComboBox::InsertAtTop</enum>
        </property>
       </widget>
      </item>
@@ -65,7 +77,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Parser</string>
+        <string>Parse</string>
        </property>
       </widget>
      </item>
