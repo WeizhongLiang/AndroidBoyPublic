@@ -883,7 +883,7 @@ class WidgetTracerList(QWidget, Ui_Form):
             hasFound = re.search(self._mFilterLogInclude, trace.getFullText(), flags=re.IGNORECASE)
             hasInTag = False
         else:
-            hasFound = self._mFilterLogInclude in item.mMessage.lower()
+            hasFound = self._mFilterLogInclude in trace.mMessage.lower()
             hasInTag = self._mFilterLogInclude in trace.mTag.lower()
         if (not hasFound and not hasInTag) or trace.mLevel < self._mFilterLogLevel:
             trace.mVisual = False
