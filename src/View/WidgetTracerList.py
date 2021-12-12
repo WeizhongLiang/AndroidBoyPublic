@@ -129,9 +129,11 @@ class WidgetTracerList(QWidget, Ui_Form):
         self.listTrace.horizontalScrollBar().setHidden(True)
         self.listTrace.horizontalScrollBar().setDisabled(True)
         self.listImportant.setWordWrap(True)
+        self.listNotice.setWordWrap(True)
         if self._mAddable:
             self.listBaseInfo.hide()
             self.listImportant.hide()
+            self.listNotice.hide()
 
         self._mLoading = False
         self._mAdding = False
@@ -158,6 +160,7 @@ class WidgetTracerList(QWidget, Ui_Form):
         self.listTrace.doubleClicked.connect(self._onDoubleClickLog)
 
         self.listImportant.doubleClicked.connect(self._onDoubleClickImportant)
+        self.listNotice.doubleClicked.connect(self._onDoubleClickNotice)
 
         self.btFindNext.clicked.connect(self.nextFind)
         self.btFindPrev.clicked.connect(self.prevFind)
@@ -360,6 +363,15 @@ class WidgetTracerList(QWidget, Ui_Form):
         row = QModelIndex.row()
         Logger.i(appModel.getAppTag(), f"at {row}")
         traceItem: QListWidgetItem = self.listImportant.item(row).data(Qt.UserRole)
+
+        # self.setSelectRow(traceRow)
+        self.setSelectItem(traceItem)
+        return
+
+    def _onDoubleClickNotice(self, QModelIndex):
+        row = QModelIndex.row()
+        Logger.i(appModel.getAppTag(), f"at {row}")
+        traceItem: QListWidgetItem = self.listNotice.item(row).data(Qt.UserRole)
 
         # self.setSelectRow(traceRow)
         self.setSelectItem(traceItem)
@@ -691,6 +703,8 @@ class WidgetTracerList(QWidget, Ui_Form):
         if not self._mAddable:
             errorDefinition = FileUtility.loadJsonFile(os.path.join(appModel.mAssetsPath, "WBTErrorDefinition.json"))
             errorDefinition = errorDefinition["errorDefinition"]
+            noticeMessage = FileUtility.loadJsonFile(os.path.join(appModel.mAssetsPath, "WBTNoticeMessage.json"))
+            noticeMessage = noticeMessage["noticeMessage"]
 
             procTime = DateTimeHelper.ProcessTime()
             endFind = self.listTrace.count()
@@ -707,6 +721,12 @@ class WidgetTracerList(QWidget, Ui_Form):
                         itemImportant = QListWidgetItem(value[0])
                         itemImportant.setData(Qt.UserRole, item)
                         self.listImportant.addItem(itemImportant)
+                        self.setItemMarked(item, True)
+                for key, value in noticeMessage.items():
+                    if key in trace.mMessage:
+                        itemNotice = QListWidgetItem(value[0])
+                        itemNotice.setData(Qt.UserRole, item)
+                        self.listNotice.addItem(itemNotice)
                         self.setItemMarked(item, True)
             Logger.i(appModel.getAppTag(), f"end with {endFind} in {procTime.getMicroseconds()}")
         return

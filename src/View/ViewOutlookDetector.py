@@ -154,6 +154,7 @@ class ViewOutlookDetector(QWidget, Ui_Form):
         self.ckFilterDate.setChecked(True)
         self._onCheckFilterData()
         self.mErrorDefinition = {}
+        self.mNoticeMessage = {}
 
         self._mThreadRunning = 0
         self._mThreadOutlook = threading.Thread(target=self._onOutlookThread)
@@ -248,7 +249,7 @@ class ViewOutlookDetector(QWidget, Ui_Form):
         curIndex = 0
         self.sEventOutlookState.emit(ActionType.analyzeTotal, totalCount, 0, None)
         for emailID, emailItem in self._mFilterMails.items():
-            analyzer = MailAnalyzer(emailItem, self.mErrorDefinition)
+            analyzer = MailAnalyzer(emailItem, self.mErrorDefinition, self.mNoticeMessage)
             self.sEventOutlookState.emit(ActionType.analyzeUpdate, 0, 0, analyzer)
             curIndex += 1
             self.sEventOutlookState.emit(ActionType.analyzeProgress, curIndex, totalCount, None)
@@ -551,6 +552,8 @@ class ViewOutlookDetector(QWidget, Ui_Form):
     def _onQueryMails(self):
         errorDefinition = FileUtility.loadJsonFile(os.path.join(appModel.mAssetsPath, "WBTErrorDefinition.json"))
         self.mErrorDefinition = errorDefinition["errorDefinition"]
+        errorDefinition = FileUtility.loadJsonFile(os.path.join(appModel.mAssetsPath, "WBTNoticeMessage.json"))
+        self.mNoticeMessage = errorDefinition["noticeMessage"]
 
         if self.ckFilterDate.isChecked():
             self._mEmailFilter.beginDate = self.dateStart.dateTime().toPyDateTime().timestamp()
@@ -562,7 +565,6 @@ class ViewOutlookDetector(QWidget, Ui_Form):
                             "filterFolderName", self._mEmailFilter.folders[0])
         appModel.saveConfig(self.__class__.__name__,
                             "filterToName", self._mEmailFilter.tos[0])
-        appModel.saveConfig(self.__class__.__name__, "errorDefinition", self.mErrorDefinition)
         self.treeOutlook.clear()
         self._mThreadOutlook = threading.Thread(target=self._onOutlookThread)
         self._mThreadOutlook.start()
