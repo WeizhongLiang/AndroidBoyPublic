@@ -136,13 +136,13 @@ class DialogMailDetail(QDialog, Ui_Dialog):
                     continue
                 # nodes = errorMsg.split("@", 3)
                 filePath = errorMsg["logFile"].split("?")
-                item = QListWidgetItem(errorMsg["name"] + "@" + filePath[1])
+                item = QListWidgetItem(errorMsg["errName"] + "@" + filePath[1])
                 item.setData(Qt.UserRole, [_ErrorTypeInList.error, errorMsg])
                 item.setBackground(uiTheme.colorNormalBackground)
                 item.setForeground(_ErrorColor.get(_ErrorTypeInList.error))
                 self.ltErrors.addItem(item)
 
-                errorKey = errorMsg["type"]
+                errorKey = errorMsg["errType"]
                 if self.cbType.findText(errorKey) < 0:
                     self.cbType.addItem(errorKey)
         if "NoticeMessage" in result:
@@ -151,13 +151,13 @@ class DialogMailDetail(QDialog, Ui_Dialog):
                     continue
                 # nodes = errorMsg.split("@", 3)
                 filePath = errorMsg["logFile"].split("?")
-                item = QListWidgetItem(errorMsg["name"] + "@" + filePath[1])
+                item = QListWidgetItem(errorMsg["errName"] + "@" + filePath[1])
                 item.setData(Qt.UserRole, [_ErrorTypeInList.error, errorMsg])
                 item.setBackground(uiTheme.colorNormalBackground)
                 item.setForeground(_ErrorColor.get(_ErrorTypeInList.error))
                 self.ltErrors.addItem(item)
 
-                errorKey = errorMsg["type"]
+                errorKey = errorMsg["errType"]
                 if self.cbType.findText(errorKey) < 0:
                     self.cbType.addItem(errorKey)
         if "DumpFile" in result:

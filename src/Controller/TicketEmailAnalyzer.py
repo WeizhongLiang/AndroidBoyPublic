@@ -222,8 +222,8 @@ class MailAnalyzer:
             if key in item.mMessage:
                 # item.mPosInFile
                 self.mAnalyzeResult[param[2]][key] = {
-                    "name": detail[0],
-                    "type": detail[1],
+                    "errName": detail[0],
+                    "errType": detail[1],
                     "logIndex": item.mIndex,
                     "logPos": item.mPosInFile,
                     "logFile": param[1],
@@ -400,17 +400,17 @@ class MailAnalyzer:
             for err, errDetail in self.mAnalyzeResult["KeyError"].items():
                 if len(errDetail) > 0:
                     if len(retString) > 0:
-                        retString += os.linesep + errDetail["name"]
+                        retString += os.linesep + errDetail["errName"]
                     else:
-                        retString += errDetail["name"]
+                        retString += errDetail["errName"]
                     retAction = AnalyzerAction.error
         if "NoticeMessage" in self.mAnalyzeResult:
             for notice, noticeDetail in self.mAnalyzeResult["NoticeMessage"].items():
                 if len(noticeDetail) > 0:
                     if len(retString) > 0:
-                        retString += os.linesep + noticeDetail["name"]
+                        retString += os.linesep + noticeDetail["errName"]
                     else:
-                        retString += noticeDetail["name"]
+                        retString += noticeDetail["errName"]
         if "DumpFile" in self.mAnalyzeResult:
             dumpState = self.mAnalyzeResult["DumpFile"]["state"]
             if DumpFileState.crashed.value == dumpState:
