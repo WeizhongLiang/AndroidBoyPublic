@@ -1,5 +1,6 @@
 import os
 import subprocess
+import re
 
 from src.Common import StringUtility
 from src.Common.DumpFileHelper import SYMBOLIZER_APP
@@ -17,10 +18,10 @@ def translateTrace(nativeSymbolFilePath: str, traceString: str) -> str:
     lines = traceString.split(os.linesep)
     for line in lines:
         stackValues = StringUtility.splitBySpace(line, '#')
-        if len(stackValues) < 4:
+        if len(stackValues) < 4 or not re.search(r".so", line, flags=re.IGNORECASE):
             continue
         filename = os.path.basename(stackValues[3])
-        tempAddresses.write(f"===== \"{line}\"\n{filename} 0x{stackValues[2]}\n\n")
+        tempAddresses.write(f" \"{line}\"\n{filename} 0x{stackValues[2]}\n\n")
     tempAddresses.close()
 
     # parse
